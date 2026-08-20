@@ -1,0 +1,1122 @@
+{
+  "workflows": [
+    {
+      "workflow": "W1",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W1_TC1",
+          "title": "Low-Risk Card Present Transaction with Typical Device",
+          "rationale": "Covers the success path for a legitimate transaction with no anomalies, typical behavior, and a fraud risk score well below threshold.",
+          "input_conditions": [
+            "fraud_risk_score = 15 (well below threshold)",
+            "alert_type = card_present",
+            "transaction_type = card_present",
+            "device intelligence normal (no VPN/TOR, device matches customer history)",
+            "No blacklist hits"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883421",
+            "customer_id": "CUST-102345",
+            "alert_type": "card_present",
+            "transaction_type": "card_present",
+            "lookback_days": 90,
+            "additional_context": {
+              "device_id": "DEV-100001",
+              "location": "San Francisco, CA",
+              "ip_address": "192.168.1.100"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "auto_approved",
+            "key_outputs": {
+              "fraud_risk_score": 15,
+              "case_status": "auto_approved",
+              "recommended_action": "approve",
+              "customer_notification_status": "not_required"
+            }
+          },
+          "success_path_differences": "Standard low-risk approval with typical transaction and device; no anomalies or blacklist hits.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details retrieved",
+              "expected_state": {
+                "transaction_id": "TX-10001",
+                "amount": 120.5
+              }
+            },
+            {
+              "step": 2,
+              "description": "Customer profile and transaction history analyzed",
+              "expected_state": {
+                "account_status": "good_standing",
+                "velocity_metrics": {
+                  "max_per_day": 5
+                }
+              }
+            },
+            {
+              "step": 3,
+              "description": "Device intelligence checked",
+              "expected_state": {
+                "device_risk_score": 10,
+                "vpn_detected": false,
+                "tor_detected": false
+              }
+            },
+            {
+              "step": 4,
+              "description": "Fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 15,
+                "risk_factors": []
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "BankingFraud_W1_TC2",
+          "title": "Low-Risk Card Not Present Transaction with Recent Customer Travel",
+          "rationale": "Validates success path for a low-risk online transaction with recent travel context, but all signals are consistent and below risk threshold.",
+          "input_conditions": [
+            "fraud_risk_score = 25",
+            "alert_type = card_not_present",
+            "transaction_type = online",
+            "Customer recent travel matches transaction location",
+            "Device intelligence normal"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883422",
+            "customer_id": "CUST-334899",
+            "alert_type": "card_not_present",
+            "transaction_type": "online",
+            "lookback_days": 90,
+            "additional_context": {
+              "device_id": "DEV-200002",
+              "location": "Miami, FL",
+              "ip_address": "185.23.44.12",
+              "recent_travel": [
+                "Miami, FL"
+              ]
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "auto_approved",
+            "key_outputs": {
+              "fraud_risk_score": 25,
+              "case_status": "auto_approved",
+              "recommended_action": "approve",
+              "customer_notification_status": "not_required"
+            }
+          },
+          "success_path_differences": "Low-risk path with recent travel provided, ensuring location anomaly is not flagged; all other signals normal.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details retrieved",
+              "expected_state": {
+                "transaction_id": "TX-20002",
+                "amount": 220.0
+              }
+            },
+            {
+              "step": 2,
+              "description": "Customer profile and transaction history analyzed",
+              "expected_state": {
+                "recent_travel": [
+                  "Miami, FL"
+                ],
+                "velocity_metrics": {
+                  "max_per_day": 3
+                }
+              }
+            },
+            {
+              "step": 3,
+              "description": "Device intelligence checked",
+              "expected_state": {
+                "device_risk_score": 15,
+                "vpn_detected": false,
+                "tor_detected": false
+              }
+            },
+            {
+              "step": 4,
+              "description": "Fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 25,
+                "risk_factors": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W2",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W2_TC1",
+          "title": "Obvious Fraud - Blacklisted Merchant, Card Not Present",
+          "rationale": "Tests success path for auto-decline when transaction is flagged by blacklist and high risk score.",
+          "input_conditions": [
+            "fraud_risk_score = 99",
+            "alert_type = card_not_present",
+            "transaction_type = online",
+            "Blacklist hit on merchant",
+            "Device fraud signals present"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883423",
+            "customer_id": "CUST-334899",
+            "alert_type": "card_not_present",
+            "transaction_type": "online",
+            "lookback_days": 90,
+            "additional_context": {
+              "device_id": "DEV-300003",
+              "location": "New York, NY",
+              "ip_address": "203.0.113.5"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "auto_declined",
+            "key_outputs": {
+              "fraud_risk_score": 99,
+              "case_status": "auto_declined",
+              "recommended_action": "decline",
+              "customer_notification_status": "sent"
+            }
+          },
+          "success_path_differences": "Auto-decline triggered by blacklist and device fraud signals; transaction blocked and notification sent.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details and customer profile retrieved",
+              "expected_state": {
+                "transaction_id": "TX-30003",
+                "merchant_blacklist_hit": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Transaction history and device intelligence analyzed",
+              "expected_state": {
+                "device_risk_score": 95
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud risk score calculated and blacklist confirmed",
+              "expected_state": {
+                "fraud_risk_score": 99,
+                "risk_factors": [
+                  "blacklist_hit",
+                  "device_fraud"
+                ]
+              }
+            },
+            {
+              "step": 4,
+              "description": "Auto-decline transaction and block card/account",
+              "expected_state": {
+                "block_status": "blocked",
+                "notification_sent": true
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "BankingFraud_W2_TC2",
+          "title": "Obvious Fraud - Account Takeover Detected on ATM Transaction",
+          "rationale": "Validates success path for auto-decline when account takeover is confirmed and risk score is above threshold.",
+          "input_conditions": [
+            "fraud_risk_score = 98",
+            "alert_type = account_takeover",
+            "transaction_type = atm",
+            "Device shows confirmed takeover signals"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883424",
+            "customer_id": "CUST-102345",
+            "alert_type": "account_takeover",
+            "transaction_type": "atm",
+            "lookback_days": 90,
+            "additional_context": {
+              "device_id": "DEV-400004",
+              "location": "Chicago, IL",
+              "ip_address": "198.51.100.10"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "auto_declined",
+            "key_outputs": {
+              "fraud_risk_score": 98,
+              "case_status": "auto_declined",
+              "recommended_action": "decline",
+              "customer_notification_status": "sent"
+            }
+          },
+          "success_path_differences": "Auto-decline based on account takeover signals and high risk score; transaction blocked and notifications sent.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details and customer profile retrieved",
+              "expected_state": {
+                "transaction_id": "TX-40004",
+                "account_status": "good_standing"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Transaction history and device intelligence analyzed",
+              "expected_state": {
+                "device_risk_score": 97,
+                "tor_detected": true
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud risk score calculated and takeover confirmed",
+              "expected_state": {
+                "fraud_risk_score": 98,
+                "risk_factors": [
+                  "account_takeover",
+                  "device_fraud"
+                ]
+              }
+            },
+            {
+              "step": 4,
+              "description": "Auto-decline transaction and block account",
+              "expected_state": {
+                "block_status": "blocked",
+                "notification_sent": true
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W3",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W3_TC1",
+          "title": "High-Risk Online Transaction with Device Mismatch",
+          "rationale": "Covers escalation for a high-risk transaction with device anomaly and multiple fraud signals.",
+          "input_conditions": [
+            "fraud_risk_score = 85",
+            "alert_type = card_not_present",
+            "transaction_type = online",
+            "Device mismatch and velocity anomaly",
+            "Cross-referenced fraud database shows no blacklist"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883425",
+            "customer_id": "CUST-334899",
+            "alert_type": "card_not_present",
+            "transaction_type": "online",
+            "lookback_days": 180,
+            "additional_context": {
+              "device_id": "DEV-500005",
+              "location": "Dallas, TX",
+              "ip_address": "203.0.113.20"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "escalated",
+            "key_outputs": {
+              "fraud_risk_score": 85,
+              "case_status": "escalated",
+              "recommended_action": "block_card",
+              "investigation_package": {
+                "transaction_id": "TX-50005",
+                "risk_factors": [
+                  "device_mismatch",
+                  "velocity_anomaly"
+                ],
+                "summary": "High-risk online purchase with device mismatch and rapid transaction velocity."
+              }
+            }
+          },
+          "success_path_differences": "Escalation triggered by device mismatch and velocity anomaly, but no blacklist hit; recommended action is block_card.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details, customer profile, and history retrieved",
+              "expected_state": {
+                "transaction_id": "TX-50005",
+                "total_transactions": 50
+              }
+            },
+            {
+              "step": 2,
+              "description": "Device intelligence and fraud database cross-referenced",
+              "expected_state": {
+                "device_risk_score": 80,
+                "merchant_blacklist_hit": false
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud risk score calculated and investigation package compiled",
+              "expected_state": {
+                "fraud_risk_score": 85
+              }
+            },
+            {
+              "step": 4,
+              "description": "Case routed to analyst",
+              "expected_state": {
+                "case_id": "CASE-50005",
+                "escalation_level": "normal"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "BankingFraud_W3_TC2",
+          "title": "High-Risk Card Present Transaction with Location Anomaly",
+          "rationale": "Success path for escalation when physical transaction occurs in unusual location, but all data is available.",
+          "input_conditions": [
+            "fraud_risk_score = 90",
+            "alert_type = card_present",
+            "transaction_type = card_present",
+            "Location anomaly detected",
+            "Device intelligence matches customer"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883426",
+            "customer_id": "CUST-102345",
+            "alert_type": "card_present",
+            "transaction_type": "card_present",
+            "lookback_days": 120,
+            "additional_context": {
+              "device_id": "DEV-600006",
+              "location": "Las Vegas, NV",
+              "ip_address": "198.51.100.55"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "escalated",
+            "key_outputs": {
+              "fraud_risk_score": 90,
+              "case_status": "escalated",
+              "recommended_action": "contact_customer",
+              "investigation_package": {
+                "transaction_id": "TX-60006",
+                "risk_factors": [
+                  "location_anomaly"
+                ],
+                "summary": "High-risk in-person transaction in new location for customer."
+              }
+            }
+          },
+          "success_path_differences": "Escalation due to location anomaly; device matches but transaction is physically out of pattern.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details, customer profile, and history retrieved",
+              "expected_state": {
+                "transaction_id": "TX-60006",
+                "states_visited": [
+                  "CA",
+                  "NV"
+                ]
+              }
+            },
+            {
+              "step": 2,
+              "description": "Device intelligence and fraud database cross-referenced",
+              "expected_state": {
+                "device_risk_score": 25,
+                "merchant_blacklist_hit": false
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud risk score calculated and investigation package compiled",
+              "expected_state": {
+                "fraud_risk_score": 90
+              }
+            },
+            {
+              "step": 4,
+              "description": "Case routed to analyst",
+              "expected_state": {
+                "case_id": "CASE-60006",
+                "escalation_level": "normal"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W4",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W4_TC1",
+          "title": "Moderate-Risk Transaction, Customer Verifies via SMS",
+          "rationale": "Covers approval path where risk score is moderate and customer successfully verifies via preferred method.",
+          "input_conditions": [
+            "fraud_risk_score = 65",
+            "alert_type = card_not_present",
+            "transaction_type = online",
+            "Preferred verification method is SMS",
+            "Customer responds and verifies"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883427",
+            "customer_id": "CUST-334899",
+            "alert_type": "card_not_present",
+            "transaction_type": "online",
+            "lookback_days": 90,
+            "preferred_verification_method": "sms",
+            "additional_context": {
+              "device_id": "DEV-700007",
+              "location": "Seattle, WA",
+              "ip_address": "203.0.113.40"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "verified",
+            "key_outputs": {
+              "fraud_risk_score": 65,
+              "case_status": "verified",
+              "recommended_action": "approve",
+              "customer_notification_status": "sent"
+            }
+          },
+          "success_path_differences": "Moderate risk triggers verification; customer verifies via SMS, transaction approved.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details and customer profile retrieved",
+              "expected_state": {
+                "transaction_id": "TX-70007",
+                "account_status": "good_standing"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Transaction history and device intelligence analyzed",
+              "expected_state": {
+                "device_risk_score": 40
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 65
+              }
+            },
+            {
+              "step": 4,
+              "description": "Customer verification requested via SMS",
+              "expected_state": {
+                "delivery_status": "sent",
+                "customer_response": "verified"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "BankingFraud_W4_TC2",
+          "title": "Moderate-Risk Transaction, Customer Verifies via Email",
+          "rationale": "Validates approval path using alternate verification method (email) with successful customer verification.",
+          "input_conditions": [
+            "fraud_risk_score = 55",
+            "alert_type = card_present",
+            "transaction_type = card_present",
+            "Preferred verification method is email",
+            "Customer responds and verifies"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883428",
+            "customer_id": "CUST-102345",
+            "alert_type": "card_present",
+            "transaction_type": "card_present",
+            "lookback_days": 60,
+            "preferred_verification_method": "email",
+            "additional_context": {
+              "device_id": "DEV-800008",
+              "location": "Denver, CO",
+              "ip_address": "198.51.100.80"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "verified",
+            "key_outputs": {
+              "fraud_risk_score": 55,
+              "case_status": "verified",
+              "recommended_action": "approve",
+              "customer_notification_status": "sent"
+            }
+          },
+          "success_path_differences": "Moderate risk with verification handled via email rather than SMS; customer verifies and transaction approved.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details and customer profile retrieved",
+              "expected_state": {
+                "transaction_id": "TX-80008",
+                "account_status": "good_standing"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Transaction history and device intelligence analyzed",
+              "expected_state": {
+                "device_risk_score": 30
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 55
+              }
+            },
+            {
+              "step": 4,
+              "description": "Customer verification requested via email",
+              "expected_state": {
+                "delivery_status": "sent",
+                "customer_response": "verified"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W5",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W5_TC1",
+          "title": "Account Takeover - Immediate Block and Escalation",
+          "rationale": "Covers urgent block and escalation for confirmed account takeover with device and login anomalies.",
+          "input_conditions": [
+            "alert_type = account_takeover",
+            "fraud_risk_score = 97",
+            "transaction_type = online",
+            "Device and login anomalies present"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883429",
+            "customer_id": "CUST-334899",
+            "alert_type": "account_takeover",
+            "transaction_type": "online",
+            "lookback_days": 30,
+            "additional_context": {
+              "device_id": "DEV-900009",
+              "location": "Boston, MA",
+              "ip_address": "203.0.113.99"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "blocked",
+            "key_outputs": {
+              "fraud_risk_score": 97,
+              "case_status": "blocked",
+              "recommended_action": "close_account",
+              "investigation_package": {
+                "transaction_id": "TX-90009",
+                "risk_factors": [
+                  "account_takeover",
+                  "device_anomaly"
+                ],
+                "summary": "Account takeover confirmed via device and login anomalies."
+              }
+            }
+          },
+          "success_path_differences": "Immediate block and urgent escalation triggered by takeover signals; all relevant data present.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Login and transaction details, customer profile retrieved",
+              "expected_state": {
+                "transaction_id": "TX-90009",
+                "account_status": "good_standing"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Device intelligence and recent account changes checked",
+              "expected_state": {
+                "device_risk_score": 95
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 97
+              }
+            },
+            {
+              "step": 4,
+              "description": "Account access blocked",
+              "expected_state": {
+                "block_status": "blocked",
+                "notification_sent": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Case routed to analyst with urgent escalation",
+              "expected_state": {
+                "escalation_level": "urgent"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W6",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W6_TC1",
+          "title": "Velocity Fraud - Rapid Transactions Across States",
+          "rationale": "Success path for velocity fraud with rapid multi-state transactions and high velocity metrics.",
+          "input_conditions": [
+            "alert_type = velocity_fraud",
+            "transaction_type = card_not_present",
+            "High transaction velocity and geographic anomalies"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883430",
+            "customer_id": "CUST-102345",
+            "alert_type": "velocity_fraud",
+            "transaction_type": "card_not_present",
+            "lookback_days": 7,
+            "additional_context": {
+              "device_id": "DEV-100010",
+              "location": "Houston, TX",
+              "ip_address": "198.51.100.101"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "escalated",
+            "key_outputs": {
+              "fraud_risk_score": 80,
+              "case_status": "escalated",
+              "recommended_action": "block_card",
+              "investigation_package": {
+                "transaction_id": "TX-100010",
+                "risk_factors": [
+                  "velocity_anomaly",
+                  "multi_state_usage"
+                ],
+                "summary": "Rapid transactions detected across multiple states."
+              }
+            }
+          },
+          "success_path_differences": "Escalation based on velocity and geographic anomalies; all data available for analyst review.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details and transaction history retrieved",
+              "expected_state": {
+                "transaction_id": "TX-100010",
+                "velocity_metrics": {
+                  "max_per_hour": 10
+                }
+              }
+            },
+            {
+              "step": 2,
+              "description": "Fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 80
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud databases cross-referenced for merchant risk",
+              "expected_state": {
+                "merchant_blacklist_hit": false
+              }
+            },
+            {
+              "step": 4,
+              "description": "Case routed to analyst",
+              "expected_state": {
+                "case_id": "CASE-100010",
+                "escalation_level": "normal"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W7",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W7_TC1",
+          "title": "Synthetic Identity - New Account Device and Identity Anomalies",
+          "rationale": "Covers escalation for new account with synthetic identity signals and device anomalies.",
+          "input_conditions": [
+            "alert_type = synthetic_identity",
+            "transaction_type = online",
+            "Device and identity anomalies detected"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883431",
+            "customer_id": "CUST-334899",
+            "alert_type": "synthetic_identity",
+            "transaction_type": "online",
+            "lookback_days": 1,
+            "additional_context": {
+              "device_id": "DEV-110011",
+              "location": "Orlando, FL",
+              "ip_address": "203.0.113.111"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "escalated",
+            "key_outputs": {
+              "fraud_risk_score": 92,
+              "case_status": "escalated",
+              "recommended_action": "escalate_sar",
+              "investigation_package": {
+                "transaction_id": "TX-110011",
+                "risk_factors": [
+                  "synthetic_identity",
+                  "device_anomaly"
+                ],
+                "summary": "Synthetic identity signals detected for new account."
+              }
+            }
+          },
+          "success_path_differences": "Escalation for synthetic identity with device anomaly; all required identity and device data present.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Customer profile and identity details retrieved",
+              "expected_state": {
+                "account_tenure_years": 0.1
+              }
+            },
+            {
+              "step": 2,
+              "description": "Device intelligence and identity databases checked",
+              "expected_state": {
+                "device_risk_score": 90
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 92
+              }
+            },
+            {
+              "step": 4,
+              "description": "Case routed to analyst",
+              "expected_state": {
+                "escalation_level": "normal"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W8",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W8_TC1",
+          "title": "Friendly Fraud - Chargeback Investigation, Evidence Provided",
+          "rationale": "Success path for friendly fraud chargeback investigation with all required evidence present.",
+          "input_conditions": [
+            "alert_type = friendly_fraud",
+            "transaction_type = card_present",
+            "Dispute with low risk signals",
+            "Evidence (delivery, signature, device match) available"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883432",
+            "customer_id": "CUST-102345",
+            "alert_type": "friendly_fraud",
+            "transaction_type": "card_present",
+            "lookback_days": 30,
+            "additional_context": {
+              "device_id": "DEV-120012",
+              "location": "Phoenix, AZ",
+              "ip_address": "198.51.100.120",
+              "delivery_confirmation": true,
+              "signature_match": true
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "escalated",
+            "key_outputs": {
+              "fraud_risk_score": 10,
+              "case_status": "escalated",
+              "recommended_action": "deny_chargeback",
+              "investigation_package": {
+                "transaction_id": "TX-120012",
+                "risk_factors": [
+                  "friendly_fraud"
+                ],
+                "summary": "Evidence supports legitimate transaction; chargeback dispute flagged as friendly fraud."
+              }
+            }
+          },
+          "success_path_differences": "Chargeback dispute with low risk and full evidence; analyst receives complete package for review.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details and customer profile retrieved",
+              "expected_state": {
+                "transaction_id": "TX-120012",
+                "delivery_confirmation": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Transaction history and device intelligence analyzed",
+              "expected_state": {
+                "device_risk_score": 10
+              }
+            },
+            {
+              "step": 3,
+              "description": "Evidence compiled and fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 10
+              }
+            },
+            {
+              "step": 4,
+              "description": "Case routed to analyst with evidence summary",
+              "expected_state": {
+                "case_id": "CASE-120012",
+                "escalation_level": "normal"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W9",
+      "test_cases": [
+        {
+          "test_case_id": "BankingFraud_W9_TC1",
+          "title": "APP Fraud - Large Wire Transfer Held and Escalated",
+          "rationale": "Covers success path for holding suspicious wire transfer and escalating for analyst review.",
+          "input_conditions": [
+            "alert_type = authorized_push_payment",
+            "transaction_type = wire",
+            "Large transfer, beneficiary flagged in fraud database",
+            "Call recording context provided"
+          ],
+          "representative_input": {
+            "alert_id": "FA-883433",
+            "customer_id": "CUST-334899",
+            "alert_type": "authorized_push_payment",
+            "transaction_type": "wire",
+            "lookback_days": 2,
+            "additional_context": {
+              "device_id": "DEV-130013",
+              "location": "Atlanta, GA",
+              "ip_address": "203.0.113.131",
+              "call_recording": "customer sounded confused"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "escalated",
+            "key_outputs": {
+              "fraud_risk_score": 93,
+              "case_status": "escalated",
+              "recommended_action": "hold_transfer",
+              "investigation_package": {
+                "transaction_id": "TX-130013",
+                "risk_factors": [
+                  "beneficiary_blacklist",
+                  "call_context"
+                ],
+                "summary": "Large wire transfer held; beneficiary flagged and customer context suggests scam risk."
+              }
+            }
+          },
+          "success_path_differences": "Wire transfer held due to beneficiary risk and suspicious customer context; escalated for urgent analyst review.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Transaction details and customer profile retrieved",
+              "expected_state": {
+                "transaction_id": "TX-130013",
+                "amount": 10000.0
+              }
+            },
+            {
+              "step": 2,
+              "description": "Transaction history and call recording context analyzed",
+              "expected_state": {
+                "call_recording": "customer sounded confused"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Fraud databases cross-referenced for beneficiary risk",
+              "expected_state": {
+                "merchant_blacklist_hit": true
+              }
+            },
+            {
+              "step": 4,
+              "description": "Fraud risk score calculated",
+              "expected_state": {
+                "fraud_risk_score": 93
+              }
+            },
+            {
+              "step": 5,
+              "description": "Wire transfer held for review",
+              "expected_state": {
+                "block_status": "blocked"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Case routed to analyst for urgent review",
+              "expected_state": {
+                "escalation_level": "urgent"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_workflows": 9,
+    "total_test_cases": 15,
+    "notes": "Each workflow is covered by at least one distinct success scenario. Where input branches exist (risk score ranges, verification method, alert type), multiple test cases are provided to ensure coverage of legitimate input variation. All representative inputs are fully specified for tool invocation, including device_id, location, and context as needed."
+  },
+  "role": "You are a banking fraud monitoring support agent that automates the triage and enrichment of fraud alerts. You gather contextual data from multiple systems, calculate fraud risk scores, and route suspicious cases to fraud analysts with comprehensive summaries, enabling rapid, accurate fraud detection and escalation.\n",
+  "goal": "Your goal is to reduce manual fraud alert triage time by automating data enrichment, risk scoring, and case routing. Success is measured by rapid, accurate identification and escalation of true fraud cases, minimizing false positives, timely customer notification, and compliance with banking regulations.\n",
+  "action_plan": {
+    "assumptions": [
+      "All fraud alerts received are valid and require initial triage.",
+      "Systems for transaction, device, customer, and fraud database access are available and reliable."
+    ],
+    "tools_and_resources": [
+      {
+        "tool": "retrieve_transaction_details",
+        "purpose": "Obtain transaction amount, merchant, MCC, location, and device data for the flagged event."
+      },
+      {
+        "tool": "get_customer_profile",
+        "purpose": "Gather customer demographics, account tenure, and typical behavior patterns."
+      },
+      {
+        "tool": "analyze_transaction_history",
+        "purpose": "Review historical spending, velocity, and geographic usage to detect anomalies."
+      },
+      {
+        "tool": "check_device_intelligence",
+        "purpose": "Assess device ID, IP address, browser fingerprint, and VPN usage for fraud indicators."
+      },
+      {
+        "tool": "calculate_fraud_risk_score",
+        "purpose": "Generate a risk score based on multiple fraud signals and contextual data."
+      },
+      {
+        "tool": "cross_reference_fraud_databases",
+        "purpose": "Check transaction, merchant, and card data against known fraud lists and blacklists."
+      },
+      {
+        "tool": "route_to_analyst",
+        "purpose": "Escalate high-risk cases to analysts with investigation summaries and recommended actions."
+      },
+      {
+        "tool": "auto_decline_transaction",
+        "purpose": "Automatically block transactions identified as obvious fraud."
+      },
+      {
+        "tool": "request_customer_verification",
+        "purpose": "Initiate customer verification via SMS or email for uncertain cases."
+      }
+    ],
+    "guidelines": [
+      "Always enrich alerts with data from all relevant systems before scoring.",
+      "Use risk score thresholds to determine routing: <30 auto-approve, >95 auto-decline, 30-95 escalate or verify."
+    ],
+    "workflow_selection": [
+      {
+        "condition": "if fraud_risk_score < 30",
+        "workflow": "W1",
+        "logic": "Auto-approve transaction as legitimate; no escalation or customer contact required."
+      },
+      {
+        "condition": "if fraud_risk_score > 95",
+        "workflow": "W2",
+        "logic": "Auto-decline transaction; block account or card immediately and notify customer."
+      },
+      {
+        "condition": "if 70 < fraud_risk_score <= 95",
+        "workflow": "W3",
+        "logic": "Escalate to analyst with full investigation package and recommended actions."
+      },
+      {
+        "condition": "if 50 <= fraud_risk_score <= 70",
+        "workflow": "W4",
+        "logic": "Request customer verification via SMS/email before escalating."
+      },
+      {
+        "condition": "if alert_type == 'account_takeover'",
+        "workflow": "W5",
+        "logic": "Immediately block account access and escalate to analyst for urgent review."
+      },
+      {
+        "condition": "if alert_type == 'velocity_fraud'",
+        "workflow": "W6",
+        "logic": "Escalate to analyst with velocity and merchant risk context."
+      },
+      {
+        "condition": "if alert_type == 'synthetic_identity'",
+        "workflow": "W7",
+        "logic": "Escalate new account alerts with synthetic identity signals for analyst review."
+      },
+      {
+        "condition": "if alert_type == 'friendly_fraud'",
+        "workflow": "W8",
+        "logic": "Provide evidence summary for analyst to review chargeback dispute."
+      },
+      {
+        "condition": "if alert_type == 'authorized_push_payment'",
+        "workflow": "W9",
+        "logic": "Hold wire transfer and escalate for possible elder or scam fraud."
+      }
+    ],
+    "failure_points": [
+      {
+        "scenario": "Unable to retrieve data from a required system (e.g., transaction history, device intelligence).",
+        "recovery": "Escalate to HUMAN_IN_THE_LOOP with details of missing data and request manual review."
+      },
+      {
+        "scenario": "Conflicting signals or ambiguous risk score (e.g., borderline score with inconsistent device data).",
+        "recovery": "Escalate to HUMAN_IN_THE_LOOP for human judgment and further investigation."
+      },
+      {
+        "scenario": "Customer verification fails or is not completed within required timeframe.",
+        "recovery": "Auto-decline transaction and notify analyst for manual follow-up."
+      }
+    ],
+    "success_criteria": [
+      "Fraud alerts are triaged and routed within 2 minutes of receipt.",
+      "All escalated cases include complete investigation packages and recommended actions.",
+      "False positives are minimized, and legitimate customer activity is not disrupted.",
+      "All regulatory and notification requirements are met for true fraud cases."
+    ]
+  }
+}

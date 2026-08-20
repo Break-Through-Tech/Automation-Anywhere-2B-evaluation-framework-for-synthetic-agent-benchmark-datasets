@@ -1,0 +1,1220 @@
+{
+  "workflows": [
+    {
+      "workflow": "W1",
+      "test_cases": [
+        {
+          "test_case_id": "ClaimsAgent_W1_TC1",
+          "title": "Emergency Property Claim \u2013 Water Intrusion, Storm Peril, Coverage Confirmed",
+          "rationale": "Covers urgent property claim with water damage, storm peril, policy active, emergency vendor dispatch via ServiceMaster.",
+          "input_conditions": [
+            "claim_type = property",
+            "severity = emergency",
+            "cause = storm/wind",
+            "policy_status = active",
+            "coverage_confirmed = true",
+            "emergency_services_needed = true"
+          ],
+          "representative_input": {
+            "source_text": "Tree fell on my roof during last night's storm. Water leaking into bedroom. Need help ASAP.",
+            "policy_number": "HO-887766",
+            "claim_type": "property",
+            "severity": "emergency",
+            "injury_reported": false,
+            "catastrophe_event": false,
+            "batch_size": 1,
+            "policy_status": "active",
+            "coverage_confirmed": true,
+            "business_interruption": false,
+            "duplicate_claim_found": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-445521",
+              "claim_status": "created",
+              "assigned_team": "CAT team",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Emergency claim triggers water mitigation vendor dispatch and CAT team routing. All data present; no ambiguity or escalation.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (storm, water intrusion)",
+              "expected_state": {
+                "loss_details": "complete",
+                "cause": "storm/wind"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim classified as property, peril: storm/wind",
+              "expected_state": {
+                "claim_type": "property",
+                "peril": "storm/wind"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Policy coverage validated (active, peril covered)",
+              "expected_state": {
+                "coverage_confirmed": true,
+                "policy_status": "active"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Claim severity assessed (emergency)",
+              "expected_state": {
+                "severity_level": "emergency",
+                "emergency_services_needed": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Claim record created with emergency flag",
+              "expected_state": {
+                "claim_status": "created",
+                "flags": [
+                  "emergency"
+                ]
+              }
+            },
+            {
+              "step": 6,
+              "description": "Emergency water mitigation vendor dispatched",
+              "expected_state": {
+                "dispatch_status": "dispatched",
+                "emergency_type": "water_mitigation",
+                "vendor_network": "ServiceMaster"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Claim routed to CAT team",
+              "expected_state": {
+                "assigned_team": "CAT team",
+                "assignment_status": "assigned"
+              }
+            },
+            {
+              "step": 8,
+              "description": "Claim acknowledgment sent to customer",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "acknowledgment"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "ClaimsAgent_W1_TC2",
+          "title": "Emergency Property Claim \u2013 Water Intrusion, Storm Peril, Local Vendor, Alternate Address",
+          "rationale": "Tests alternate vendor dispatch and address parsing, confirms agent supports different vendor networks and locations.",
+          "input_conditions": [
+            "claim_type = property",
+            "severity = emergency",
+            "cause = storm/wind",
+            "policy_status = active",
+            "coverage_confirmed = true",
+            "emergency_services_needed = true",
+            "vendor_network = LocalVendor",
+            "incident_location = alternate city/state"
+          ],
+          "representative_input": {
+            "source_text": "Heavy rain caused basement flooding at 88 Oak St, Springfield, IL. Water rising quickly.",
+            "policy_number": "HO-998877",
+            "claim_type": "property",
+            "severity": "emergency",
+            "injury_reported": false,
+            "catastrophe_event": false,
+            "batch_size": 1,
+            "policy_status": "active",
+            "coverage_confirmed": true,
+            "business_interruption": false,
+            "duplicate_claim_found": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-445522",
+              "claim_status": "created",
+              "assigned_team": "CAT team",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Emergency vendor dispatch uses LocalVendor network and alternate address; all other steps standard.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (flood, alternate address)",
+              "expected_state": {
+                "loss_details": "complete",
+                "location": "88 Oak St, Springfield, IL"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim classified as property, peril: water/storm",
+              "expected_state": {
+                "claim_type": "property",
+                "peril": "water"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Policy coverage validated (active, peril covered)",
+              "expected_state": {
+                "coverage_confirmed": true,
+                "policy_status": "active"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Claim severity assessed (emergency)",
+              "expected_state": {
+                "severity_level": "emergency",
+                "emergency_services_needed": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Claim record created with emergency flag",
+              "expected_state": {
+                "claim_status": "created",
+                "flags": [
+                  "emergency"
+                ]
+              }
+            },
+            {
+              "step": 6,
+              "description": "Emergency water mitigation vendor dispatched (LocalVendor)",
+              "expected_state": {
+                "dispatch_status": "dispatched",
+                "emergency_type": "water_mitigation",
+                "vendor_network": "LocalVendor"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Claim routed to CAT team",
+              "expected_state": {
+                "assigned_team": "CAT team",
+                "assignment_status": "assigned"
+              }
+            },
+            {
+              "step": 8,
+              "description": "Claim acknowledgment sent to customer",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "acknowledgment"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W2",
+      "test_cases": [
+        {
+          "test_case_id": "ClaimsAgent_W2_TC1",
+          "title": "Auto Accident with Bodily Injury \u2013 Standard BI, Coverage Confirmed",
+          "rationale": "Covers auto accident with a single injury, liability coverage confirmed, BI adjuster assignment.",
+          "input_conditions": [
+            "claim_type = auto",
+            "injury_reported = true",
+            "cause = rear-end collision",
+            "policy_status = active",
+            "coverage_confirmed = true"
+          ],
+          "representative_input": {
+            "source_text": "I was rear-ended on I-95. Neck pain, went to hospital.",
+            "policy_number": "AUTO-123456",
+            "claim_type": "auto",
+            "severity": "standard",
+            "injury_reported": true,
+            "catastrophe_event": false,
+            "batch_size": 1,
+            "policy_status": "active",
+            "coverage_confirmed": true,
+            "duplicate_claim_found": false,
+            "business_interruption": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-445523",
+              "claim_status": "created",
+              "assigned_team": "BI adjuster",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Standard BI path; injury details present, no large loss or litigation flags.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (auto, injury)",
+              "expected_state": {
+                "loss_details": "complete",
+                "injuries": [
+                  "neck pain"
+                ]
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim classified as auto liability",
+              "expected_state": {
+                "claim_type": "auto",
+                "sub_type": "liability"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Policy coverage validated (active, liability covered)",
+              "expected_state": {
+                "coverage_confirmed": true,
+                "policy_status": "active"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Claim severity assessed (BI flag)",
+              "expected_state": {
+                "severity_level": "standard",
+                "flags": [
+                  "BI"
+                ]
+              }
+            },
+            {
+              "step": 5,
+              "description": "Claim record created with injury flag",
+              "expected_state": {
+                "claim_status": "created",
+                "flags": [
+                  "BI"
+                ]
+              }
+            },
+            {
+              "step": 6,
+              "description": "Claim routed to BI adjuster",
+              "expected_state": {
+                "assigned_team": "BI adjuster",
+                "assignment_status": "assigned"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Claim acknowledgment sent to claimant",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "acknowledgment"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "ClaimsAgent_W2_TC2",
+          "title": "Auto Accident with Bodily Injury \u2013 Multiple Injuries, Coverage Confirmed",
+          "rationale": "Tests agent's ability to process multiple injury details and route accordingly.",
+          "input_conditions": [
+            "claim_type = auto",
+            "injury_reported = true",
+            "cause = side-impact collision",
+            "policy_status = active",
+            "coverage_confirmed = true",
+            "multiple injuries"
+          ],
+          "representative_input": {
+            "source_text": "Our car was hit from the side at Main & 5th. My wife and I both have back and shoulder pain.",
+            "policy_number": "AUTO-654321",
+            "claim_type": "auto",
+            "severity": "standard",
+            "injury_reported": true,
+            "catastrophe_event": false,
+            "batch_size": 1,
+            "policy_status": "active",
+            "coverage_confirmed": true,
+            "duplicate_claim_found": false,
+            "business_interruption": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-445524",
+              "claim_status": "created",
+              "assigned_team": "BI adjuster",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Multiple injuries processed, but outcome and routing remain standard BI.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (auto, multiple injuries)",
+              "expected_state": {
+                "loss_details": "complete",
+                "injuries": [
+                  "back pain",
+                  "shoulder pain"
+                ]
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim classified as auto liability",
+              "expected_state": {
+                "claim_type": "auto",
+                "sub_type": "liability"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Policy coverage validated (active, liability covered)",
+              "expected_state": {
+                "coverage_confirmed": true,
+                "policy_status": "active"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Claim severity assessed (BI flag)",
+              "expected_state": {
+                "severity_level": "standard",
+                "flags": [
+                  "BI"
+                ]
+              }
+            },
+            {
+              "step": 5,
+              "description": "Claim record created with injury flag",
+              "expected_state": {
+                "claim_status": "created",
+                "flags": [
+                  "BI"
+                ]
+              }
+            },
+            {
+              "step": 6,
+              "description": "Claim routed to BI adjuster",
+              "expected_state": {
+                "assigned_team": "BI adjuster",
+                "assignment_status": "assigned"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Claim acknowledgment sent to claimant",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "acknowledgment"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W3",
+      "test_cases": [
+        {
+          "test_case_id": "ClaimsAgent_W3_TC1",
+          "title": "Catastrophe Event \u2013 Batch Processing, Emergencies Flagged",
+          "rationale": "Covers batch intake for hurricane event, mixture of emergencies and standard claims, all coverage confirmed.",
+          "input_conditions": [
+            "catastrophe_event = true",
+            "batch_size = 3",
+            "claims include mix of emergency and standard severity",
+            "coverage_confirmed = true for all"
+          ],
+          "representative_input": {
+            "catastrophe_event": true,
+            "batch_size": 3,
+            "source_text": [
+              "Hurricane wind blew off roof, major water damage at 22 Bay Rd, Miami, FL.",
+              "Fence destroyed by fallen tree, minor damage at 11 Pine St, Miami, FL.",
+              "Basement flooding, urgent help needed at 99 Ocean Blvd, Miami, FL."
+            ],
+            "policy_number": [
+              "HO-111111",
+              "HO-222222",
+              "HO-333333"
+            ],
+            "claim_type": [
+              "property",
+              "property",
+              "property"
+            ],
+            "severity": [
+              "emergency",
+              "standard",
+              "emergency"
+            ],
+            "injury_reported": [
+              false,
+              false,
+              false
+            ],
+            "policy_status": [
+              "active",
+              "active",
+              "active"
+            ],
+            "coverage_confirmed": [
+              true,
+              true,
+              true
+            ],
+            "business_interruption": [
+              false,
+              false,
+              false
+            ],
+            "duplicate_claim_found": [
+              false,
+              false,
+              false
+            ],
+            "data_incomplete": [
+              false,
+              false,
+              false
+            ]
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": [
+                "2026-445525",
+                "2026-445526",
+                "2026-445527"
+              ],
+              "claim_status": [
+                "created",
+                "created",
+                "created"
+              ],
+              "assigned_team": [
+                "CAT team",
+                "CAT team",
+                "CAT team"
+              ],
+              "customer_acknowledgment_status": [
+                "sent",
+                "sent",
+                "sent"
+              ]
+            }
+          },
+          "success_path_differences": "Emergency claims trigger vendor dispatch; standard claims routed without emergency vendor. All routed to CAT team.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Batch loss details extracted for all claims",
+              "expected_state": {
+                "loss_details": "complete",
+                "batch_size": 3
+              }
+            },
+            {
+              "step": 2,
+              "description": "Each claim classified by type",
+              "expected_state": {
+                "claim_type": [
+                  "property",
+                  "property",
+                  "property"
+                ]
+              }
+            },
+            {
+              "step": 3,
+              "description": "Batch policy coverage validated",
+              "expected_state": {
+                "coverage_confirmed": [
+                  true,
+                  true,
+                  true
+                ]
+              }
+            },
+            {
+              "step": 4,
+              "description": "Severity assessed; emergencies flagged",
+              "expected_state": {
+                "severity_level": [
+                  "emergency",
+                  "standard",
+                  "emergency"
+                ]
+              }
+            },
+            {
+              "step": 5,
+              "description": "Bulk claim records created, CAT event tagged",
+              "expected_state": {
+                "claim_status": [
+                  "created",
+                  "created",
+                  "created"
+                ],
+                "flags": [
+                  "catastrophe"
+                ]
+              }
+            },
+            {
+              "step": 6,
+              "description": "All claims routed to CAT team, emergencies prioritized",
+              "expected_state": {
+                "assigned_team": [
+                  "CAT team",
+                  "CAT team",
+                  "CAT team"
+                ]
+              }
+            },
+            {
+              "step": 7,
+              "description": "Emergency vendors dispatched for flagged claims",
+              "expected_state": {
+                "dispatch_status": [
+                  "dispatched",
+                  null,
+                  "dispatched"
+                ]
+              }
+            },
+            {
+              "step": 8,
+              "description": "Batch claim acknowledgment sent to claimants",
+              "expected_state": {
+                "delivery_status": [
+                  "sent",
+                  "sent",
+                  "sent"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W4",
+      "test_cases": [
+        {
+          "test_case_id": "ClaimsAgent_W4_TC1",
+          "title": "Workers Comp Claim \u2013 Lost Time Injury, Medical Dispatch",
+          "rationale": "Covers workers comp claim with occupational injury, lost time, medical management initiation.",
+          "input_conditions": [
+            "claim_type = workers_comp",
+            "injury_reported = true",
+            "cause = slip/fall at work",
+            "policy_status = active",
+            "coverage_confirmed = true",
+            "severity = standard"
+          ],
+          "representative_input": {
+            "source_text": "Employee slipped on wet floor, sprained ankle, unable to work.",
+            "policy_number": "WC-777888",
+            "claim_type": "workers_comp",
+            "severity": "standard",
+            "injury_reported": true,
+            "policy_status": "active",
+            "coverage_confirmed": true,
+            "business_interruption": false,
+            "duplicate_claim_found": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-WC-1123",
+              "claim_status": "created",
+              "assigned_team": "WC adjuster",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Medical management triggered (nurse case manager), standard lost time injury path.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (occupational injury)",
+              "expected_state": {
+                "loss_details": "complete",
+                "injuries": [
+                  "sprained ankle"
+                ]
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim classified as workers comp",
+              "expected_state": {
+                "claim_type": "workers_comp"
+              }
+            },
+            {
+              "step": 3,
+              "description": "WC policy validated",
+              "expected_state": {
+                "coverage_confirmed": true,
+                "policy_status": "active"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Severity assessed (medical management needed)",
+              "expected_state": {
+                "severity_level": "standard",
+                "emergency_services_needed": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Claim record created",
+              "expected_state": {
+                "claim_status": "created"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Claim routed to WC adjuster",
+              "expected_state": {
+                "assigned_team": "WC adjuster",
+                "assignment_status": "assigned"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Medical provider dispatched (nurse case manager)",
+              "expected_state": {
+                "dispatch_status": "dispatched",
+                "emergency_type": "medical"
+              }
+            },
+            {
+              "step": 8,
+              "description": "Claim acknowledgment sent to employee",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "acknowledgment"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W5",
+      "test_cases": [
+        {
+          "test_case_id": "ClaimsAgent_W5_TC1",
+          "title": "Attorney-Represented Slip & Fall \u2013 Liability, Legal Notification",
+          "rationale": "Covers attorney-represented liability claim, triggers legal notification and document preservation.",
+          "input_conditions": [
+            "claim_type = liability",
+            "attorney_represented = true",
+            "cause = slip and fall at business",
+            "policy_status = active",
+            "coverage_confirmed = true"
+          ],
+          "representative_input": {
+            "source_text": "Our client, Jane Doe, slipped on wet floor at your store on 5/12/2026 and sustained injuries. We represent her.",
+            "policy_number": "GL-334455",
+            "claim_type": "liability",
+            "severity": "litigation",
+            "attorney_represented": true,
+            "policy_status": "active",
+            "coverage_confirmed": true,
+            "business_interruption": false,
+            "duplicate_claim_found": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-GL-9988",
+              "claim_status": "created",
+              "assigned_team": "Senior liability adjuster",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Attorney-represented triggers litigation flag, legal notification, and document preservation requests.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (attorney letter, injury details)",
+              "expected_state": {
+                "loss_details": "complete",
+                "attorney_represented": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim classified as liability",
+              "expected_state": {
+                "claim_type": "liability",
+                "sub_type": "slip and fall"
+              }
+            },
+            {
+              "step": 3,
+              "description": "GL policy and premises coverage validated",
+              "expected_state": {
+                "coverage_confirmed": true,
+                "policy_status": "active"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Severity assessed (litigation risk flagged)",
+              "expected_state": {
+                "severity_level": "litigation",
+                "flags": [
+                  "attorney",
+                  "litigation"
+                ]
+              }
+            },
+            {
+              "step": 5,
+              "description": "GL claim record created with litigation flag",
+              "expected_state": {
+                "claim_status": "created",
+                "flags": [
+                  "litigation"
+                ]
+              }
+            },
+            {
+              "step": 6,
+              "description": "Claim routed to senior liability adjuster, legal team notified",
+              "expected_state": {
+                "assigned_team": "Senior liability adjuster",
+                "assignment_status": "assigned"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Document preservation request sent to insured",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "attorney_notification"
+              }
+            },
+            {
+              "step": 8,
+              "description": "Claim acknowledgment sent to attorney",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "acknowledgment"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W6",
+      "test_cases": [
+        {
+          "test_case_id": "ClaimsAgent_W6_TC1",
+          "title": "Denied Claim \u2013 Policy Lapsed, Coverage Not Confirmed",
+          "rationale": "Covers claim for lapsed policy, triggers denial letter and regulatory documentation.",
+          "input_conditions": [
+            "policy_status = lapsed",
+            "coverage_confirmed = false",
+            "claim_type = property"
+          ],
+          "representative_input": {
+            "source_text": "Tree branch broke window during windstorm. Need to file claim.",
+            "policy_number": "HO-555666",
+            "claim_type": "property",
+            "severity": "denied",
+            "policy_status": "lapsed",
+            "coverage_confirmed": false,
+            "business_interruption": false,
+            "duplicate_claim_found": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-445528",
+              "claim_status": "denied",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Claim is processed as denied due to lapsed policy; denial letter sent.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (property, windstorm)",
+              "expected_state": {
+                "loss_details": "complete",
+                "cause": "windstorm"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim classified as property",
+              "expected_state": {
+                "claim_type": "property"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Policy status and coverage validated (lapsed, not covered)",
+              "expected_state": {
+                "coverage_confirmed": false,
+                "policy_status": "lapsed"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Severity assessed (denied flag)",
+              "expected_state": {
+                "severity_level": "denied",
+                "flags": [
+                  "denied"
+                ]
+              }
+            },
+            {
+              "step": 5,
+              "description": "Claim record created as denied",
+              "expected_state": {
+                "claim_status": "denied"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Coverage denial letter sent to customer",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "denial"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W7",
+      "test_cases": [
+        {
+          "test_case_id": "ClaimsAgent_W7_TC1",
+          "title": "Duplicate Claim \u2013 FNOL Already Reported, Link and Notify",
+          "rationale": "Covers scenario where FNOL matches existing claim, links communication and notifies customer.",
+          "input_conditions": [
+            "duplicate_claim_found = true",
+            "claim_type = property"
+          ],
+          "representative_input": {
+            "source_text": "Following up on my previous claim for roof damage after last week's storm.",
+            "policy_number": "HO-112233",
+            "claim_type": "property",
+            "severity": "standard",
+            "duplicate_claim_found": true,
+            "policy_status": "active",
+            "coverage_confirmed": true,
+            "business_interruption": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-445521",
+              "claim_status": "duplicate",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Duplicate FNOL is linked to original claim, duplicate notification sent.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (property, roof damage)",
+              "expected_state": {
+                "loss_details": "complete"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim type checked for duplication",
+              "expected_state": {
+                "duplicate_claim_found": true
+              }
+            },
+            {
+              "step": 3,
+              "description": "Communication linked to existing claim",
+              "expected_state": {
+                "claim_status": "duplicate",
+                "linked_claims": [
+                  "2026-445521"
+                ]
+              }
+            },
+            {
+              "step": 4,
+              "description": "Duplicate notification sent to customer",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "duplicate_notification"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W8",
+      "test_cases": [
+        {
+          "test_case_id": "ClaimsAgent_W8_TC1",
+          "title": "Complex Commercial Property Claim \u2013 Business Interruption, Large Loss",
+          "rationale": "Covers large commercial property claim with BI, triggers specialists and linked claims.",
+          "input_conditions": [
+            "claim_type = commercial_property",
+            "business_interruption = true",
+            "cause = fire",
+            "policy_status = active",
+            "coverage_confirmed = true"
+          ],
+          "representative_input": {
+            "source_text": "Fire in warehouse disrupted operations, lost inventory and halted business.",
+            "policy_number": "CP-445566",
+            "claim_type": "commercial_property",
+            "severity": "large_loss",
+            "business_interruption": true,
+            "policy_status": "active",
+            "coverage_confirmed": true,
+            "duplicate_claim_found": false,
+            "data_incomplete": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "claim_number": "2026-CP-7788",
+              "claim_status": "created",
+              "assigned_team": "Large loss unit",
+              "customer_acknowledgment_status": "sent"
+            }
+          },
+          "success_path_differences": "Linked claims created for property and BI; forensic accountant and engineer dispatched.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Loss details extracted (fire, business interruption)",
+              "expected_state": {
+                "loss_details": "complete",
+                "cause": "fire"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Claim classified as commercial property + BI",
+              "expected_state": {
+                "claim_type": "commercial_property",
+                "sub_type": "business_interruption"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Property and BI coverage validated",
+              "expected_state": {
+                "coverage_confirmed": true,
+                "policy_status": "active"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Severity assessed (large loss, BI exposure)",
+              "expected_state": {
+                "severity_level": "large_loss",
+                "flags": [
+                  "BI"
+                ]
+              }
+            },
+            {
+              "step": 5,
+              "description": "Linked claims created for property and BI",
+              "expected_state": {
+                "claim_status": "created",
+                "linked_claims": [
+                  "2026-CP-7788",
+                  "2026-BI-7788"
+                ]
+              }
+            },
+            {
+              "step": 6,
+              "description": "Claim routed to large loss unit and BI specialist",
+              "expected_state": {
+                "assigned_team": "Large loss unit",
+                "assignment_status": "assigned"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Forensic accountant and engineer dispatched",
+              "expected_state": {
+                "dispatch_status": "dispatched",
+                "emergency_type": "salvage"
+              }
+            },
+            {
+              "step": 8,
+              "description": "Claim acknowledgment sent to insured",
+              "expected_state": {
+                "delivery_status": "sent",
+                "message_type": "acknowledgment"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_workflows": 8,
+    "total_test_cases": 11,
+    "notes": "All test cases represent distinct, successful completion paths for each workflow, with input completeness ensured for all tool invocations. For batch (W3) and vendor dispatch (W1, W8), variations in input and vendor network are covered. No ambiguous, escalated, or failed scenarios are included."
+  },
+  "role": "You are an intelligent claims intake and triage agent that automates First Notice of Loss (FNOL) processing for insurance carriers. You extract, validate, classify, and route claims received via email, web forms, or phone transcripts, ensuring accurate data capture and rapid assignment to the correct teams and vendors.\n",
+  "goal": "Your goal is to process FNOL submissions in under 5 minutes, extracting all required claim data, validating coverage, classifying claim type and severity, triggering emergency services when needed, creating claims in the core system, and ensuring timely, compliant customer acknowledgment and routing.\n",
+  "action_plan": {
+    "assumptions": [
+      "All FNOL submissions contain enough information to begin extraction and triage.",
+      "Policy and claims systems are available and responsive for validation and record creation."
+    ],
+    "tools_and_resources": [
+      {
+        "tool": "extract_loss_details",
+        "purpose": "Parse and extract structured claim data from unstructured FNOL submissions (email, web form, transcript)."
+      },
+      {
+        "tool": "classify_claim_type",
+        "purpose": "Categorize the claim as property, auto, liability, workers compensation, etc., using extracted details."
+      },
+      {
+        "tool": "validate_policy_coverage",
+        "purpose": "Check policy status, coverage dates, and peril applicability for reported loss."
+      },
+      {
+        "tool": "assess_claim_severity",
+        "purpose": "Determine urgency, emergency needs, and claim complexity for triage."
+      },
+      {
+        "tool": "create_claim_record",
+        "purpose": "Create a new claim in the core system with all available information."
+      },
+      {
+        "tool": "route_to_adjuster",
+        "purpose": "Assign claim to appropriate adjuster or specialized team based on type, location, severity, and workload."
+      },
+      {
+        "tool": "trigger_emergency_services",
+        "purpose": "Dispatch vendors for emergency mitigation, repairs, medical, or other urgent needs."
+      },
+      {
+        "tool": "send_claim_acknowledgment",
+        "purpose": "Notify customer/claimant of claim creation, next steps, and contact information."
+      }
+    ],
+    "guidelines": [
+      "Always validate policy coverage before claim creation or vendor dispatch.",
+      "Route claims to specialized teams for catastrophe, large loss, BI, or attorney-represented scenarios.",
+      "Trigger emergency services only when claim severity warrants immediate action.",
+      "Escalate to human review for ambiguous, high-severity, or complex cases (e.g., litigation, fraud, coverage disputes)."
+    ],
+    "workflow_selection": [
+      {
+        "condition": "If input.claim_type == 'property' and input.severity == 'emergency'",
+        "workflow": "W1",
+        "logic": "Route to storm damage emergency workflow for immediate mitigation and CAT team assignment."
+      },
+      {
+        "condition": "If input.claim_type == 'auto' and input.injury_reported == true",
+        "workflow": "W2",
+        "logic": "Route to Auto Accident workflow with BI flag and injury triage."
+      },
+      {
+        "condition": "If input.catastrophe_event == true and input.batch_size > 1",
+        "workflow": "W3",
+        "logic": "Route to Catastrophe Event workflow for batch intake and routing."
+      },
+      {
+        "condition": "If input.claim_type == 'workers_comp' and input.injury_reported == true",
+        "workflow": "W4",
+        "logic": "Route to Workers Compensation workflow with medical management."
+      },
+      {
+        "condition": "If input.claim_type == 'liability' and input.attorney_represented == true",
+        "workflow": "W5",
+        "logic": "Route to Liability workflow for attorney-represented claims and legal notification."
+      },
+      {
+        "condition": "If input.policy_status == 'lapsed' or input.coverage_confirmed == false",
+        "workflow": "W6",
+        "logic": "Route to Denied Claim workflow for coverage denial and regulatory notification."
+      },
+      {
+        "condition": "If input.duplicate_claim_found == true",
+        "workflow": "W7",
+        "logic": "Route to Duplicate Claim workflow for linking and acknowledgment."
+      },
+      {
+        "condition": "If input.claim_type == 'commercial_property' and input.business_interruption == true",
+        "workflow": "W8",
+        "logic": "Route to Complex Commercial Claim workflow for large loss and BI handling."
+      },
+      {
+        "condition": "If input.claim_type not recognized or input.data_incomplete == true",
+        "workflow": "W9",
+        "logic": "Escalate to human review for ambiguous or incomplete FNOL submissions."
+      }
+    ],
+    "failure_points": [
+      {
+        "scenario": "Policy system unavailable or unresponsive during coverage validation",
+        "recovery": "Retry up to 3 times, escalate to HUMAN_IN_THE_LOOP if unresolved."
+      },
+      {
+        "scenario": "Key claim data missing or ambiguous after extraction",
+        "recovery": "Request clarification from customer, escalate to HUMAN_IN_THE_LOOP if not resolved."
+      },
+      {
+        "scenario": "Claim creation fails due to system error",
+        "recovery": "Log error, notify adjuster supervisor, escalate to HUMAN_IN_THE_LOOP."
+      },
+      {
+        "scenario": "Emergency vendor dispatch fails (no availability)",
+        "recovery": "Escalate to HUMAN_IN_THE_LOOP for manual vendor assignment."
+      }
+    ],
+    "success_criteria": [
+      "Claim created in core system with all required data and correct classification.",
+      "Policy coverage validated and documented.",
+      "Claim routed to appropriate team/adjuster within SLA (5 minutes for emergencies, 30 minutes for standard claims).",
+      "Customer/claimant receives timely acknowledgment with claim number and next steps.",
+      "Emergency services triggered when required.",
+      "All regulatory notifications and documentation completed."
+    ]
+  }
+}

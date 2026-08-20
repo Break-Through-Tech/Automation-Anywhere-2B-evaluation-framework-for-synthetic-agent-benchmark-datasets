@@ -1,0 +1,913 @@
+{
+  "workflows": [
+    {
+      "workflow": "W1 - Standard Prior Authorization Submission",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcarePA_W1_TC1",
+          "title": "Standard MRI PA - All Documentation Present, Criteria Met",
+          "rationale": "Validates standard PA flow for a common imaging procedure (MRI) with all required documentation present and criteria met.",
+          "input_conditions": [
+            "service_type = standard",
+            "cpt_code = 72148 (MRI)",
+            "all required clinical documentation available",
+            "medical necessity criteria met"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445566",
+            "payer_id": "PAYER-ANTHEM",
+            "plan_id": "PLAN-BCBS-01",
+            "cpt_code": "72148",
+            "diagnosis_code": "M54.5",
+            "service_type": "standard"
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-556677",
+              "decision_notes": "Approved for 90 days, MRI criteria met.",
+              "reference_id": "PA-778899",
+              "valid_through": "2024-09-10"
+            }
+          },
+          "success_path_differences": "Straightforward path: all documentation found in EHR, criteria met, PA submitted and approved.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA requirement checked for MRI",
+              "expected_state": {
+                "pa_required": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Medical necessity criteria retrieved for MRI",
+              "expected_state": {
+                "criteria_text": "MRI criteria",
+                "required_docs": [
+                  "clinical note",
+                  "imaging report"
+                ]
+              }
+            },
+            {
+              "step": 3,
+              "description": "All required clinical documentation gathered",
+              "expected_state": {
+                "docs_found": [
+                  "clinical note",
+                  "imaging report"
+                ],
+                "docs_missing": []
+              }
+            },
+            {
+              "step": 4,
+              "description": "Clinical criteria validated",
+              "expected_state": {
+                "criteria_met": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "PA submission prepared and assembled",
+              "expected_state": {
+                "ready_to_submit": true
+              }
+            },
+            {
+              "step": 6,
+              "description": "PA request submitted via API/portal",
+              "expected_state": {
+                "submission_status": "submitted"
+              }
+            },
+            {
+              "step": 7,
+              "description": "PA status tracked; provider notified of approval",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-556677"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "HealthcarePA_W1_TC2",
+          "title": "Standard Sleep Study PA - Alternate Documentation Path",
+          "rationale": "Tests standard PA for a sleep study (CPT 95800), where alternate documentation (e.g., home sleep test report) is required and present.",
+          "input_conditions": [
+            "service_type = standard",
+            "cpt_code = 95800 (Sleep Study)",
+            "alternate required documentation available",
+            "criteria met via alternate clinical evidence"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445641",
+            "payer_id": "PAYER-UHC",
+            "plan_id": "PLAN-MEDICARE-02",
+            "cpt_code": "95800",
+            "diagnosis_code": "G47.33",
+            "service_type": "standard"
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-991122",
+              "decision_notes": "Approved, home sleep study criteria met.",
+              "reference_id": "PA-445601",
+              "valid_through": "2025-01-15"
+            }
+          },
+          "success_path_differences": "Branch where alternate documentation (home sleep test) is present and sufficient for criteria validation.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA requirement checked for sleep study",
+              "expected_state": {
+                "pa_required": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Medical necessity criteria retrieved for sleep study",
+              "expected_state": {
+                "criteria_text": "Sleep study criteria",
+                "required_docs": [
+                  "clinical note",
+                  "home sleep test report"
+                ]
+              }
+            },
+            {
+              "step": 3,
+              "description": "Alternate required documentation gathered",
+              "expected_state": {
+                "docs_found": [
+                  "clinical note",
+                  "home sleep test report"
+                ],
+                "docs_missing": []
+              }
+            },
+            {
+              "step": 4,
+              "description": "Clinical criteria validated using alternate documentation",
+              "expected_state": {
+                "criteria_met": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "PA submission prepared",
+              "expected_state": {
+                "ready_to_submit": true
+              }
+            },
+            {
+              "step": 6,
+              "description": "PA request submitted via portal",
+              "expected_state": {
+                "submission_status": "submitted"
+              }
+            },
+            {
+              "step": 7,
+              "description": "PA status tracked; provider notified of approval",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-991122"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W2 - Documentation Request and Completion Workflow",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcarePA_W2_TC1",
+          "title": "Documentation Completion After Initial EHR Deficiency",
+          "rationale": "Validates agent's ability to successfully complete PA after missing documents are requested and received from provider.",
+          "input_conditions": [
+            "service_type = standard",
+            "additional_docs_needed = true",
+            "initial EHR query missing required documentation",
+            "provider supplies missing documentation"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445566",
+            "payer_id": "PAYER-ANTHEM",
+            "plan_id": "PLAN-BCBS-01",
+            "cpt_code": "72148",
+            "diagnosis_code": "M54.5",
+            "service_type": "standard",
+            "additional_docs_needed": true
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-556677",
+              "decision_notes": "Approved for 90 days, MRI criteria met after additional documentation received.",
+              "reference_id": "PA-778899",
+              "valid_through": "2024-09-10"
+            }
+          },
+          "success_path_differences": "Branch where documentation is initially missing and completed after provider response.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA requirements and criteria checked",
+              "expected_state": {
+                "pa_required": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Initial clinical documentation gathered; some documents missing",
+              "expected_state": {
+                "docs_found": [
+                  "clinical note"
+                ],
+                "docs_missing": [
+                  "imaging report"
+                ]
+              }
+            },
+            {
+              "step": 3,
+              "description": "Provider supplies missing documentation (imaging report)",
+              "expected_state": {
+                "docs_found": [
+                  "imaging report"
+                ],
+                "docs_missing": []
+              }
+            },
+            {
+              "step": 4,
+              "description": "Clinical criteria validated after all docs present",
+              "expected_state": {
+                "criteria_met": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "PA submission prepared and sent",
+              "expected_state": {
+                "ready_to_submit": true
+              }
+            },
+            {
+              "step": 6,
+              "description": "PA status tracked; provider notified of approval",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-556677"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W3 - Specialty Drug Prior Authorization Workflow",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcarePA_W3_TC1",
+          "title": "Specialty Drug PA - High-Cost Medication, All Criteria Met",
+          "rationale": "Tests successful specialty drug PA for a high-cost medication (J0135), with all intensive documentation and review requirements met.",
+          "input_conditions": [
+            "service_type = specialty_drug",
+            "cpt_code = J0135",
+            "specialty_drug = true",
+            "all required labs, notes, treatment history present",
+            "criteria met"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445641",
+            "payer_id": "PAYER-UHC",
+            "plan_id": "PLAN-MEDICARE-02",
+            "cpt_code": "J0135",
+            "diagnosis_code": "M06.9",
+            "service_type": "specialty_drug",
+            "specialty_drug": true
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-991122",
+              "decision_notes": "Specialty drug PA approved after clinical review.",
+              "reference_id": "PA-445601",
+              "valid_through": "2025-01-15"
+            }
+          },
+          "success_path_differences": "Specialty drug logic: more intensive documentation, but all criteria and review steps passed.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA requirement checked for specialty drug",
+              "expected_state": {
+                "pa_required": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Detailed medical necessity criteria retrieved",
+              "expected_state": {
+                "criteria_text": "Specialty drug criteria",
+                "required_docs": [
+                  "labs",
+                  "treatment history",
+                  "provider notes"
+                ]
+              }
+            },
+            {
+              "step": 3,
+              "description": "Extensive documentation gathered",
+              "expected_state": {
+                "docs_found": [
+                  "labs",
+                  "treatment history",
+                  "provider notes"
+                ],
+                "docs_missing": []
+              }
+            },
+            {
+              "step": 4,
+              "description": "Clinical criteria validated",
+              "expected_state": {
+                "criteria_met": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Comprehensive PA submission prepared",
+              "expected_state": {
+                "ready_to_submit": true
+              }
+            },
+            {
+              "step": 6,
+              "description": "PA submitted via appropriate channel",
+              "expected_state": {
+                "submission_status": "submitted"
+              }
+            },
+            {
+              "step": 7,
+              "description": "PA status tracked; provider notified of approval",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-991122"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W4 - Denial and Appeal Workflow",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcarePA_W4_TC1",
+          "title": "Appeal After Initial PA Denial - Additional Evidence Provided",
+          "rationale": "Validates successful appeal process when new documentation is available and appeal is approved.",
+          "input_conditions": [
+            "appeal_requested = true",
+            "initial PA denied",
+            "supplemental documentation available for appeal",
+            "appeal reason provided"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445641",
+            "payer_id": "PAYER-UHC",
+            "plan_id": "PLAN-MEDICARE-02",
+            "cpt_code": "J0135",
+            "diagnosis_code": "M06.9",
+            "service_type": "specialty_drug",
+            "appeal_requested": true
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-991122",
+              "decision_notes": "Appeal approved after review of supplemental documentation.",
+              "reference_id": "APPEAL-223344",
+              "valid_through": "2025-01-15"
+            }
+          },
+          "success_path_differences": "Appeal path: new evidence provided, appeal submitted and approved.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA status tracked; denial reason obtained",
+              "expected_state": {
+                "pa_status": "denied",
+                "decision_notes": "Initial criteria not met"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Supplemental documentation gathered for appeal",
+              "expected_state": {
+                "docs_found": [
+                  "additional labs",
+                  "specialist note"
+                ],
+                "docs_missing": []
+              }
+            },
+            {
+              "step": 3,
+              "description": "Appeal submission prepared",
+              "expected_state": {
+                "appeal_status": "submitted",
+                "new_reference_id": "APPEAL-223344"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Appeal status tracked; appeal approved",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-991122"
+              }
+            },
+            {
+              "step": 5,
+              "description": "Provider notified of appeal approval",
+              "expected_state": {
+                "final_status": "approved"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W5 - Durable Medical Equipment PA Workflow",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcarePA_W5_TC1",
+          "title": "DME PA - Home Oxygen, All Clinical Criteria Met",
+          "rationale": "Validates successful DME PA for home oxygen (E1390) with all required documentation (pulse ox, ABG, diagnosis) present.",
+          "input_conditions": [
+            "service_type = dme",
+            "cpt_code = E1390",
+            "all required DME documentation present",
+            "criteria met"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445566",
+            "payer_id": "PAYER-ANTHEM",
+            "plan_id": "PLAN-BCBS-01",
+            "cpt_code": "E1390",
+            "diagnosis_code": "J44.9",
+            "service_type": "dme"
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-556677",
+              "decision_notes": "DME PA approved; home oxygen delivery authorized.",
+              "reference_id": "PA-778899",
+              "valid_through": "2024-09-10"
+            }
+          },
+          "success_path_differences": "DME branch: specific clinical data (pulse ox, ABG) required and present.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA requirement checked for DME",
+              "expected_state": {
+                "pa_required": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Medical necessity criteria for DME retrieved",
+              "expected_state": {
+                "criteria_text": "DME criteria",
+                "required_docs": [
+                  "diagnosis",
+                  "pulse ox",
+                  "ABG"
+                ]
+              }
+            },
+            {
+              "step": 3,
+              "description": "Required DME documentation gathered",
+              "expected_state": {
+                "docs_found": [
+                  "diagnosis",
+                  "pulse ox",
+                  "ABG"
+                ],
+                "docs_missing": []
+              }
+            },
+            {
+              "step": 4,
+              "description": "Clinical criteria validated",
+              "expected_state": {
+                "criteria_met": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "PA submission prepared and sent",
+              "expected_state": {
+                "ready_to_submit": true
+              }
+            },
+            {
+              "step": 6,
+              "description": "PA status tracked; supplier notified",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-556677"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W6 - Urgent/Expedited Prior Authorization Workflow",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcarePA_W6_TC1",
+          "title": "Urgent Cardiac Cath PA - Expedited Approval",
+          "rationale": "Validates agent's ability to process urgent PA requests for cardiac catheterization (CPT 93458), ensuring expedited workflow and approval.",
+          "input_conditions": [
+            "service_type = urgent",
+            "urgent = true",
+            "cpt_code = 93458 (Cardiac Cath)",
+            "ER notes and labs present",
+            "criteria met"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445566",
+            "payer_id": "PAYER-ANTHEM",
+            "plan_id": "PLAN-BCBS-01",
+            "cpt_code": "93458",
+            "diagnosis_code": "I25.10",
+            "service_type": "urgent",
+            "urgent": true
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-556677",
+              "decision_notes": "Urgent PA approved for cardiac cath; expedited review.",
+              "reference_id": "PA-778899",
+              "valid_through": "2024-09-10"
+            }
+          },
+          "success_path_differences": "Urgent branch: expedited submission via phone/fax/portal, urgent flags set, faster review.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA requirement checked for urgent procedure",
+              "expected_state": {
+                "pa_required": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Urgent clinical documentation (ER notes, labs) gathered",
+              "expected_state": {
+                "docs_found": [
+                  "ER note",
+                  "labs"
+                ],
+                "docs_missing": []
+              }
+            },
+            {
+              "step": 3,
+              "description": "Expedited PA submission prepared",
+              "expected_state": {
+                "ready_to_submit": true
+              }
+            },
+            {
+              "step": 4,
+              "description": "PA submitted via fastest method",
+              "expected_state": {
+                "submission_status": "submitted"
+              }
+            },
+            {
+              "step": 5,
+              "description": "Expedited PA status tracked",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-556677"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Provider notified of urgent approval",
+              "expected_state": {
+                "final_status": "approved"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W7 - Multi-Step Bariatric Surgery PA Workflow",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcarePA_W7_TC1",
+          "title": "Bariatric Surgery PA - All Multi-Step Criteria Met",
+          "rationale": "Validates multi-step bariatric surgery PA for CPT 43644, with all documentation (nutrition, psych eval, cardiac clearance) present and criteria met.",
+          "input_conditions": [
+            "service_type = surgery",
+            "cpt_code = 43644",
+            "all required multi-step documentation present",
+            "criteria met"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445641",
+            "payer_id": "PAYER-UHC",
+            "plan_id": "PLAN-MEDICARE-02",
+            "cpt_code": "43644",
+            "diagnosis_code": "E66.01",
+            "service_type": "surgery"
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-991122",
+              "decision_notes": "Bariatric surgery PA approved; all criteria met.",
+              "reference_id": "PA-445601",
+              "valid_through": "2025-01-15"
+            }
+          },
+          "success_path_differences": "Multi-step path: extensive documentation (nutrition, psych, cardiac) all completed and validated.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA requirement checked for bariatric surgery",
+              "expected_state": {
+                "pa_required": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Medical necessity criteria retrieved (BMI, comorbidities, program)",
+              "expected_state": {
+                "criteria_text": "Bariatric criteria",
+                "required_docs": [
+                  "nutrition eval",
+                  "psych eval",
+                  "cardiac clearance"
+                ]
+              }
+            },
+            {
+              "step": 3,
+              "description": "Comprehensive documentation gathered",
+              "expected_state": {
+                "docs_found": [
+                  "nutrition eval",
+                  "psych eval",
+                  "cardiac clearance"
+                ],
+                "docs_missing": []
+              }
+            },
+            {
+              "step": 4,
+              "description": "All clinical criteria validated",
+              "expected_state": {
+                "criteria_met": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Large PA packet prepared for committee",
+              "expected_state": {
+                "ready_to_submit": true
+              }
+            },
+            {
+              "step": 6,
+              "description": "PA submitted for committee review",
+              "expected_state": {
+                "submission_status": "submitted"
+              }
+            },
+            {
+              "step": 7,
+              "description": "PA status tracked; provider notified",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-991122"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W8 - PA Status Tracking and Follow-Up Workflow",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcarePA_W8_TC1",
+          "title": "Status Check for Approved PA",
+          "rationale": "Validates agent's ability to track and report approved PA status upon provider request.",
+          "input_conditions": [
+            "pa_status_check = true",
+            "reference_id corresponds to approved PA"
+          ],
+          "representative_input": {
+            "patient_id": "PAT-445566",
+            "payer_id": "PAYER-ANTHEM",
+            "plan_id": "PLAN-BCBS-01",
+            "cpt_code": "72148",
+            "diagnosis_code": "M54.5",
+            "service_type": "standard",
+            "pa_status_check": true
+          },
+          "expected_success_outcome": {
+            "final_status": "approved",
+            "key_outputs": {
+              "pa_status": "approved",
+              "auth_number": "AUTH-556677",
+              "decision_notes": "Approved for 90 days, MRI criteria met.",
+              "reference_id": "PA-778899",
+              "valid_through": "2024-09-10"
+            }
+          },
+          "success_path_differences": "Provider requests status for approved PA; agent retrieves and reports results.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "PA status tracked for reference ID",
+              "expected_state": {
+                "pa_status": "approved",
+                "auth_number": "AUTH-556677"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Results categorized as approved",
+              "expected_state": {
+                "final_status": "approved"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Provider notified of approval",
+              "expected_state": {
+                "final_status": "approved"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_workflows": 8,
+    "total_test_cases": 10,
+    "notes": "Each workflow is covered with at least one distinct success scenario. Multiple test cases are provided for standard PA workflow to cover alternate documentation paths. All representative inputs include required identifiers and fields for tool invocation, with scenario-specific flags set where relevant. Failure, escalation, and ambiguous scenarios are excluded as per instructions."
+  },
+  "role": "You are a healthcare prior authorization automation agent that processes provider PA requests by checking payer requirements, gathering clinical documentation, preparing and submitting authorizations, and tracking decisions to optimize turnaround and approval rates.\n",
+  "goal": "Your goal is to automate, accelerate, and optimize prior authorization submissions for healthcare services, ensuring all payer criteria are met, documentation is complete, and decisions are tracked and communicated, reducing administrative burden and improving patient access to care.\n",
+  "action_plan": {
+    "assumptions": [
+      "Provider requests contain accurate CPT/HCPCS codes, diagnosis codes, and clinical indication.",
+      "EHR and payer portal/API integrations are available for data extraction and submission."
+    ],
+    "tools_and_resources": [
+      {
+        "tool": "check_pa_requirements",
+        "purpose": "Determine if a procedure/service requires prior authorization for a given payer/plan."
+      },
+      {
+        "tool": "retrieve_medical_necessity_criteria",
+        "purpose": "Obtain the payer's medical necessity criteria for specific CPT/diagnosis codes."
+      },
+      {
+        "tool": "gather_clinical_documentation",
+        "purpose": "Extract relevant clinical notes, labs, imaging, and treatment history from EHR."
+      },
+      {
+        "tool": "validate_clinical_criteria",
+        "purpose": "Check if the patient's clinical data meets payer's medical necessity requirements."
+      },
+      {
+        "tool": "prepare_pa_submission",
+        "purpose": "Complete and assemble the PA request form with clinical justification and attachments."
+      },
+      {
+        "tool": "submit_pa_request",
+        "purpose": "Submit the PA request via payer portal/API/EDI transaction."
+      },
+      {
+        "tool": "track_pa_status",
+        "purpose": "Monitor and update the status of submitted PA requests."
+      },
+      {
+        "tool": "appeal_pa_denial",
+        "purpose": "Prepare and submit appeals for denied PA requests with supplemental documentation."
+      }
+    ],
+    "guidelines": [
+      "Always verify PA requirements before gathering documentation.",
+      "Only submit requests when all required clinical criteria and documentation are met or missing data is explicitly addressed.",
+      "Escalate cases to human review when criteria interpretation is ambiguous or urgent clinical judgment is required.",
+      "Use expedited submission methods for urgent/emergency requests.",
+      "Initiate appeals only when additional evidence is available or denial appears incorrect."
+    ],
+    "workflow_selection": [
+      {
+        "condition": "if input.service_type == \"urgent\"",
+        "workflow": "W6",
+        "logic": "Route to expedited PA workflow for urgent/emergency requests."
+      },
+      {
+        "condition": "if input.appeal_requested == true",
+        "workflow": "W4",
+        "logic": "Route to denial/appeal workflow if provider requests appeal."
+      },
+      {
+        "condition": "if input.pa_status_check == true",
+        "workflow": "W8",
+        "logic": "Route to PA tracking workflow for status follow-up."
+      },
+      {
+        "condition": "if input.cpt_code in [\"72148\", \"95800\", \"E1390\", \"74177\", \"93458\", \"43644\"] and input.urgent != true",
+        "workflow": "W1",
+        "logic": "Route to standard PA submission workflow for supported CPT codes."
+      },
+      {
+        "condition": "if input.cpt_code == \"J0135\" or input.specialty_drug == true",
+        "workflow": "W3",
+        "logic": "Route to specialty drug PA workflow."
+      },
+      {
+        "condition": "if input.cpt_code == \"43644\"",
+        "workflow": "W7",
+        "logic": "Route to bariatric surgery multi-step workflow."
+      },
+      {
+        "condition": "if input.additional_docs_needed == true",
+        "workflow": "W2",
+        "logic": "Route to documentation request workflow."
+      },
+      {
+        "condition": "else",
+        "workflow": "W1",
+        "logic": "Default to standard PA workflow; escalate to human if criteria ambiguous."
+      }
+    ],
+    "failure_points": [
+      {
+        "scenario": "Missing required clinical documentation from EHR.",
+        "recovery": "Request missing documentation from provider and pause submission until received."
+      },
+      {
+        "scenario": "Payer portal/API unavailable or submission error.",
+        "recovery": "Retry submission, switch to alternate delivery (fax/phone), or escalate to human."
+      },
+      {
+        "scenario": "Criteria not met but provider insists on submission.",
+        "recovery": "Submit with available documentation and flag for possible denial/appeal."
+      },
+      {
+        "scenario": "Ambiguous medical necessity criteria interpretation.",
+        "recovery": "Escalate to HUMAN_IN_THE_LOOP for clinical review."
+      },
+      {
+        "scenario": "PA status not updated after expected SLA.",
+        "recovery": "Escalate to payer contact or human follow-up."
+      }
+    ],
+    "success_criteria": [
+      "PA request submitted with all required documentation and clinical criteria met.",
+      "PA status tracked and communicated to provider/patient within target turnaround time.",
+      "Appeals initiated promptly for denials with viable clinical evidence.",
+      "Urgent/emergency requests processed via expedited workflow.",
+      "Provider notified of approval/denial/next steps in timely manner."
+    ]
+  }
+}

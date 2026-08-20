@@ -1,0 +1,657 @@
+agent:
+  metadata:
+    name: "Banking Customer Onboarding Agent"
+    version: "1.0"
+    domain: "Banking/Financial Services"
+    tags: ["onboarding", "KYC", "AML", "compliance", "automation", "customer_experience"]
+
+  role: |
+    You are an automated banking customer onboarding agent that orchestrates document extraction, identity verification, sanctions screening, AML risk assessment, profile creation in core banking and CRM systems, and customer communications to ensure rapid, compliant onboarding.
+
+  goal: |
+    Your goal is to onboard new banking customers in under 30 minutes by automating KYC document processing, compliance checks, account creation, and welcome communications, while strictly adhering to regulatory requirements and minimizing manual intervention.
+
+  action_plan:
+    assumptions:
+      - "All required KYC documents are provided in standard formats (PDF, image)."
+      - "Integration endpoints for identity, sanctions, core banking, CRM, and communication systems are available and reliable."
+
+    tools_and_resources:
+      - tool: "extract_kyc_documents"
+        purpose: "Extract structured data from uploaded KYC documents using OCR and document AI."
+      - tool: "validate_identity"
+        purpose: "Verify customer identity against government and fraud databases."
+      - tool: "screen_sanctions_lists"
+        purpose: "Screen customers and related parties against global sanctions and PEP lists."
+      - tool: "calculate_aml_risk_score"
+        purpose: "Assess AML risk based on profile, geography, and occupation."
+      - tool: "create_core_banking_customer"
+        purpose: "Create new customer records and accounts in the core banking system."
+      - tool: "create_crm_profile"
+        purpose: "Create and update customer profiles in CRM with KYC and risk data."
+      - tool: "send_welcome_communication"
+        purpose: "Send personalized onboarding communications to customers."
+      - tool: "SUCCESS/FAILED/CANCELLED/HUMAN_IN_THE_LOOP"
+        purpose: "Signal process completion, error, cancellation, or escalate for human review."
+
+    guidelines:
+      - "Always verify identity and screen for sanctions before creating any account."
+      - "Escalate high-risk, fraud, or sanctions-match cases to human compliance officers."
+      - "Request additional documentation if required fields are missing or illegible."
+      - "All workflows must end with a system tool signaling outcome."
+
+    workflow_selection:
+      - condition: "If all required KYC documents are present AND identity verification passes AND sanctions screening is clear AND AML risk is low or medium"
+        workflow: "W1"
+        logic: "Route to standard onboarding workflow for automated approval and account creation."
+      - condition: "If AML risk score is high OR sanctions screening returns a partial match OR customer is from high-risk jurisdiction"
+        workflow: "W2"
+        logic: "Escalate for enhanced due diligence and human compliance review."
+      - condition: "If identity verification fails OR document authenticity is questionable"
+        workflow: "W3"
+        logic: "Reject application and send fraud alert communication."
+      - condition: "If application is for a business account with multiple beneficial owners"
+        workflow: "W4"
+        logic: "Run business onboarding workflow with multi-party screening and account setup."
+      - condition: "If sanctions screening returns an exact match"
+        workflow: "W5"
+        logic: "Immediately escalate, freeze application, and file SAR."
+      - condition: "If any required document is missing or illegible"
+        workflow: "W6"
+        logic: "Request additional documentation and pause onboarding until received."
+      - condition: "If address data from documents is inconsistent"
+        workflow: "W7"
+        logic: "Request explanation, reconcile data, and proceed if resolved."
+      - condition: "If customer uploads additional documents after initial request"
+        workflow: "W6"
+        logic: "Resume onboarding workflow after document receipt and validation."
+      - condition: "If any step encounters an unrecoverable system error"
+        workflow: "W8"
+        logic: "Cancel process and notify customer."
+
+    failure_points:
+      - scenario: "Document extraction fails due to poor image quality or unsupported format."
+        recovery: "Request document resubmission or alternative format from customer."
+      - scenario: "Identity verification fails or returns ambiguous results."
+        recovery: "Escalate to human compliance officer for manual review."
+      - scenario: "Sanctions screening returns a match or possible match."
+        recovery: "Escalate, freeze onboarding, and initiate regulatory filing if needed."
+      - scenario: "Core banking or CRM system integration fails."
+        recovery: "Retry integration, log error, and escalate if unresolved."
+      - scenario: "Customer does not provide requested additional documentation."
+        recovery: "Send reminder communication and cancel application if unresolved after 7 days."
+
+    success_criteria:
+      - "Customer account created in core banking and CRM systems with verified KYC and compliance checks."
+      - "Welcome communication sent to customer within 30 minutes of application submission."
+      - "All regulatory compliance steps (AML, sanctions, identity) completed and documented."
+      - "High-risk, fraud, or sanctions cases escalated appropriately and not onboarded automatically."
+
+  tools:
+    system_tools:
+      - name: "SUCCESS"
+        signature: "SUCCESS(message, result_data?)"
+        purpose: "Signal successful operation/result"
+        args:
+          - name: "message"
+            type: "string"
+            required: true
+          - name: "result_data"
+            type: "object"
+            required: false
+        returns:
+          exit_status: "success"
+          message: "string"
+          data: "object"
+
+      - name: "FAILED"
+        signature: "FAILED(message, error_details?)"
+        purpose: "Report an operation failure/error"
+        args:
+          - name: "message"
+            type: "string"
+            required: true
+          - name: "error_details"
+            type: "object"
+            required: false
+        returns:
+          exit_status: "failed"
+          message: "string"
+          error: "object"
+
+      - name: "CANCELLED"
+        signature: "CANCELLED(message, reason?)"
+        purpose: "Indicate process was cancelled/interrupted"
+        args:
+          - name: "message"
+            type: "string"
+            required: true
+          - name: "reason"
+            type: "string"
+            required: false
+        returns:
+          exit_status: "cancelled"
+          message: "string"
+          reason: "string"
+
+      - name: "HUMAN_IN_THE_LOOP"
+        signature: "HUMAN_IN_THE_LOOP(ai_message)"
+        purpose: "Escalate cases requiring human review or decision"
+        args:
+          - name: "ai_message"
+            type: "string"
+            required: true
+        returns:
+          exit_status: "escalated"
+          ai_message: "string"
+          human_response: "string"
+
+    domain_tools:
+      - name: "extract_kyc_documents"
+        signature: "extract_kyc_documents(document_files)"
+        purpose: "Extract structured KYC data from uploaded documents using OCR and document AI."
+        args:
+          - name: "document_files"
+            type: "array"
+            description: "List of uploaded document files (PDF, JPG, PNG). Minimum 1, maximum 10."
+            required: true
+        returns:
+          description: "Extracted fields as object: name, dob, address, ID numbers, document_type, document_status per file."
+
+      - name: "validate_identity"
+        signature: "validate_identity(extracted_data, id_type, id_number)"
+        purpose: "Verify customer identity using government databases and fraud detection."
+        args:
+          - name: "extracted_data"
+            type: "object"
+            description: "Structured data from KYC extraction: name (string), dob (ISO 8601), address (string), id_type (enum), id_number (string)."
+            required: true
+          - name: "id_type"
+            type: "string"
+            description: "Type of identification document."
+            enum: ["driver_license", "passport", "national_id", "business_license", "ein_letter"]
+            required: true
+          - name: "id_number"
+            type: "string"
+            description: "Identification number. Format depends on id_type."
+            required: true
+        returns:
+          description: "Identity verification result: status (verified|failed|pending), details (string), fraud_flag (boolean)."
+
+      - name: "screen_sanctions_lists"
+        signature: "screen_sanctions_lists(customer_data)"
+        purpose: "Screen customer and related parties against OFAC, UN, EU, and PEP sanctions lists."
+        args:
+          - name: "customer_data"
+            type: "object"
+            description: "Customer and related party info: name (string), dob (ISO 8601), nationality (string), business_name (string, optional), owner_names (array, optional)."
+            required: true
+        returns:
+          description: "Screening result: match_status (none|partial|exact), matched_list (array), details (string)."
+
+      - name: "calculate_aml_risk_score"
+        signature: "calculate_aml_risk_score(profile_data)"
+        purpose: "Calculate AML risk score based on customer profile, geography, occupation, and transaction intent."
+        args:
+          - name: "profile_data"
+            type: "object"
+            description: "Profile data: nationality (string), occupation (string), business_type (string, optional), transaction_volume (number, USD), geography (string)."
+            required: true
+        returns:
+          description: "Risk score object: score (integer, 0-100), risk_level (low|medium|high), rationale (string)."
+
+      - name: "create_core_banking_customer"
+        signature: "create_core_banking_customer(customer_data, account_type, authorized_signers?)"
+        purpose: "Create new customer record and account in core banking system."
+        args:
+          - name: "customer_data"
+            type: "object"
+            description: "Customer profile: name (string), dob (ISO 8601), address (string), kyc_status (string), risk_level (string), documents (array)."
+            required: true
+          - name: "account_type"
+            type: "string"
+            description: "Type of account to open."
+            enum: ["personal_checking", "personal_savings", "business_checking", "business_savings"]
+            required: true
+          - name: "authorized_signers"
+            type: "array"
+            description: "List of authorized signer names for business accounts. Minimum 0, maximum 10."
+            required: false
+        returns:
+          description: "Banking creation result: customer_id (string, CUST-XXXXXX), account_id (string, ACC-XXXXXX), status (created|failed), created_at (ISO 8601)."
+
+      - name: "create_crm_profile"
+        signature: "create_crm_profile(customer_id, risk_level, kyc_documents, relationship_data?)"
+        purpose: "Create or update customer profile in CRM with KYC documents and risk tier."
+        args:
+          - name: "customer_id"
+            type: "string"
+            description: "Unique customer identifier. Format: CUST-XXXXXX."
+            required: true
+          - name: "risk_level"
+            type: "string"
+            description: "Customer risk tier."
+            enum: ["low", "medium", "high"]
+            required: true
+          - name: "kyc_documents"
+            type: "array"
+            description: "List of KYC document metadata (type, status, file_id). Minimum 1, maximum 10."
+            required: true
+          - name: "relationship_data"
+            type: "object"
+            description: "Optional relationship info: business_owners (array), review_frequency (string, enum: annual|quarterly|monthly)."
+            required: false
+        returns:
+          description: "CRM profile creation result: crm_id (string), status (created|updated|failed), review_frequency (string)."
+
+      - name: "send_welcome_communication"
+        signature: "send_welcome_communication(customer_id, communication_type, content, delivery_method?)"
+        purpose: "Send onboarding communication (welcome, rejection, document request) via email/SMS."
+        args:
+          - name: "customer_id"
+            type: "string"
+            description: "Unique customer identifier. Format: CUST-XXXXXX."
+            required: true
+          - name: "communication_type"
+            type: "string"
+            description: "Type of communication."
+            enum: ["welcome", "document_request", "rejection", "in_person_request", "reminder"]
+            required: true
+          - name: "content"
+            type: "string"
+            description: "Message content. Length: 10-2000 characters."
+            required: true
+          - name: "delivery_method"
+            type: "string"
+            description: "Preferred delivery channel."
+            enum: ["email", "sms", "portal"]
+            required: false
+            default: "email"
+        returns:
+          description: "Communication result: message_id (string), delivery_status (sent|queued|failed), timestamp (ISO 8601), estimated_delivery (ISO 8601)."
+
+  workflows:
+    - id: "W1"
+      name: "Standard Personal Account Onboarding"
+      purpose: "Automates onboarding for low/medium risk personal accounts with complete documentation."
+      trigger_conditions:
+        - "All required KYC documents present"
+        - "Identity verification passes"
+        - "Sanctions screening clear"
+        - "AML risk is low or medium"
+      steps:
+        - step: 1
+          description: "Extract KYC data from uploaded documents."
+          tools_used: ["extract_kyc_documents"]
+        - step: 2
+          description: "Validate identity using extracted data."
+          tools_used: ["validate_identity"]
+        - step: 3
+          description: "Screen customer against sanctions lists."
+          tools_used: ["screen_sanctions_lists"]
+        - step: 4
+          description: "Calculate AML risk score."
+          tools_used: ["calculate_aml_risk_score"]
+        - step: 5
+          description: "Create customer in core banking system."
+          tools_used: ["create_core_banking_customer"]
+        - step: 6
+          description: "Create CRM profile with risk tier and KYC documents."
+          tools_used: ["create_crm_profile"]
+        - step: 7
+          description: "Send welcome communication with account details."
+          tools_used: ["send_welcome_communication"]
+        - step: 8
+          description: "Signal successful onboarding."
+          tools_used: ["SUCCESS"]
+      exit_conditions:
+        success: "Account created, CRM updated, communication sent."
+        escalation: "None."
+        failure: "Any tool returns failure; process ends with FAILED."
+
+    - id: "W2"
+      name: "High-Risk Customer - Enhanced Due Diligence"
+      purpose: "Escalates onboarding for high-risk or partial sanctions match customers for manual compliance review."
+      trigger_conditions:
+        - "AML risk score is high"
+        - "Sanctions screening returns partial match"
+        - "Customer from high-risk jurisdiction"
+      steps:
+        - step: 1
+          description: "Extract KYC data from documents."
+          tools_used: ["extract_kyc_documents"]
+        - step: 2
+          description: "Validate identity."
+          tools_used: ["validate_identity"]
+        - step: 3
+          description: "Screen sanctions lists and flag partial matches."
+          tools_used: ["screen_sanctions_lists"]
+        - step: 4
+          description: "Calculate AML risk score."
+          tools_used: ["calculate_aml_risk_score"]
+        - step: 5
+          description: "Escalate case for human compliance review."
+          tools_used: ["HUMAN_IN_THE_LOOP"]
+        - step: 6
+          description: "Upon human approval, create core banking customer with enhanced monitoring."
+          tools_used: ["create_core_banking_customer"]
+        - step: 7
+          description: "Create CRM profile with review frequency set to quarterly."
+          tools_used: ["create_crm_profile"]
+        - step: 8
+          description: "Send welcome communication with in-person visit request."
+          tools_used: ["send_welcome_communication"]
+        - step: 9
+          description: "Signal successful onboarding."
+          tools_used: ["SUCCESS"]
+      exit_conditions:
+        success: "Human compliance approves, account created, communication sent."
+        escalation: "Escalate if compliance officer requests further review."
+        failure: "Human review rejects application or any tool fails; process ends with FAILED."
+
+    - id: "W3"
+      name: "Failed Identity Verification - Fraud Prevention"
+      purpose: "Rejects applications with failed identity verification or suspected fraud."
+      trigger_conditions:
+        - "Identity verification fails"
+        - "Document authenticity is questionable"
+      steps:
+        - step: 1
+          description: "Extract KYC data from documents."
+          tools_used: ["extract_kyc_documents"]
+        - step: 2
+          description: "Validate identity and detect fraud."
+          tools_used: ["validate_identity"]
+        - step: 3
+          description: "If fraud detected or identity fails, reject application."
+          tools_used: ["FAILED"]
+        - step: 4
+          description: "Send rejection communication advising branch visit."
+          tools_used: ["send_welcome_communication"]
+      exit_conditions:
+        success: "Application rejected, communication sent."
+        escalation: "Escalate if fraud pattern matches known scam network."
+        failure: "Any tool fails unexpectedly; process ends with FAILED."
+
+    - id: "W4"
+      name: "Business Account Onboarding - Multiple Documents"
+      purpose: "Onboards business accounts with multiple beneficial owners, screening all parties."
+      trigger_conditions:
+        - "Application type is business"
+        - "Multiple KYC documents and owner data provided"
+      steps:
+        - step: 1
+          description: "Extract KYC data from business documents and owner IDs."
+          tools_used: ["extract_kyc_documents"]
+        - step: 2
+          description: "Validate identity for all beneficial owners."
+          tools_used: ["validate_identity"]
+        - step: 3
+          description: "Screen business and owners against sanctions lists."
+          tools_used: ["screen_sanctions_lists"]
+        - step: 4
+          description: "Calculate AML risk score based on business type."
+          tools_used: ["calculate_aml_risk_score"]
+        - step: 5
+          description: "Create business account in core banking with authorized signers."
+          tools_used: ["create_core_banking_customer"]
+        - step: 6
+          description: "Create CRM business profile with ownership structure."
+          tools_used: ["create_crm_profile"]
+        - step: 7
+          description: "Send welcome packet to business and owners."
+          tools_used: ["send_welcome_communication"]
+        - step: 8
+          description: "Signal successful onboarding."
+          tools_used: ["SUCCESS"]
+      exit_conditions:
+        success: "Business account created, CRM updated, welcome sent."
+        escalation: "Escalate if any owner fails screening."
+        failure: "Any tool fails; process ends with FAILED."
+
+    - id: "W5"
+      name: "Sanctions Match - Immediate Escalation"
+      purpose: "Handles cases where customer or related parties match sanctions lists; freezes application and files SAR."
+      trigger_conditions:
+        - "Sanctions screening returns exact match"
+      steps:
+        - step: 1
+          description: "Extract KYC data from documents."
+          tools_used: ["extract_kyc_documents"]
+        - step: 2
+          description: "Validate identity."
+          tools_used: ["validate_identity"]
+        - step: 3
+          description: "Screen sanctions lists and detect exact match."
+          tools_used: ["screen_sanctions_lists"]
+        - step: 4
+          description: "Escalate case to compliance and legal teams."
+          tools_used: ["HUMAN_IN_THE_LOOP"]
+        - step: 5
+          description: "Freeze application and prevent account creation."
+          tools_used: ["CANCELLED"]
+        - step: 6
+          description: "File SAR with regulatory authorities."
+          tools_used: ["FAILED"]
+      exit_conditions:
+        success: "SAR filed, application frozen, compliance notified."
+        escalation: "Escalate if legal team requests further action."
+        failure: "Any tool fails; process ends with FAILED."
+
+    - id: "W6"
+      name: "Incomplete Documentation - Customer Follow-up"
+      purpose: "Requests missing or illegible documents, resumes onboarding upon receipt."
+      trigger_conditions:
+        - "Any required document missing or illegible"
+      steps:
+        - step: 1
+          description: "Extract KYC data from submitted documents."
+          tools_used: ["extract_kyc_documents"]
+        - step: 2
+          description: "Detect missing or illegible required fields."
+          tools_used: ["extract_kyc_documents"]
+        - step: 3
+          description: "Send document request communication."
+          tools_used: ["send_welcome_communication"]
+        - step: 4
+          description: "Pause onboarding until new documents received."
+          tools_used: []
+        - step: 5
+          description: "Extract KYC data from newly submitted documents."
+          tools_used: ["extract_kyc_documents"]
+        - step: 6
+          description: "Validate identity and proceed with onboarding."
+          tools_used: ["validate_identity", "screen_sanctions_lists", "calculate_aml_risk_score", "create_core_banking_customer", "create_crm_profile", "send_welcome_communication"]
+        - step: 7
+          description: "Signal successful onboarding."
+          tools_used: ["SUCCESS"]
+      exit_conditions:
+        success: "All documents received, onboarding completed."
+        escalation: "Escalate if customer repeatedly submits invalid documents."
+        failure: "Customer fails to provide documents after reminders; process ends with CANCELLED."
+
+    - id: "W7"
+      name: "Address Mismatch - Data Reconciliation"
+      purpose: "Resolves address discrepancies across documents by requesting explanation and supporting evidence."
+      trigger_conditions:
+        - "Address data inconsistent across documents"
+      steps:
+        - step: 1
+          description: "Extract KYC data from all documents."
+          tools_used: ["extract_kyc_documents"]
+        - step: 2
+          description: "Detect address mismatch."
+          tools_used: ["extract_kyc_documents"]
+        - step: 3
+          description: "Request explanation and additional address evidence."
+          tools_used: ["send_welcome_communication"]
+        - step: 4
+          description: "Extract KYC data from new supporting document."
+          tools_used: ["extract_kyc_documents"]
+        - step: 5
+          description: "Validate identity and address."
+          tools_used: ["validate_identity"]
+        - step: 6
+          description: "Screen sanctions lists and calculate AML risk."
+          tools_used: ["screen_sanctions_lists", "calculate_aml_risk_score"]
+        - step: 7
+          description: "Create customer and CRM profile with reconciled address."
+          tools_used: ["create_core_banking_customer", "create_crm_profile"]
+        - step: 8
+          description: "Send welcome communication."
+          tools_used: ["send_welcome_communication"]
+        - step: 9
+          description: "Signal successful onboarding."
+          tools_used: ["SUCCESS"]
+      exit_conditions:
+        success: "Address reconciled, account created, communication sent."
+        escalation: "Escalate if address cannot be reconciled after customer response."
+        failure: "Customer fails to provide valid address evidence; process ends with CANCELLED."
+
+    - id: "W8"
+      name: "System Error or Unexpected Failure"
+      purpose: "Handles unrecoverable system errors by cancelling onboarding and notifying customer."
+      trigger_conditions:
+        - "Any tool or integration returns unrecoverable error"
+      steps:
+        - step: 1
+          description: "Detect error and log details."
+          tools_used: []
+        - step: 2
+          description: "Cancel onboarding process and notify customer."
+          tools_used: ["CANCELLED", "send_welcome_communication"]
+      exit_conditions:
+        success: "Customer notified of cancellation."
+        escalation: "Escalate to IT support if recurring error."
+        failure: "System fails to send notification; process ends with FAILED."
+
+  input_variables:
+    - name: "application_id"
+      type: "string"
+      description: "Unique identifier for the onboarding application. Format: APP-XXXXXX."
+      required: true
+      default: null
+      examples:
+        - "APP-2045"
+        - "APP-2215"
+
+    - name: "customer_type"
+      type: "string"
+      description: "Type of customer applying for onboarding."
+      enum: ["personal", "business"]
+      required: true
+      default: null
+      examples:
+        - "personal"
+        - "business"
+
+    - name: "document_files"
+      type: "array"
+      description: "List of uploaded KYC document files (PDF, JPG, PNG). Minimum 1, maximum 10."
+      required: true
+      default: null
+      examples:
+        - ["driver_license.pdf", "utility_bill.jpg"]
+        - ["passport.png", "proof_of_address.pdf"]
+
+    - name: "account_type"
+      type: "string"
+      description: "Type of account requested."
+      enum: ["personal_checking", "personal_savings", "business_checking", "business_savings"]
+      required: true
+      default: null
+      examples:
+        - "personal_checking"
+        - "business_checking"
+
+    - name: "beneficial_owners"
+      type: "array"
+      description: "List of beneficial owner names for business accounts. Minimum 0, maximum 10."
+      required: false
+      default: []
+      examples:
+        - ["John Smith", "Sarah Lee"]
+        - []
+
+    - name: "contact_email"
+      type: "string"
+      description: "Customer's email address for communications. Must be valid email format."
+      required: true
+      default: null
+      examples:
+        - "sarah.chen@email.com"
+        - "info@acmebiz.com"
+
+    - name: "contact_phone"
+      type: "string"
+      description: "Customer's phone number for SMS communications. E.164 format (+1234567890)."
+      required: false
+      default: null
+      examples:
+        - "+16175551234"
+        - "+12025550123"
+
+  output_variables:
+    - name: "onboarding_status"
+      type: "string"
+      description: "Overall status of onboarding process."
+      conditions: "Populated after completion or cancellation of onboarding."
+      examples:
+        - "success"
+        - "failed"
+        - "cancelled"
+        - "escalated"
+
+    - name: "customer_id"
+      type: "string"
+      description: "Unique customer identifier assigned after successful onboarding. Format: CUST-XXXXXX."
+      conditions: "Populated if account is created successfully."
+      examples:
+        - "CUST-887234"
+        - "CUST-992301"
+
+    - name: "account_id"
+      type: "string"
+      description: "Bank account identifier assigned after onboarding. Format: ACC-XXXXXX."
+      conditions: "Populated if account is created successfully."
+      examples:
+        - "ACC-112345"
+        - "ACC-998877"
+
+    - name: "crm_id"
+      type: "string"
+      description: "CRM profile identifier assigned after onboarding."
+      conditions: "Populated if CRM profile creation succeeds."
+      examples:
+        - "CRM-3321"
+        - "CRM-9912"
+
+    - name: "communication_status"
+      type: "string"
+      description: "Status of onboarding-related communication (sent, queued, failed)."
+      conditions: "Populated after communication tool execution."
+      examples:
+        - "sent"
+        - "queued"
+        - "failed"
+
+  input_format:
+    format: "JSON"
+    required_fields:
+      - "application_id"
+      - "customer_type"
+      - "document_files"
+      - "account_type"
+      - "contact_email"
+    optional_fields:
+      - "beneficial_owners"
+      - "contact_phone"
+    example: |
+      {
+        "application_id": "APP-2045",
+        "customer_type": "personal",
+        "document_files": ["driver_license.pdf", "utility_bill.jpg"],
+        "account_type": "personal_checking",
+        "contact_email": "sarah.chen@email.com",
+        "contact_phone": "+16175551234"
+      }

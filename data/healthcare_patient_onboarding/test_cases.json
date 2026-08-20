@@ -1,0 +1,1140 @@
+{
+  "workflows": [
+    {
+      "workflow": "W1 - Full New Patient Onboarding",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcareOnboarding_W1_TC1",
+          "title": "Adult patient with active insurance, initial visit, and preferred dates",
+          "rationale": "Covers standard onboarding for a new adult patient with valid insurance; utilizes preferred appointment dates branch.",
+          "input_conditions": [
+            "Patient age >= 18",
+            "Insurance eligibility active",
+            "All required demographics and insurance fields present",
+            "Initial visit requested",
+            "Preferred dates provided"
+          ],
+          "representative_input": {
+            "form_id": "PAT-10001",
+            "appointment_type": "initial_visit",
+            "preferred_dates": [
+              "2024-04-10",
+              "2024-04-12"
+            ],
+            "provider_id": "PROV-12345",
+            "self_pay": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "patient_record": {
+                "patient_id": "900001",
+                "status": "created",
+                "ehr_system": "Epic"
+              },
+              "insurance_eligibility": {
+                "status": "active",
+                "copay": 25,
+                "deductible": 500,
+                "deductible_met": 150,
+                "prior_auth_required": false
+              },
+              "appointment": {
+                "appointment_id": "APPT-10101",
+                "provider_id": "PROV-12345",
+                "slot": {
+                  "date": "2024-04-10",
+                  "time": "09:00",
+                  "duration": 30
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-30001",
+                "delivery_status": "sent",
+                "timestamp": "2024-03-01T10:30:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "Preferred dates are provided, so agent selects an available slot matching patient preference; insurance eligibility is active and no prior auth required.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract patient demographics from intake form",
+              "expected_state": {
+                "demographics_status": "extracted",
+                "required_fields_present": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Extract insurance info from intake form",
+              "expected_state": {
+                "insurance_fields_status": "extracted",
+                "required_fields_present": true
+              }
+            },
+            {
+              "step": 3,
+              "description": "Verify insurance eligibility using extracted info",
+              "expected_state": {
+                "insurance_eligibility_status": "active",
+                "prior_auth_required": false
+              }
+            },
+            {
+              "step": 4,
+              "description": "Extract medical history from intake form",
+              "expected_state": {
+                "medical_history_status": "extracted"
+              }
+            },
+            {
+              "step": 5,
+              "description": "Create new patient record in EHR",
+              "expected_state": {
+                "patient_record_status": "created"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Check provider availability for initial appointment",
+              "expected_state": {
+                "available_slots_found": true
+              }
+            },
+            {
+              "step": 7,
+              "description": "Schedule appointment and send confirmation",
+              "expected_state": {
+                "appointment_status": "scheduled",
+                "confirmation_sent": true
+              }
+            },
+            {
+              "step": 8,
+              "description": "Signal successful onboarding",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "HealthcareOnboarding_W1_TC2",
+          "title": "Adult patient with active insurance, annual physical, no preferred dates",
+          "rationale": "Tests onboarding when patient does not specify preferred dates, agent selects earliest available slot.",
+          "input_conditions": [
+            "Patient age >= 18",
+            "Insurance eligibility active",
+            "All required demographics and insurance fields present",
+            "Annual physical requested",
+            "No preferred dates"
+          ],
+          "representative_input": {
+            "form_id": "PAT-10002",
+            "appointment_type": "annual_physical",
+            "provider_id": "PROV-67890",
+            "self_pay": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "patient_record": {
+                "patient_id": "900002",
+                "status": "created",
+                "ehr_system": "Epic"
+              },
+              "insurance_eligibility": {
+                "status": "active",
+                "copay": 0,
+                "deductible": 1000,
+                "deductible_met": 500,
+                "prior_auth_required": false
+              },
+              "appointment": {
+                "appointment_id": "APPT-10102",
+                "provider_id": "PROV-67890",
+                "slot": {
+                  "date": "2024-04-15",
+                  "time": "13:00",
+                  "duration": 45
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-30002",
+                "delivery_status": "sent",
+                "timestamp": "2024-03-02T12:00:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "No preferred dates, so agent selects earliest available slot for annual physical; insurance eligibility is active.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract patient demographics from intake form",
+              "expected_state": {
+                "demographics_status": "extracted",
+                "required_fields_present": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Extract insurance info from intake form",
+              "expected_state": {
+                "insurance_fields_status": "extracted",
+                "required_fields_present": true
+              }
+            },
+            {
+              "step": 3,
+              "description": "Verify insurance eligibility using extracted info",
+              "expected_state": {
+                "insurance_eligibility_status": "active",
+                "prior_auth_required": false
+              }
+            },
+            {
+              "step": 4,
+              "description": "Extract medical history from intake form",
+              "expected_state": {
+                "medical_history_status": "extracted"
+              }
+            },
+            {
+              "step": 5,
+              "description": "Create new patient record in EHR",
+              "expected_state": {
+                "patient_record_status": "created"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Check provider availability for annual physical",
+              "expected_state": {
+                "available_slots_found": true
+              }
+            },
+            {
+              "step": 7,
+              "description": "Schedule appointment and send confirmation",
+              "expected_state": {
+                "appointment_status": "scheduled",
+                "confirmation_sent": true
+              }
+            },
+            {
+              "step": 8,
+              "description": "Signal successful onboarding",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W2 - Pediatric Patient Onboarding",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcareOnboarding_W2_TC1",
+          "title": "Pediatric patient (<18) with parent as subscriber, well-child visit",
+          "rationale": "Ensures pediatric onboarding with parent/guardian as insurance subscriber and well-child appointment.",
+          "input_conditions": [
+            "Patient age < 18",
+            "Subscriber relationship is parent",
+            "Insurance eligibility active",
+            "Well-child appointment requested"
+          ],
+          "representative_input": {
+            "form_id": "PAT-20001",
+            "appointment_type": "well_child",
+            "provider_id": "PROV-54321",
+            "self_pay": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "patient_record": {
+                "patient_id": "910001",
+                "status": "created",
+                "ehr_system": "Epic"
+              },
+              "insurance_eligibility": {
+                "status": "active",
+                "copay": 10,
+                "deductible": 250,
+                "deductible_met": 50,
+                "prior_auth_required": false
+              },
+              "appointment": {
+                "appointment_id": "APPT-20101",
+                "provider_id": "PROV-54321",
+                "slot": {
+                  "date": "2024-05-10",
+                  "time": "10:00",
+                  "duration": 30
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-40001",
+                "delivery_status": "sent",
+                "timestamp": "2024-04-01T14:00:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "Insurance subscriber is parent, so eligibility check uses parent info; agent sends confirmation and vaccine requirements to parent.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract patient and parent/guardian demographics",
+              "expected_state": {
+                "demographics_status": "extracted",
+                "subscriber_relationship": "parent"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Extract insurance info, verify parent/guardian as subscriber",
+              "expected_state": {
+                "insurance_fields_status": "extracted",
+                "subscriber_relationship": "parent"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Verify insurance eligibility for dependent",
+              "expected_state": {
+                "insurance_eligibility_status": "active",
+                "prior_auth_required": false
+              }
+            },
+            {
+              "step": 4,
+              "description": "Extract medical history and immunization status",
+              "expected_state": {
+                "medical_history_status": "extracted"
+              }
+            },
+            {
+              "step": 5,
+              "description": "Create pediatric patient record in EHR, link to parent",
+              "expected_state": {
+                "patient_record_status": "created"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Schedule well-child appointment",
+              "expected_state": {
+                "appointment_status": "scheduled"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Send confirmation and vaccine requirements to parent",
+              "expected_state": {
+                "confirmation_sent": true
+              }
+            },
+            {
+              "step": 8,
+              "description": "Signal successful onboarding",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W3 - Insurance Eligibility Failure - Request Update",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcareOnboarding_W3_TC1",
+          "title": "Patient provides updated insurance after initial inactive coverage",
+          "rationale": "Tests successful resolution after patient supplies new insurance following a coverage failure.",
+          "input_conditions": [
+            "Initial insurance eligibility inactive",
+            "Patient responds with updated insurance",
+            "New insurance eligibility active"
+          ],
+          "representative_input": {
+            "form_id": "PAT-30001",
+            "appointment_type": "initial_visit",
+            "provider_id": "PROV-13579",
+            "self_pay": false,
+            "insurance_update": {
+              "carrier": "NewHealth",
+              "policy_number": "NH-55555",
+              "group_number": "NHG-8888",
+              "subscriber_name": "John Doe",
+              "dob": "1990-06-15"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "patient_record": {
+                "patient_id": "920001",
+                "status": "created",
+                "ehr_system": "Epic"
+              },
+              "insurance_eligibility": {
+                "status": "active",
+                "copay": 20,
+                "deductible": 400,
+                "deductible_met": 100,
+                "prior_auth_required": false
+              },
+              "appointment": {
+                "appointment_id": "APPT-30101",
+                "provider_id": "PROV-13579",
+                "slot": {
+                  "date": "2024-06-05",
+                  "time": "11:00",
+                  "duration": 30
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-50001",
+                "delivery_status": "sent",
+                "timestamp": "2024-05-01T09:00:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "Agent requests updated insurance after initial failure; patient responds, agent re-verifies and proceeds with onboarding.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract patient demographics and insurance info",
+              "expected_state": {
+                "demographics_status": "extracted",
+                "insurance_fields_status": "extracted"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Attempt insurance eligibility verification (inactive)",
+              "expected_state": {
+                "insurance_eligibility_status": "inactive"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Send request for updated insurance or self-pay",
+              "expected_state": {
+                "request_sent": true
+              }
+            },
+            {
+              "step": 4,
+              "description": "Patient responds with updated insurance",
+              "expected_state": {
+                "insurance_update_received": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Re-attempt insurance verification (active)",
+              "expected_state": {
+                "insurance_eligibility_status": "active"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Create EHR record, schedule appointment, send confirmation",
+              "expected_state": {
+                "patient_record_status": "created",
+                "appointment_status": "scheduled",
+                "confirmation_sent": true
+              }
+            },
+            {
+              "step": 7,
+              "description": "Signal success",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W4 - Specialty Referral with Prior Authorization",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcareOnboarding_W4_TC1",
+          "title": "Specialty referral with prior auth approved",
+          "rationale": "Validates successful specialty onboarding when prior authorization is required and approved.",
+          "input_conditions": [
+            "Referral for specialty consult",
+            "Insurance eligibility active",
+            "Prior auth required and approved"
+          ],
+          "representative_input": {
+            "form_id": "PAT-40001",
+            "appointment_type": "specialty_consult",
+            "provider_id": "PROV-24680",
+            "referral_id": "REF-10001",
+            "self_pay": false,
+            "prior_auth_number": "AUTH-12345"
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "appointment": {
+                "appointment_id": "APPT-40101",
+                "provider_id": "PROV-24680",
+                "slot": {
+                  "date": "2024-07-10",
+                  "time": "15:00",
+                  "duration": 60
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-60001",
+                "delivery_status": "sent",
+                "timestamp": "2024-06-15T16:00:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "Prior authorization flow is triggered and completed successfully; agent includes auth number in communication.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract patient demographics and referral details",
+              "expected_state": {
+                "demographics_status": "extracted",
+                "referral_status": "valid"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Verify insurance eligibility, check prior auth requirement",
+              "expected_state": {
+                "insurance_eligibility_status": "active",
+                "prior_auth_required": true
+              }
+            },
+            {
+              "step": 3,
+              "description": "Initiate prior authorization request",
+              "expected_state": {
+                "prior_auth_status": "approved"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Hold scheduling until prior auth approved",
+              "expected_state": {
+                "scheduling_status": "pending"
+              }
+            },
+            {
+              "step": 5,
+              "description": "Schedule specialist appointment",
+              "expected_state": {
+                "appointment_status": "scheduled"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Send communication with auth number and appointment details",
+              "expected_state": {
+                "confirmation_sent": true
+              }
+            },
+            {
+              "step": 7,
+              "description": "Signal success",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W5 - Self-Pay Patient Onboarding",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcareOnboarding_W5_TC1",
+          "title": "Self-pay patient onboarding with initial visit",
+          "rationale": "Covers onboarding for patient who selects self-pay; skips insurance, provides pricing estimate.",
+          "input_conditions": [
+            "Self-pay selected",
+            "No insurance info provided",
+            "All required demographics present"
+          ],
+          "representative_input": {
+            "form_id": "PAT-50001",
+            "appointment_type": "initial_visit",
+            "provider_id": "PROV-11223",
+            "self_pay": true
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "patient_record": {
+                "patient_id": "930001",
+                "status": "created",
+                "ehr_system": "Epic"
+              },
+              "appointment": {
+                "appointment_id": "APPT-50101",
+                "provider_id": "PROV-11223",
+                "slot": {
+                  "date": "2024-08-01",
+                  "time": "09:30",
+                  "duration": 30
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-70001",
+                "delivery_status": "sent",
+                "timestamp": "2024-07-01T09:00:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "Insurance verification is entirely skipped; agent sends pricing estimate and payment instructions.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract patient demographics",
+              "expected_state": {
+                "demographics_status": "extracted"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Extract medical history",
+              "expected_state": {
+                "medical_history_status": "extracted"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Create self-pay patient record in EHR",
+              "expected_state": {
+                "patient_record_status": "created"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Provide pricing estimate via communication",
+              "expected_state": {
+                "pricing_sent": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Schedule appointment with payment required at visit",
+              "expected_state": {
+                "appointment_status": "scheduled"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Send appointment confirmation with payment instructions",
+              "expected_state": {
+                "confirmation_sent": true
+              }
+            },
+            {
+              "step": 7,
+              "description": "Signal successful onboarding",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W6 - Duplicate Patient Detection and Merge",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcareOnboarding_W6_TC1",
+          "title": "Duplicate patient detected by SSN and DOB, records merged",
+          "rationale": "Ensures agent can detect exact duplicate, merge records, and proceed without escalation.",
+          "input_conditions": [
+            "Patient demographics match existing EHR record (name + DOB or SSN)",
+            "Exact match, no ambiguity"
+          ],
+          "representative_input": {
+            "form_id": "PAT-60001",
+            "appointment_type": "follow_up",
+            "provider_id": "PROV-33445",
+            "existing_patient_id": "876543",
+            "self_pay": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "patient_record": {
+                "patient_id": "876543",
+                "status": "merged",
+                "ehr_system": "Epic"
+              },
+              "appointment": {
+                "appointment_id": "APPT-60101",
+                "provider_id": "PROV-33445",
+                "slot": {
+                  "date": "2024-09-12",
+                  "time": "11:30",
+                  "duration": 30
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-80001",
+                "delivery_status": "sent",
+                "timestamp": "2024-08-12T08:00:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "Agent detects exact duplicate, merges data, schedules appointment, and sends duplicate alert to staff.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract patient demographics",
+              "expected_state": {
+                "demographics_status": "extracted"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Search EHR for matching records",
+              "expected_state": {
+                "duplicate_found": true,
+                "match_type": "exact"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Update/merge existing record with new info",
+              "expected_state": {
+                "patient_record_status": "merged"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Merge insurance info if new/updated",
+              "expected_state": {
+                "insurance_merged": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Schedule appointment under existing patient ID",
+              "expected_state": {
+                "appointment_status": "scheduled"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Send duplicate alert to staff for review",
+              "expected_state": {
+                "alert_sent": true
+              }
+            },
+            {
+              "step": 7,
+              "description": "Signal success",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W7 - High-Risk/Complex Medical History Onboarding",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcareOnboarding_W7_TC1",
+          "title": "High-risk patient with >2 chronic conditions and >5 medications",
+          "rationale": "Validates onboarding path for patients with complex medical history triggering care coordinator assignment.",
+          "input_conditions": [
+            "Medical history contains >2 chronic conditions",
+            "Medical history contains >5 medications",
+            "Insurance eligibility active"
+          ],
+          "representative_input": {
+            "form_id": "PAT-70001",
+            "appointment_type": "chronic_care",
+            "provider_id": "PROV-55667",
+            "self_pay": false
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "patient_record": {
+                "patient_id": "940001",
+                "status": "created",
+                "ehr_system": "Epic"
+              },
+              "insurance_eligibility": {
+                "status": "active",
+                "copay": 15,
+                "deductible": 600,
+                "deductible_met": 400,
+                "prior_auth_required": false
+              },
+              "appointment": {
+                "appointment_id": "APPT-70101",
+                "provider_id": "PROV-55667",
+                "slot": {
+                  "date": "2024-10-05",
+                  "time": "10:30",
+                  "duration": 60
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-90001",
+                "delivery_status": "sent",
+                "timestamp": "2024-09-01T10:00:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "Agent flags patient as high-risk, assigns care coordinator, and schedules extended visit.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract patient demographics",
+              "expected_state": {
+                "demographics_status": "extracted"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Extract detailed medical history",
+              "expected_state": {
+                "medical_history_status": "extracted",
+                "chronic_conditions_count": 3,
+                "medications_count": 6
+              }
+            },
+            {
+              "step": 3,
+              "description": "Verify insurance eligibility",
+              "expected_state": {
+                "insurance_eligibility_status": "active"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Create EHR record with high-risk flag",
+              "expected_state": {
+                "patient_record_status": "created",
+                "high_risk_flag": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Assign care coordinator (manual or system)",
+              "expected_state": {
+                "care_coordinator_assigned": true
+              }
+            },
+            {
+              "step": 6,
+              "description": "Check provider availability for extended visit",
+              "expected_state": {
+                "available_slots_found": true
+              }
+            },
+            {
+              "step": 7,
+              "description": "Schedule extended appointment",
+              "expected_state": {
+                "appointment_status": "scheduled"
+              }
+            },
+            {
+              "step": 8,
+              "description": "Send welcome packet and disease management resources",
+              "expected_state": {
+                "welcome_sent": true
+              }
+            },
+            {
+              "step": 9,
+              "description": "Signal successful onboarding",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W8 - Incomplete Intake Form - Request Information",
+      "test_cases": [
+        {
+          "test_case_id": "HealthcareOnboarding_W8_TC1",
+          "title": "Missing insurance fields, patient supplies info on request",
+          "rationale": "Covers path where required insurance info is missing, agent requests and receives update, then completes onboarding.",
+          "input_conditions": [
+            "Intake form missing required insurance fields",
+            "Patient responds with missing info",
+            "Insurance eligibility active"
+          ],
+          "representative_input": {
+            "form_id": "PAT-80001",
+            "appointment_type": "initial_visit",
+            "provider_id": "PROV-77889",
+            "missing_fields": [
+              "policy_number",
+              "group_number"
+            ],
+            "insurance_update": {
+              "carrier": "HealthPlus",
+              "policy_number": "HP-22222",
+              "group_number": "HPG-3333",
+              "subscriber_name": "Jane Smith",
+              "dob": "1985-03-22"
+            }
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "patient_record": {
+                "patient_id": "950001",
+                "status": "created",
+                "ehr_system": "Epic"
+              },
+              "insurance_eligibility": {
+                "status": "active",
+                "copay": 30,
+                "deductible": 700,
+                "deductible_met": 200,
+                "prior_auth_required": false
+              },
+              "appointment": {
+                "appointment_id": "APPT-80101",
+                "provider_id": "PROV-77889",
+                "slot": {
+                  "date": "2024-11-20",
+                  "time": "14:30",
+                  "duration": 30
+                },
+                "status": "scheduled"
+              },
+              "communication_status": {
+                "message_id": "MSG-100001",
+                "delivery_status": "sent",
+                "timestamp": "2024-10-20T13:00:00Z"
+              },
+              "escalation_flag": false
+            }
+          },
+          "success_path_differences": "Agent detects missing insurance info, requests update, receives info, re-verifies eligibility, and completes onboarding.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Extract available demographics and insurance info",
+              "expected_state": {
+                "demographics_status": "extracted",
+                "insurance_fields_status": "incomplete"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Identify missing required fields",
+              "expected_state": {
+                "missing_fields_detected": true
+              }
+            },
+            {
+              "step": 3,
+              "description": "Send request for missing information to patient/guardian",
+              "expected_state": {
+                "request_sent": true
+              }
+            },
+            {
+              "step": 4,
+              "description": "Patient supplies missing info",
+              "expected_state": {
+                "missing_info_received": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "Extract updated data and re-verify insurance",
+              "expected_state": {
+                "insurance_eligibility_status": "active"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Create EHR patient record and schedule appointment",
+              "expected_state": {
+                "patient_record_status": "created",
+                "appointment_status": "scheduled"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Send confirmation communication",
+              "expected_state": {
+                "confirmation_sent": true
+              }
+            },
+            {
+              "step": 8,
+              "description": "Signal success",
+              "expected_state": {
+                "final_status": "success"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_workflows": 8,
+    "total_test_cases": 10,
+    "notes": "All workflows have at least one distinct success path. For workflows with meaningful input variations (e.g., W1), multiple test cases are provided to cover different appointment types and input branches. All representative inputs are complete with required identifiers, insurance, dates, and flags for tool invocation. No failure, escalation, or ambiguous scenarios are included."
+  },
+  "role": "You are an automated healthcare patient onboarding agent that streamlines the registration process by extracting patient data from intake forms, verifying insurance eligibility, creating/updating EHR patient records, and scheduling initial appointments according to provider availability and patient preferences.\n",
+  "goal": "Your goal is to ensure every new patient is onboarded efficiently, with accurate demographic and insurance data, validated eligibility, and a scheduled appointment, while maintaining HIPAA compliance and minimizing manual intervention.\n",
+  "action_plan": {
+    "assumptions": [
+      "All intake forms are accessible in a structured format (digital or OCR-converted).",
+      "Insurance verification APIs and EHR systems are available and integrated."
+    ],
+    "tools_and_resources": [
+      {
+        "tool": "extract_patient_demographics",
+        "purpose": "Extracts patient name, DOB, address, contact info, SSN from intake forms."
+      },
+      {
+        "tool": "extract_insurance_info",
+        "purpose": "Extracts insurance carrier, policy number, group number, and subscriber details."
+      },
+      {
+        "tool": "verify_insurance_eligibility",
+        "purpose": "Checks insurance coverage status, copay, deductible, and prior authorization requirements via payer API."
+      },
+      {
+        "tool": "extract_medical_history",
+        "purpose": "Extracts allergies, medications, conditions, surgical history from forms."
+      },
+      {
+        "tool": "create_ehr_patient_record",
+        "purpose": "Creates or updates patient records in the EHR system with all onboarding data."
+      },
+      {
+        "tool": "check_provider_availability",
+        "purpose": "Retrieves available appointment slots from scheduling system."
+      },
+      {
+        "tool": "schedule_appointment",
+        "purpose": "Books appointments and sends confirmation to patient."
+      },
+      {
+        "tool": "send_patient_communication",
+        "purpose": "Sends email/SMS notifications with appointment details, instructions, or requests for missing information."
+      }
+    ],
+    "guidelines": [
+      "Always validate that required demographic and insurance fields are present before proceeding.",
+      "Do not create EHR records or schedule appointments until insurance eligibility is confirmed, unless patient is self-pay.",
+      "Detect duplicate patient records by matching name + DOB or SSN; update/merge as needed and flag for staff review.",
+      "Escalate to human-in-the-loop for insurance issues, prior authorization delays, or ambiguous duplicates.",
+      "Maintain HIPAA compliance by ensuring secure data handling and access logging."
+    ],
+    "workflow_selection": [
+      {
+        "condition": "If all required demographics and insurance fields are present AND insurance eligibility is active",
+        "workflow": "W1",
+        "logic": "Full onboarding workflow for new patient with valid insurance."
+      },
+      {
+        "condition": "If subscriber is parent/guardian AND patient age < 18",
+        "workflow": "W2",
+        "logic": "Pediatric onboarding workflow with parent as insurance subscriber."
+      },
+      {
+        "condition": "If insurance eligibility check returns inactive/terminated coverage",
+        "workflow": "W3",
+        "logic": "Hold onboarding, request updated insurance or self-pay arrangement."
+      },
+      {
+        "condition": "If referral for specialist AND prior authorization required",
+        "workflow": "W4",
+        "logic": "Specialty referral workflow with prior authorization handling."
+      },
+      {
+        "condition": "If patient selects self-pay or no insurance provided",
+        "workflow": "W5",
+        "logic": "Self-pay onboarding workflow, skip insurance verification, provide pricing."
+      },
+      {
+        "condition": "If patient demographics match existing EHR record (name + DOB or SSN)",
+        "workflow": "W6",
+        "logic": "Duplicate detection workflow, update/merge record, notify staff."
+      },
+      {
+        "condition": "If complex medical history (multiple high-risk conditions or >5 medications)",
+        "workflow": "W7",
+        "logic": "High-risk onboarding workflow, assign care coordinator."
+      },
+      {
+        "condition": "If intake form is missing required fields or insurance details are illegible",
+        "workflow": "W8",
+        "logic": "Incomplete form workflow, request additional information from patient."
+      }
+    ],
+    "failure_points": [
+      {
+        "scenario": "Insurance eligibility API unavailable or returns error",
+        "recovery": "Escalate to HUMAN_IN_THE_LOOP for manual verification or follow-up."
+      },
+      {
+        "scenario": "Duplicate detection ambiguous (similar but not exact match)",
+        "recovery": "Escalate to HUMAN_IN_THE_LOOP for staff review and decision."
+      },
+      {
+        "scenario": "Missing required demographic or insurance fields",
+        "recovery": "Send request for missing data via send_patient_communication tool."
+      },
+      {
+        "scenario": "Prior authorization denied or delayed beyond acceptable time",
+        "recovery": "Escalate to HUMAN_IN_THE_LOOP for alternate scheduling or patient notification."
+      }
+    ],
+    "success_criteria": [
+      "Patient record created or updated in EHR with accurate demographics, insurance, and medical history.",
+      "Insurance eligibility verified and appointment scheduled.",
+      "Patient or guardian receives confirmation communication with instructions.",
+      "Duplicate records merged or flagged for review; HIPAA compliance maintained.",
+      "All required data fields validated and complete prior to onboarding completion."
+    ]
+  }
+}

@@ -1,0 +1,740 @@
+{
+  "workflows": [
+    {
+      "workflow": "W1 - Standard Personal Account Onboarding",
+      "test_cases": [
+        {
+          "test_case_id": "BankOnboard_W1_TC1",
+          "title": "Low-Risk Personal Account: Standard KYC, Driver License",
+          "rationale": "Covers the most common onboarding for a personal customer with low AML risk, US nationality, and standard KYC documents.",
+          "input_conditions": [
+            "Personal account",
+            "KYC documents: driver license and utility bill",
+            "US nationality, occupation: engineer",
+            "Transaction volume: $5,000",
+            "All documents clear and legible"
+          ],
+          "representative_input": {
+            "application_id": "APP-10001",
+            "customer_type": "personal",
+            "document_files": [
+              "driver_license.pdf",
+              "utility_bill.jpg"
+            ],
+            "account_type": "personal_checking",
+            "contact_email": "alice.smith@email.com",
+            "contact_phone": "+12025550123"
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "onboarding_status": "success",
+              "customer_id": "CUST-887234",
+              "account_id": "ACC-112345",
+              "crm_id": "CRM-3321",
+              "communication_status": "sent"
+            }
+          },
+          "success_path_differences": "All data is present, identity verified, sanctions screening clear, AML risk score low. No additional documents or reconciliation required.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Documents extracted",
+              "expected_state": {
+                "documents_status": "valid",
+                "required_docs_present": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Identity verified",
+              "expected_state": {
+                "identity_status": "verified",
+                "fraud_flag": false
+              }
+            },
+            {
+              "step": 3,
+              "description": "Sanctions screening clear",
+              "expected_state": {
+                "match_status": "none"
+              }
+            },
+            {
+              "step": 4,
+              "description": "AML risk score calculated",
+              "expected_state": {
+                "risk_level": "low",
+                "score": 25
+              }
+            },
+            {
+              "step": 5,
+              "description": "Core banking customer created",
+              "expected_state": {
+                "status": "created",
+                "customer_id": "CUST-887234"
+              }
+            },
+            {
+              "step": 6,
+              "description": "CRM profile created",
+              "expected_state": {
+                "crm_id": "CRM-3321",
+                "status": "created"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Welcome communication sent",
+              "expected_state": {
+                "communication_status": "sent"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "BankOnboard_W1_TC2",
+          "title": "Medium-Risk Personal Account: Passport KYC, Foreign National, Higher Volume",
+          "rationale": "Validates onboarding for a personal customer with medium AML risk, foreign nationality, and different KYC document types.",
+          "input_conditions": [
+            "Personal account",
+            "KYC documents: passport and proof of address",
+            "Nationality: UK, occupation: consultant",
+            "Transaction volume: $30,000",
+            "All documents clear and legible"
+          ],
+          "representative_input": {
+            "application_id": "APP-10002",
+            "customer_type": "personal",
+            "document_files": [
+              "passport.png",
+              "proof_of_address.pdf"
+            ],
+            "account_type": "personal_savings",
+            "contact_email": "oliver.jones@email.com",
+            "contact_phone": "+447700900123"
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "onboarding_status": "success",
+              "customer_id": "CUST-992301",
+              "account_id": "ACC-998877",
+              "crm_id": "CRM-9912",
+              "communication_status": "sent"
+            }
+          },
+          "success_path_differences": "AML risk score is medium due to higher transaction volume and foreign nationality, but still within automated approval path. Different document types used for KYC extraction.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Documents extracted",
+              "expected_state": {
+                "documents_status": "valid",
+                "required_docs_present": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Identity verified",
+              "expected_state": {
+                "identity_status": "verified",
+                "fraud_flag": false
+              }
+            },
+            {
+              "step": 3,
+              "description": "Sanctions screening clear",
+              "expected_state": {
+                "match_status": "none"
+              }
+            },
+            {
+              "step": 4,
+              "description": "AML risk score calculated",
+              "expected_state": {
+                "risk_level": "medium",
+                "score": 55
+              }
+            },
+            {
+              "step": 5,
+              "description": "Core banking customer created",
+              "expected_state": {
+                "status": "created",
+                "customer_id": "CUST-992301"
+              }
+            },
+            {
+              "step": 6,
+              "description": "CRM profile created",
+              "expected_state": {
+                "crm_id": "CRM-9912",
+                "status": "created"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Welcome communication sent",
+              "expected_state": {
+                "communication_status": "sent"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W4 - Business Account Onboarding - Multiple Documents",
+      "test_cases": [
+        {
+          "test_case_id": "BankOnboard_W4_TC1",
+          "title": "Business Account: Multiple Owners, All Pass Screening",
+          "rationale": "Tests business onboarding with multiple beneficial owners, all with valid documents, low AML risk, and no sanctions matches.",
+          "input_conditions": [
+            "Business account",
+            "Business documents: business license, EIN letter, proof of address",
+            "Beneficial owners: John Smith, Sarah Lee",
+            "Owner documents: passports",
+            "Business type: consulting, US",
+            "All documents valid"
+          ],
+          "representative_input": {
+            "application_id": "APP-20001",
+            "customer_type": "business",
+            "document_files": [
+              "business_license.pdf",
+              "ein_letter.pdf",
+              "proof_of_address.pdf",
+              "john_smith_passport.jpg",
+              "sarah_lee_passport.jpg"
+            ],
+            "account_type": "business_checking",
+            "contact_email": "info@acmebiz.com",
+            "contact_phone": "+16175551234",
+            "beneficial_owners": [
+              "John Smith",
+              "Sarah Lee"
+            ]
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "onboarding_status": "success",
+              "customer_id": "CUST-30001",
+              "account_id": "ACC-30001",
+              "crm_id": "CRM-30001",
+              "communication_status": "sent"
+            }
+          },
+          "success_path_differences": "Business KYC extraction for multiple document types, identity validation for multiple owners, business AML risk calculation, authorized signers set, CRM profile includes ownership structure.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Business and owner documents extracted",
+              "expected_state": {
+                "documents_status": "valid",
+                "required_docs_present": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Identities of all owners verified",
+              "expected_state": {
+                "identity_status": "verified",
+                "fraud_flag": false
+              }
+            },
+            {
+              "step": 3,
+              "description": "Business and owners screened for sanctions",
+              "expected_state": {
+                "match_status": "none"
+              }
+            },
+            {
+              "step": 4,
+              "description": "AML risk score calculated for business",
+              "expected_state": {
+                "risk_level": "low",
+                "score": 20
+              }
+            },
+            {
+              "step": 5,
+              "description": "Business account created in core banking",
+              "expected_state": {
+                "status": "created",
+                "customer_id": "CUST-30001",
+                "account_id": "ACC-30001"
+              }
+            },
+            {
+              "step": 6,
+              "description": "CRM business profile created",
+              "expected_state": {
+                "crm_id": "CRM-30001",
+                "status": "created"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Welcome communication sent to business and owners",
+              "expected_state": {
+                "communication_status": "sent"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "BankOnboard_W4_TC2",
+          "title": "Business Account: Single Owner, Medium AML Risk",
+          "rationale": "Validates business onboarding with only one beneficial owner, medium AML risk due to higher transaction volume.",
+          "input_conditions": [
+            "Business account",
+            "Business documents: business license, EIN letter",
+            "Beneficial owner: Maria Gomez",
+            "Owner document: national ID",
+            "Business type: import/export, Mexico",
+            "Transaction volume: $75,000",
+            "All documents valid"
+          ],
+          "representative_input": {
+            "application_id": "APP-20002",
+            "customer_type": "business",
+            "document_files": [
+              "business_license.pdf",
+              "ein_letter.pdf",
+              "maria_gomez_national_id.jpg"
+            ],
+            "account_type": "business_savings",
+            "contact_email": "contact@importmex.com",
+            "contact_phone": "+525512345678",
+            "beneficial_owners": [
+              "Maria Gomez"
+            ]
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "onboarding_status": "success",
+              "customer_id": "CUST-30002",
+              "account_id": "ACC-30002",
+              "crm_id": "CRM-30002",
+              "communication_status": "sent"
+            }
+          },
+          "success_path_differences": "Only one owner to validate, AML risk is medium due to geography and volume, but all screening passes. CRM profile reflects single ownership.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Business and owner documents extracted",
+              "expected_state": {
+                "documents_status": "valid",
+                "required_docs_present": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Owner identity verified",
+              "expected_state": {
+                "identity_status": "verified",
+                "fraud_flag": false
+              }
+            },
+            {
+              "step": 3,
+              "description": "Business and owner screened for sanctions",
+              "expected_state": {
+                "match_status": "none"
+              }
+            },
+            {
+              "step": 4,
+              "description": "AML risk score calculated for business",
+              "expected_state": {
+                "risk_level": "medium",
+                "score": 60
+              }
+            },
+            {
+              "step": 5,
+              "description": "Business account created in core banking",
+              "expected_state": {
+                "status": "created",
+                "customer_id": "CUST-30002",
+                "account_id": "ACC-30002"
+              }
+            },
+            {
+              "step": 6,
+              "description": "CRM business profile created",
+              "expected_state": {
+                "crm_id": "CRM-30002",
+                "status": "created"
+              }
+            },
+            {
+              "step": 7,
+              "description": "Welcome communication sent to business and owner",
+              "expected_state": {
+                "communication_status": "sent"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W6 - Incomplete Documentation - Customer Follow-up",
+      "test_cases": [
+        {
+          "test_case_id": "BankOnboard_W6_TC1",
+          "title": "Personal Account: Missing Proof of Address, Provided After Request",
+          "rationale": "Tests process where customer initially omits proof of address, receives document request, and provides valid document for successful onboarding.",
+          "input_conditions": [
+            "Personal account",
+            "Initial KYC: only driver license",
+            "Missing proof of address",
+            "Customer provides proof_of_address.pdf after request"
+          ],
+          "representative_input": {
+            "application_id": "APP-30001",
+            "customer_type": "personal",
+            "document_files": [
+              "driver_license.pdf"
+            ],
+            "account_type": "personal_checking",
+            "contact_email": "jane.doe@email.com",
+            "contact_phone": "+12025550123",
+            "additional_documents": [
+              "proof_of_address.pdf"
+            ]
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "onboarding_status": "success",
+              "customer_id": "CUST-40001",
+              "account_id": "ACC-40001",
+              "crm_id": "CRM-40001",
+              "communication_status": "sent"
+            }
+          },
+          "success_path_differences": "Onboarding paused after initial extraction, document request sent, resumes after customer provides missing proof. Standard onboarding resumes.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Initial document extracted",
+              "expected_state": {
+                "documents_status": "valid",
+                "missing_fields": [
+                  "address"
+                ]
+              }
+            },
+            {
+              "step": 2,
+              "description": "Document request sent",
+              "expected_state": {
+                "communication_status": "sent",
+                "communication_type": "document_request"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Additional document received and extracted",
+              "expected_state": {
+                "documents_status": "valid",
+                "required_docs_present": true
+              }
+            },
+            {
+              "step": 4,
+              "description": "Identity verified",
+              "expected_state": {
+                "identity_status": "verified",
+                "fraud_flag": false
+              }
+            },
+            {
+              "step": 5,
+              "description": "Sanctions screening clear",
+              "expected_state": {
+                "match_status": "none"
+              }
+            },
+            {
+              "step": 6,
+              "description": "AML risk score calculated",
+              "expected_state": {
+                "risk_level": "low",
+                "score": 30
+              }
+            },
+            {
+              "step": 7,
+              "description": "Core banking customer created",
+              "expected_state": {
+                "status": "created",
+                "customer_id": "CUST-40001"
+              }
+            },
+            {
+              "step": 8,
+              "description": "CRM profile created",
+              "expected_state": {
+                "crm_id": "CRM-40001",
+                "status": "created"
+              }
+            },
+            {
+              "step": 9,
+              "description": "Welcome communication sent",
+              "expected_state": {
+                "communication_status": "sent"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W7 - Address Mismatch - Data Reconciliation",
+      "test_cases": [
+        {
+          "test_case_id": "BankOnboard_W7_TC1",
+          "title": "Address Mismatch: Customer Provides Explanation and Valid New Document",
+          "rationale": "Covers scenario where address mismatch is detected, customer provides explanation and new document, and onboarding proceeds successfully.",
+          "input_conditions": [
+            "Personal account",
+            "KYC documents: driver license (old address), utility bill (new address)",
+            "Address mismatch detected",
+            "Customer provides rental_agreement.pdf with new address"
+          ],
+          "representative_input": {
+            "application_id": "APP-40001",
+            "customer_type": "personal",
+            "document_files": [
+              "driver_license.pdf",
+              "utility_bill.jpg"
+            ],
+            "account_type": "personal_checking",
+            "contact_email": "tom.baker@email.com",
+            "contact_phone": "+12025550123",
+            "address_explanation": "Moved recently, utility bill and rental agreement reflect new address.",
+            "additional_documents": [
+              "rental_agreement.pdf"
+            ]
+          },
+          "expected_success_outcome": {
+            "final_status": "success",
+            "key_outputs": {
+              "onboarding_status": "success",
+              "customer_id": "CUST-50001",
+              "account_id": "ACC-50001",
+              "crm_id": "CRM-50001",
+              "communication_status": "sent"
+            }
+          },
+          "success_path_differences": "Address mismatch detected after initial extraction, customer responds with explanation and valid supporting document, system reconciles address and proceeds.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Initial documents extracted, address mismatch detected",
+              "expected_state": {
+                "documents_status": "valid",
+                "address_mismatch": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Explanation and supporting document requested",
+              "expected_state": {
+                "communication_status": "sent",
+                "communication_type": "document_request"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Supporting document extracted and address reconciled",
+              "expected_state": {
+                "documents_status": "valid",
+                "address_reconciled": true
+              }
+            },
+            {
+              "step": 4,
+              "description": "Identity and address verified",
+              "expected_state": {
+                "identity_status": "verified",
+                "fraud_flag": false
+              }
+            },
+            {
+              "step": 5,
+              "description": "Sanctions screening clear, AML risk calculated",
+              "expected_state": {
+                "match_status": "none",
+                "risk_level": "low",
+                "score": 35
+              }
+            },
+            {
+              "step": 6,
+              "description": "Core banking customer created",
+              "expected_state": {
+                "status": "created",
+                "customer_id": "CUST-50001"
+              }
+            },
+            {
+              "step": 7,
+              "description": "CRM profile created with reconciled address",
+              "expected_state": {
+                "crm_id": "CRM-50001",
+                "status": "created"
+              }
+            },
+            {
+              "step": 8,
+              "description": "Welcome communication sent",
+              "expected_state": {
+                "communication_status": "sent"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_workflows": 4,
+    "total_test_cases": 6,
+    "notes": "Only workflows W1 (standard personal), W4 (business multi-owner), W6 (incomplete docs resolved), and W7 (address mismatch resolved) have distinct success-only paths. Workflows W2 (high risk), W3 (fraud), W5 (sanctions match), and W8 (system error) inherently require escalation or failure and are excluded. Test cases vary by AML risk, nationality, document completeness, number of owners, and reconciliation branch."
+  },
+  "role": "You are an automated banking customer onboarding agent that orchestrates document extraction, identity verification, sanctions screening, AML risk assessment, profile creation in core banking and CRM systems, and customer communications to ensure rapid, compliant onboarding.\n",
+  "goal": "Your goal is to onboard new banking customers in under 30 minutes by automating KYC document processing, compliance checks, account creation, and welcome communications, while strictly adhering to regulatory requirements and minimizing manual intervention.\n",
+  "action_plan": {
+    "assumptions": [
+      "All required KYC documents are provided in standard formats (PDF, image).",
+      "Integration endpoints for identity, sanctions, core banking, CRM, and communication systems are available and reliable."
+    ],
+    "tools_and_resources": [
+      {
+        "tool": "extract_kyc_documents",
+        "purpose": "Extract structured data from uploaded KYC documents using OCR and document AI."
+      },
+      {
+        "tool": "validate_identity",
+        "purpose": "Verify customer identity against government and fraud databases."
+      },
+      {
+        "tool": "screen_sanctions_lists",
+        "purpose": "Screen customers and related parties against global sanctions and PEP lists."
+      },
+      {
+        "tool": "calculate_aml_risk_score",
+        "purpose": "Assess AML risk based on profile, geography, and occupation."
+      },
+      {
+        "tool": "create_core_banking_customer",
+        "purpose": "Create new customer records and accounts in the core banking system."
+      },
+      {
+        "tool": "create_crm_profile",
+        "purpose": "Create and update customer profiles in CRM with KYC and risk data."
+      },
+      {
+        "tool": "send_welcome_communication",
+        "purpose": "Send personalized onboarding communications to customers."
+      },
+      {
+        "tool": "SUCCESS/FAILED/CANCELLED/HUMAN_IN_THE_LOOP",
+        "purpose": "Signal process completion, error, cancellation, or escalate for human review."
+      }
+    ],
+    "guidelines": [
+      "Always verify identity and screen for sanctions before creating any account.",
+      "Escalate high-risk, fraud, or sanctions-match cases to human compliance officers.",
+      "Request additional documentation if required fields are missing or illegible.",
+      "All workflows must end with a system tool signaling outcome."
+    ],
+    "workflow_selection": [
+      {
+        "condition": "If all required KYC documents are present AND identity verification passes AND sanctions screening is clear AND AML risk is low or medium",
+        "workflow": "W1",
+        "logic": "Route to standard onboarding workflow for automated approval and account creation."
+      },
+      {
+        "condition": "If AML risk score is high OR sanctions screening returns a partial match OR customer is from high-risk jurisdiction",
+        "workflow": "W2",
+        "logic": "Escalate for enhanced due diligence and human compliance review."
+      },
+      {
+        "condition": "If identity verification fails OR document authenticity is questionable",
+        "workflow": "W3",
+        "logic": "Reject application and send fraud alert communication."
+      },
+      {
+        "condition": "If application is for a business account with multiple beneficial owners",
+        "workflow": "W4",
+        "logic": "Run business onboarding workflow with multi-party screening and account setup."
+      },
+      {
+        "condition": "If sanctions screening returns an exact match",
+        "workflow": "W5",
+        "logic": "Immediately escalate, freeze application, and file SAR."
+      },
+      {
+        "condition": "If any required document is missing or illegible",
+        "workflow": "W6",
+        "logic": "Request additional documentation and pause onboarding until received."
+      },
+      {
+        "condition": "If address data from documents is inconsistent",
+        "workflow": "W7",
+        "logic": "Request explanation, reconcile data, and proceed if resolved."
+      },
+      {
+        "condition": "If customer uploads additional documents after initial request",
+        "workflow": "W6",
+        "logic": "Resume onboarding workflow after document receipt and validation."
+      },
+      {
+        "condition": "If any step encounters an unrecoverable system error",
+        "workflow": "W8",
+        "logic": "Cancel process and notify customer."
+      }
+    ],
+    "failure_points": [
+      {
+        "scenario": "Document extraction fails due to poor image quality or unsupported format.",
+        "recovery": "Request document resubmission or alternative format from customer."
+      },
+      {
+        "scenario": "Identity verification fails or returns ambiguous results.",
+        "recovery": "Escalate to human compliance officer for manual review."
+      },
+      {
+        "scenario": "Sanctions screening returns a match or possible match.",
+        "recovery": "Escalate, freeze onboarding, and initiate regulatory filing if needed."
+      },
+      {
+        "scenario": "Core banking or CRM system integration fails.",
+        "recovery": "Retry integration, log error, and escalate if unresolved."
+      },
+      {
+        "scenario": "Customer does not provide requested additional documentation.",
+        "recovery": "Send reminder communication and cancel application if unresolved after 7 days."
+      }
+    ],
+    "success_criteria": [
+      "Customer account created in core banking and CRM systems with verified KYC and compliance checks.",
+      "Welcome communication sent to customer within 30 minutes of application submission.",
+      "All regulatory compliance steps (AML, sanctions, identity) completed and documented.",
+      "High-risk, fraud, or sanctions cases escalated appropriately and not onboarded automatically."
+    ]
+  }
+}

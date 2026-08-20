@@ -1,0 +1,1172 @@
+{
+  "workflows": [
+    {
+      "workflow": "W1 - Standard Raw Materials Purchase - 3-Way Match",
+      "test_cases": [
+        {
+          "test_case_id": "P2P_W1_TC1",
+          "title": "Standard requisition, preferred supplier, exact invoice match",
+          "rationale": "Covers the typical happy path for standard procurement with exact match and auto-approval.",
+          "input_conditions": [
+            "requisition_type: standard",
+            "budget_status: within_limit",
+            "supplier_contract_status: preferred",
+            "invoice_match_status: exact",
+            "priority: normal"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-445521",
+            "requisition_type": "standard",
+            "amount": 15000.0,
+            "cost_center": "CC-50100",
+            "GL_account": "GL-50100",
+            "supplier_id": "SUP-ABC123",
+            "priority": "normal",
+            "invoice_id": "INV-556677",
+            "receipt_id": "GR-887812"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "read_purchase_requisition",
+                  "validate_budget_availability",
+                  "check_supplier_contracts",
+                  "create_purchase_order",
+                  "send_po_to_supplier",
+                  "match_invoice_to_po",
+                  "route_payment_approval",
+                  "process_payment"
+                ],
+                "approvals": [
+                  "auto"
+                ],
+                "exceptions": []
+              },
+              "payment_details": {
+                "invoice_id": "INV-556677",
+                "payment_status": "completed",
+                "amount": 15000.0,
+                "scheduled_date": "2024-02-28",
+                "method": "ach"
+              },
+              "approval_status": "approved"
+            }
+          },
+          "success_path_differences": "This path exercises the exact match branch, auto-approval for payment, and preferred supplier compliance.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Purchase requisition read and parsed",
+              "expected_state": {
+                "requisition_valid": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Budget validated and within limit",
+              "expected_state": {
+                "budget_status": "within_limit",
+                "available_balance": 20000.0
+              }
+            },
+            {
+              "step": 3,
+              "description": "Supplier contract checked and preferred",
+              "expected_state": {
+                "contract_status": "preferred",
+                "contract_price": 15000.0
+              }
+            },
+            {
+              "step": 4,
+              "description": "PO created with contract terms",
+              "expected_state": {
+                "po_id": "PO-123456",
+                "items": [
+                  {
+                    "item_code": "RM-1001",
+                    "quantity": 100,
+                    "unit_price": 150.0
+                  }
+                ],
+                "expedite": false
+              }
+            },
+            {
+              "step": 5,
+              "description": "PO sent to supplier via EDI",
+              "expected_state": {
+                "delivery_status": "sent",
+                "method": "edi"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Goods receipt recorded",
+              "expected_state": {
+                "receipt_id": "GR-887812",
+                "received_quantity": 100
+              }
+            },
+            {
+              "step": 7,
+              "description": "Invoice matched to PO and receipt (exact match)",
+              "expected_state": {
+                "match_status": "exact",
+                "variance_amount": 0
+              }
+            },
+            {
+              "step": 8,
+              "description": "Auto-approval routed for payment",
+              "expected_state": {
+                "approval_status": "approved",
+                "approver": "auto"
+              }
+            },
+            {
+              "step": 9,
+              "description": "Payment processed via ACH",
+              "expected_state": {
+                "payment_status": "completed",
+                "method": "ach"
+              }
+            },
+            {
+              "step": 10,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        },
+        {
+          "test_case_id": "P2P_W1_TC2",
+          "title": "Standard requisition, preferred supplier, small price variance within tolerance",
+          "rationale": "Covers path where invoice has a small price variance but remains within auto-approval tolerance.",
+          "input_conditions": [
+            "requisition_type: standard",
+            "budget_status: within_limit",
+            "supplier_contract_status: preferred",
+            "invoice_match_status: small_variance",
+            "variance_amount: 50",
+            "priority: normal"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-445534",
+            "requisition_type": "standard",
+            "amount": 5000.0,
+            "cost_center": "CC-60500",
+            "GL_account": "GL-60500",
+            "supplier_id": "SUP-OFFICEDEPOT",
+            "priority": "normal",
+            "invoice_id": "INV-887799",
+            "receipt_id": "GR-445501"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "read_purchase_requisition",
+                  "validate_budget_availability",
+                  "check_supplier_contracts",
+                  "create_purchase_order",
+                  "send_po_to_supplier",
+                  "match_invoice_to_po",
+                  "route_payment_approval",
+                  "process_payment"
+                ],
+                "approvals": [
+                  "auto"
+                ],
+                "exceptions": [
+                  {
+                    "type": "price_variance",
+                    "variance_amount": 50,
+                    "resolution": "auto-approved"
+                  }
+                ]
+              },
+              "payment_details": {
+                "invoice_id": "INV-887799",
+                "payment_status": "completed",
+                "amount": 5050.0,
+                "scheduled_date": "2024-03-01",
+                "method": "ach"
+              },
+              "approval_status": "approved"
+            }
+          },
+          "success_path_differences": "This path exercises the small price variance branch, which is auto-approved due to being within tolerance limits.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Purchase requisition read and parsed",
+              "expected_state": {
+                "requisition_valid": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Budget validated and within limit",
+              "expected_state": {
+                "budget_status": "within_limit",
+                "available_balance": 10000.0
+              }
+            },
+            {
+              "step": 3,
+              "description": "Supplier contract checked and preferred",
+              "expected_state": {
+                "contract_status": "preferred",
+                "contract_price": 5000.0
+              }
+            },
+            {
+              "step": 4,
+              "description": "PO created with contract terms",
+              "expected_state": {
+                "po_id": "PO-654321",
+                "items": [
+                  {
+                    "item_code": "RM-2002",
+                    "quantity": 50,
+                    "unit_price": 100.0
+                  }
+                ],
+                "expedite": false
+              }
+            },
+            {
+              "step": 5,
+              "description": "PO sent to supplier via EDI",
+              "expected_state": {
+                "delivery_status": "sent",
+                "method": "edi"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Goods receipt recorded",
+              "expected_state": {
+                "receipt_id": "GR-445501",
+                "received_quantity": 50
+              }
+            },
+            {
+              "step": 7,
+              "description": "Invoice matched to PO and receipt (small price variance)",
+              "expected_state": {
+                "match_status": "small_variance",
+                "variance_amount": 50
+              }
+            },
+            {
+              "step": 8,
+              "description": "Auto-approval routed for payment",
+              "expected_state": {
+                "approval_status": "approved",
+                "approver": "auto"
+              }
+            },
+            {
+              "step": 9,
+              "description": "Payment processed via ACH",
+              "expected_state": {
+                "payment_status": "completed",
+                "method": "ach"
+              }
+            },
+            {
+              "step": 10,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W2 - Budget Exceeded - Approval Required",
+      "test_cases": [
+        {
+          "test_case_id": "P2P_W2_TC1",
+          "title": "Budget exceeded, CFO override granted, PO created and sent",
+          "rationale": "Validates successful path for budget overrun with override approval and subsequent PO creation.",
+          "input_conditions": [
+            "budget_status: exceeded",
+            "requisition_type: standard",
+            "amount: 22000.00",
+            "CFO approval: granted"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-445600",
+            "requisition_type": "standard",
+            "amount": 22000.0,
+            "cost_center": "CC-50100",
+            "GL_account": "GL-50100",
+            "supplier_id": "SUP-ABC123",
+            "priority": "high"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "read_purchase_requisition",
+                  "validate_budget_availability",
+                  "check_supplier_contracts",
+                  "create_purchase_order",
+                  "send_po_to_supplier"
+                ],
+                "approvals": [
+                  "CFO"
+                ],
+                "exceptions": [
+                  {
+                    "type": "budget_exceeded",
+                    "variance_amount": 2000.0,
+                    "resolution": "override approved"
+                  }
+                ]
+              }
+            }
+          },
+          "success_path_differences": "This path exercises budget override approval and email PO transmission, not auto-approval.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Purchase requisition read and parsed",
+              "expected_state": {
+                "requisition_valid": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Budget validated and exceeded",
+              "expected_state": {
+                "budget_status": "exceeded",
+                "exceeded_amount": 2000.0
+              }
+            },
+            {
+              "step": 3,
+              "description": "Budget override approval granted by CFO",
+              "expected_state": {
+                "approval_status": "approved",
+                "approver": "CFO"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Supplier contract checked for compliance",
+              "expected_state": {
+                "contract_status": "preferred"
+              }
+            },
+            {
+              "step": 5,
+              "description": "PO created and sent via email",
+              "expected_state": {
+                "po_id": "PO-222222",
+                "delivery_status": "sent",
+                "method": "email"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W3 - Invoice Price Mismatch - Exception Routing",
+      "test_cases": [
+        {
+          "test_case_id": "P2P_W3_TC1",
+          "title": "Invoice price mismatch > $500, AP resolves and payment processed",
+          "rationale": "Validates successful exception handling for price variance above tolerance, resolved by AP.",
+          "input_conditions": [
+            "invoice_match_status: price_mismatch",
+            "variance_amount: 800",
+            "AP review: resolved"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-445700",
+            "requisition_type": "standard",
+            "amount": 12000.0,
+            "cost_center": "CC-60500",
+            "GL_account": "GL-60500",
+            "supplier_id": "SUP-XYZ789",
+            "priority": "normal",
+            "invoice_id": "INV-999888",
+            "receipt_id": "GR-123456"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "match_invoice_to_po",
+                  "route_payment_approval",
+                  "process_payment"
+                ],
+                "approvals": [
+                  "AP"
+                ],
+                "exceptions": [
+                  {
+                    "type": "price_mismatch",
+                    "variance_amount": 800,
+                    "resolution": "approved by AP"
+                  }
+                ]
+              },
+              "payment_details": {
+                "invoice_id": "INV-999888",
+                "payment_status": "completed",
+                "amount": 12800.0,
+                "scheduled_date": "2024-04-01",
+                "method": "ach"
+              },
+              "approval_status": "approved"
+            }
+          },
+          "success_path_differences": "Exercises AP review and approval for price mismatch above tolerance, payment processed after exception resolution.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Invoice matched to PO and receipt (price mismatch > $500)",
+              "expected_state": {
+                "match_status": "price_mismatch",
+                "variance_amount": 800
+              }
+            },
+            {
+              "step": 2,
+              "description": "Exception routed to AP for review",
+              "expected_state": {
+                "approval_status": "approved",
+                "approver": "AP"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Payment processed after AP approval",
+              "expected_state": {
+                "payment_status": "completed",
+                "method": "ach"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W4 - Quantity Discrepancy - Partial Receipt",
+      "test_cases": [
+        {
+          "test_case_id": "P2P_W4_TC1",
+          "title": "Partial receipt, quantity mismatch, backorder received and payments processed",
+          "rationale": "Validates successful handling of partial receipt and backorder reconciliation with two payments.",
+          "input_conditions": [
+            "invoice_match_status: quantity_mismatch",
+            "partial receipt",
+            "backorder received"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-445800",
+            "requisition_type": "standard",
+            "amount": 10000.0,
+            "cost_center": "CC-50100",
+            "GL_account": "GL-50100",
+            "supplier_id": "SUP-ABC123",
+            "priority": "normal",
+            "invoice_id": "INV-777666",
+            "receipt_id": "GR-654321"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "match_invoice_to_po",
+                  "route_payment_approval",
+                  "process_payment",
+                  "process_payment"
+                ],
+                "approvals": [
+                  "auto"
+                ],
+                "exceptions": [
+                  {
+                    "type": "quantity_mismatch",
+                    "resolution": "partial and final payments processed"
+                  }
+                ]
+              },
+              "payment_details": {
+                "invoice_id": "INV-777666",
+                "payment_status": "completed",
+                "amount": 10000.0,
+                "scheduled_date": "2024-05-01",
+                "method": "ach"
+              },
+              "approval_status": "approved"
+            }
+          },
+          "success_path_differences": "Exercises partial payment for received units, then final payment after backorder fulfillment.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Partial goods receipt recorded",
+              "expected_state": {
+                "receipt_id": "GR-654321",
+                "received_quantity": 60,
+                "ordered_quantity": 100
+              }
+            },
+            {
+              "step": 2,
+              "description": "Invoice matched to PO and receipt (quantity mismatch)",
+              "expected_state": {
+                "match_status": "quantity_mismatch",
+                "variance_amount": 40
+              }
+            },
+            {
+              "step": 3,
+              "description": "Payment approval routed for partial payment",
+              "expected_state": {
+                "approval_status": "approved",
+                "approver": "auto"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Partial payment processed",
+              "expected_state": {
+                "payment_status": "completed",
+                "amount": 6000.0
+              }
+            },
+            {
+              "step": 5,
+              "description": "Backorder received and reconciled",
+              "expected_state": {
+                "receipt_id": "GR-654322",
+                "received_quantity": 40
+              }
+            },
+            {
+              "step": 6,
+              "description": "Final payment processed",
+              "expected_state": {
+                "payment_status": "completed",
+                "amount": 4000.0
+              }
+            },
+            {
+              "step": 7,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W5 - Duplicate Invoice Detection",
+      "test_cases": [
+        {
+          "test_case_id": "P2P_W5_TC1",
+          "title": "Duplicate invoice detected and rejected, supplier notified",
+          "rationale": "Validates successful detection and rejection of duplicate invoice, preventing double payment.",
+          "input_conditions": [
+            "invoice_duplicate_status: duplicate_detected",
+            "invoice_id already paid"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-445900",
+            "requisition_type": "standard",
+            "amount": 8000.0,
+            "cost_center": "CC-60500",
+            "GL_account": "GL-60500",
+            "supplier_id": "SUP-XYZ789",
+            "priority": "normal",
+            "invoice_id": "INV-333444",
+            "receipt_id": "GR-999888"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "match_invoice_to_po",
+                  "route_payment_approval"
+                ],
+                "approvals": [],
+                "exceptions": [
+                  {
+                    "type": "duplicate_invoice",
+                    "resolution": "rejected and supplier notified"
+                  }
+                ]
+              },
+              "approval_status": "rejected"
+            }
+          },
+          "success_path_differences": "Exercises duplicate detection and rejection path, supplier notified, no payment processed.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Invoice matched to PO and payment history (duplicate detected)",
+              "expected_state": {
+                "match_status": "duplicate_detected",
+                "invoice_id": "INV-333444"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Invoice rejected and supplier notified",
+              "expected_state": {
+                "approval_status": "rejected",
+                "comments": "Duplicate invoice"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W6 - Early Payment Discount - Optimize Cash Flow",
+      "test_cases": [
+        {
+          "test_case_id": "P2P_W6_TC1",
+          "title": "Early payment discount available, cash sufficient, payment processed early",
+          "rationale": "Validates capturing early payment discount when cash position allows.",
+          "input_conditions": [
+            "invoice_terms.discount_available: true",
+            "cash_position: sufficient"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-446000",
+            "requisition_type": "standard",
+            "amount": 7000.0,
+            "cost_center": "CC-50100",
+            "GL_account": "GL-50100",
+            "supplier_id": "SUP-ABC123",
+            "priority": "normal",
+            "invoice_id": "INV-555666",
+            "receipt_id": "GR-888777"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "match_invoice_to_po",
+                  "route_payment_approval",
+                  "process_payment"
+                ],
+                "approvals": [
+                  "auto"
+                ],
+                "exceptions": [
+                  {
+                    "type": "early_payment_discount",
+                    "resolution": "discount captured"
+                  }
+                ]
+              },
+              "payment_details": {
+                "invoice_id": "INV-555666",
+                "payment_status": "completed",
+                "amount": 6930.0,
+                "scheduled_date": "2024-03-15",
+                "method": "ach"
+              },
+              "approval_status": "approved"
+            }
+          },
+          "success_path_differences": "Exercises early payment discount branch, payment processed on accelerated schedule.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Invoice matched to PO and receipt (discount available)",
+              "expected_state": {
+                "match_status": "early_payment",
+                "invoice_terms": {
+                  "discount_available": true,
+                  "discount_rate": 1
+                }
+              }
+            },
+            {
+              "step": 2,
+              "description": "Payment approval routed recommending early payment",
+              "expected_state": {
+                "approval_status": "approved",
+                "approver": "auto"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Payment processed on recommended schedule",
+              "expected_state": {
+                "payment_status": "completed",
+                "amount": 6930.0
+              }
+            },
+            {
+              "step": 4,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W7 - Blanket PO Release - Ongoing Supply Agreement",
+      "test_cases": [
+        {
+          "test_case_id": "P2P_W7_TC1",
+          "title": "Blanket PO release, within limits, auto-approval and payment",
+          "rationale": "Validates successful blanket PO release and payment under ongoing supply agreement.",
+          "input_conditions": [
+            "requisition_type: blanket_release",
+            "release_amount: within_limit"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-446100",
+            "requisition_type": "blanket_release",
+            "amount": 3000.0,
+            "cost_center": "CC-60500",
+            "GL_account": "GL-60500",
+            "supplier_id": "SUP-XYZ789",
+            "priority": "normal",
+            "invoice_id": "INV-222333",
+            "receipt_id": "GR-444555"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "read_purchase_requisition",
+                  "check_supplier_contracts",
+                  "create_purchase_order",
+                  "send_po_to_supplier",
+                  "match_invoice_to_po",
+                  "route_payment_approval",
+                  "process_payment"
+                ],
+                "approvals": [
+                  "auto"
+                ],
+                "exceptions": []
+              },
+              "payment_details": {
+                "invoice_id": "INV-222333",
+                "payment_status": "completed",
+                "amount": 3000.0,
+                "scheduled_date": "2024-06-01",
+                "method": "ach"
+              },
+              "approval_status": "approved"
+            }
+          },
+          "success_path_differences": "Exercises blanket PO release branch, auto-approval for payment when within release limits.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Blanket PO release requisition read",
+              "expected_state": {
+                "requisition_valid": true
+              }
+            },
+            {
+              "step": 2,
+              "description": "Supplier contract checked for blanket status and limits",
+              "expected_state": {
+                "contract_status": "blanket",
+                "release_limit": 5000.0
+              }
+            },
+            {
+              "step": 3,
+              "description": "PO release created",
+              "expected_state": {
+                "po_id": "PO-777777",
+                "items": [
+                  {
+                    "item_code": "RM-3003",
+                    "quantity": 30,
+                    "unit_price": 100.0
+                  }
+                ]
+              }
+            },
+            {
+              "step": 4,
+              "description": "PO release sent to supplier",
+              "expected_state": {
+                "delivery_status": "sent",
+                "method": "edi"
+              }
+            },
+            {
+              "step": 5,
+              "description": "Goods receipt recorded",
+              "expected_state": {
+                "receipt_id": "GR-444555",
+                "received_quantity": 30
+              }
+            },
+            {
+              "step": 6,
+              "description": "Invoice matched to blanket PO and release",
+              "expected_state": {
+                "match_status": "blanket_release",
+                "variance_amount": 0
+              }
+            },
+            {
+              "step": 7,
+              "description": "Auto-approval routed for payment",
+              "expected_state": {
+                "approval_status": "approved",
+                "approver": "auto"
+              }
+            },
+            {
+              "step": 8,
+              "description": "Payment processed",
+              "expected_state": {
+                "payment_status": "completed",
+                "method": "ach"
+              }
+            },
+            {
+              "step": 9,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "workflow": "W8 - Emergency Purchase - Expedited Processing",
+      "test_cases": [
+        {
+          "test_case_id": "P2P_W8_TC1",
+          "title": "Urgent requisition, expedited PO and payment, production resumes",
+          "rationale": "Validates successful emergency purchase path with expedited PO and payment.",
+          "input_conditions": [
+            "requisition_priority: urgent",
+            "budget_status: within_limit",
+            "supplier_contract_status: preferred"
+          ],
+          "representative_input": {
+            "requisition_id": "REQ-446200",
+            "requisition_type": "standard",
+            "amount": 18000.0,
+            "cost_center": "CC-50100",
+            "GL_account": "GL-50100",
+            "supplier_id": "SUP-ABC123",
+            "priority": "urgent",
+            "invoice_id": "INV-888999",
+            "receipt_id": "GR-555666"
+          },
+          "expected_success_outcome": {
+            "final_status": "completed",
+            "key_outputs": {
+              "workflow_status": "completed",
+              "audit_log": {
+                "steps": [
+                  "read_purchase_requisition",
+                  "validate_budget_availability",
+                  "check_supplier_contracts",
+                  "create_purchase_order",
+                  "send_po_to_supplier",
+                  "match_invoice_to_po",
+                  "route_payment_approval",
+                  "process_payment"
+                ],
+                "approvals": [
+                  "auto"
+                ],
+                "exceptions": [
+                  {
+                    "type": "expedited",
+                    "resolution": "urgent purchase processed"
+                  }
+                ]
+              },
+              "payment_details": {
+                "invoice_id": "INV-888999",
+                "payment_status": "completed",
+                "amount": 18000.0,
+                "scheduled_date": "2024-03-02",
+                "method": "ach"
+              },
+              "approval_status": "approved"
+            }
+          },
+          "success_path_differences": "Exercises urgent requisition branch, expedited PO creation, and payment processing.",
+          "milestones": [
+            {
+              "step": 1,
+              "description": "Emergency purchase requisition read",
+              "expected_state": {
+                "requisition_valid": true,
+                "priority": "urgent"
+              }
+            },
+            {
+              "step": 2,
+              "description": "Budget validated for expedited purchase",
+              "expected_state": {
+                "budget_status": "within_limit"
+              }
+            },
+            {
+              "step": 3,
+              "description": "Supplier contract checked (bidding bypassed)",
+              "expected_state": {
+                "contract_status": "preferred"
+              }
+            },
+            {
+              "step": 4,
+              "description": "Expedited PO created with overnight shipping",
+              "expected_state": {
+                "po_id": "PO-888888",
+                "expedite": true
+              }
+            },
+            {
+              "step": 5,
+              "description": "PO sent to supplier via call and email",
+              "expected_state": {
+                "delivery_status": "sent",
+                "method": "email"
+              }
+            },
+            {
+              "step": 6,
+              "description": "Goods receipt recorded",
+              "expected_state": {
+                "receipt_id": "GR-555666",
+                "received_quantity": 100
+              }
+            },
+            {
+              "step": 7,
+              "description": "Invoice matched to PO including expedited charges",
+              "expected_state": {
+                "match_status": "exact",
+                "variance_amount": 0
+              }
+            },
+            {
+              "step": 8,
+              "description": "Payment approval routed for expedited payment",
+              "expected_state": {
+                "approval_status": "approved",
+                "approver": "auto"
+              }
+            },
+            {
+              "step": 9,
+              "description": "Payment processed",
+              "expected_state": {
+                "payment_status": "completed",
+                "method": "ach"
+              }
+            },
+            {
+              "step": 10,
+              "description": "Workflow completion signaled",
+              "expected_state": {
+                "workflow_status": "completed"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_workflows": 8,
+    "total_test_cases": 10,
+    "notes": "All workflows with possible successful completion paths are covered. Variations emphasize different branches (e.g., exact match, small variance, budget override, partial receipt, early payment, blanket release, urgent processing). No escalation, failure, or ambiguous scenarios included. W9 (Human Escalation) is not covered as its primary outcome is escalation, not automated success."
+  },
+  "role": "You are a Purchase-to-Pay (P2P) automation agent that orchestrates the end-to-end procurement process for manufacturing, from requisition intake to payment processing, including budget validation, supplier contract compliance, purchase order creation, invoice matching, exception handling, and payment execution.\n",
+  "goal": "Your goal is to minimize manual intervention and cycle time in the manufacturing P2P process by ensuring requisitions are validated, purchase orders are compliant and timely, invoices are accurately matched, exceptions are routed efficiently, and payments are processed promptly, all while maintaining auditability and compliance.\n",
+  "action_plan": {
+    "assumptions": [
+      "ERP and procurement systems are integrated and accessible for data retrieval and updates.",
+      "Supplier contracts, budget data, and payment platforms are up-to-date and available via API or EDI."
+    ],
+    "tools_and_resources": [
+      {
+        "tool": "read_purchase_requisition",
+        "purpose": "Extract and parse requisition details from ERP/procurement system."
+      },
+      {
+        "tool": "validate_budget_availability",
+        "purpose": "Check cost center/GL account budget for requisition approval."
+      },
+      {
+        "tool": "check_supplier_contracts",
+        "purpose": "Evaluate supplier compliance, contract pricing, and preferred vendor status."
+      },
+      {
+        "tool": "create_purchase_order",
+        "purpose": "Generate and record purchase orders with line items and terms."
+      },
+      {
+        "tool": "send_po_to_supplier",
+        "purpose": "Transmit purchase orders to suppliers via EDI, email, or portal."
+      },
+      {
+        "tool": "match_invoice_to_po",
+        "purpose": "Perform 3-way match between PO, goods receipt, and supplier invoice."
+      },
+      {
+        "tool": "route_payment_approval",
+        "purpose": "Submit matched invoices for payment or flag exceptions for review."
+      },
+      {
+        "tool": "process_payment",
+        "purpose": "Initiate payment to supplier via ACH, wire, or check."
+      }
+    ],
+    "guidelines": [
+      "Auto-approve requisitions within budget and authority limits; escalate overruns.",
+      "Enforce preferred supplier compliance and log exceptions for audit.",
+      "Apply 3-way match tolerance rules for invoice variances.",
+      "Reject duplicate invoices based on PO, amount, and payment history.",
+      "Recommend early payment when terms offer discounts and cash flow allows.",
+      "Maintain segregation of duties and audit trail for all approvals and overrides."
+    ],
+    "workflow_selection": [
+      {
+        "condition": "if requisition_type == \"standard\" and budget_status == \"within_limit\" and supplier_contract_status == \"preferred\"",
+        "workflow": "W1",
+        "logic": "Standard requisition, budget validated, preferred supplier; trigger full 3-way match workflow."
+      },
+      {
+        "condition": "if budget_status == \"exceeded\"",
+        "workflow": "W2",
+        "logic": "Budget overrun detected; escalate for approval and reallocation before PO creation."
+      },
+      {
+        "condition": "if invoice_match_status == \"price_mismatch\" and variance_amount > 500",
+        "workflow": "W3",
+        "logic": "Invoice price mismatch exceeds tolerance; route exception for AP review and resolution."
+      },
+      {
+        "condition": "if invoice_match_status == \"quantity_mismatch\"",
+        "workflow": "W4",
+        "logic": "Quantity discrepancy detected; hold payment, initiate partial payment if backorder confirmed."
+      },
+      {
+        "condition": "if invoice_duplicate_status == \"duplicate_detected\"",
+        "workflow": "W5",
+        "logic": "Duplicate invoice detected; reject invoice and notify supplier."
+      },
+      {
+        "condition": "if invoice_terms.discount_available == true and cash_position == \"sufficient\"",
+        "workflow": "W6",
+        "logic": "Early payment discount available and cash flow supports; recommend accelerated payment."
+      },
+      {
+        "condition": "if requisition_type == \"blanket_release\"",
+        "workflow": "W7",
+        "logic": "Blanket PO release; validate release limits, process as ongoing supply agreement."
+      },
+      {
+        "condition": "if requisition_priority == \"urgent\"",
+        "workflow": "W8",
+        "logic": "Emergency requisition flagged; expedite processing, bypass standard supplier bidding."
+      },
+      {
+        "condition": "if workflow cannot be determined or exception is outside tolerance rules",
+        "workflow": "W9",
+        "logic": "Escalate to human for review (edge cases, complex exceptions)."
+      }
+    ],
+    "failure_points": [
+      {
+        "scenario": "Budget data unavailable or outdated",
+        "recovery": "Escalate to finance for manual validation and update system records."
+      },
+      {
+        "scenario": "Supplier contract not found or expired",
+        "recovery": "Escalate to procurement for contract review or alternate supplier selection."
+      },
+      {
+        "scenario": "Invoice variance unresolved after AP review",
+        "recovery": "Escalate to manager for final decision or dispute resolution."
+      },
+      {
+        "scenario": "Payment processing error (bank API failure)",
+        "recovery": "Retry payment, notify finance, and escalate if unresolved."
+      },
+      {
+        "scenario": "Duplicate invoice not detected due to missing reference data",
+        "recovery": "Escalate to AP for manual duplicate check and audit log update."
+      }
+    ],
+    "success_criteria": [
+      "Requisition-to-payment cycle completed within target SLA (hours, not days).",
+      "No budget overruns, duplicate payments, or maverick spend.",
+      "All exceptions resolved or properly escalated.",
+      "Audit trail maintained for all approvals, changes, and overrides.",
+      "Supplier relationships improved through timely, accurate payments."
+    ]
+  }
+}

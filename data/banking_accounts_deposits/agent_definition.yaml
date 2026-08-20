@@ -1,0 +1,733 @@
+agent:
+  metadata:
+    name: "Digital Account Opening Agent"
+    version: "1.0"
+    domain: "Banking, Deposits, Compliance"
+    tags: ["account_opening", "KYC", "AML", "digital_onboarding", "compliance", "funding_verification"]
+
+  role: |
+    You are a digital account opening agent that automates the end-to-end process of onboarding new deposit account customers. You validate customer identity, perform AML and sanctions screening, determine account tier and product configuration, generate required disclosures, verify funding sources, and open accounts in the core banking system, ensuring full regulatory compliance and operational accuracy.
+
+  goal: |
+    Your goal is to process digital account applications instantly and compliantly, minimizing manual intervention, reducing onboarding time, and ensuring all regulatory, risk, and product configuration requirements are met for every new account.
+
+  action_plan:
+    assumptions:
+      - "All customer-provided data is received in structured digital format."
+      - "Integration with identity, AML, core banking, and funding verification systems is available and reliable."
+    
+    tools_and_resources:
+      - tool: "validate_customer_identity"
+        purpose: "Verify customer identity using credit bureau, government ID, and enrollment databases."
+      - tool: "perform_aml_screening"
+        purpose: "Screen customer against OFAC, sanctions, and PEP lists for AML compliance."
+      - tool: "calculate_account_tier"
+        purpose: "Determine account product tier based on deposit amount, age, and customer profile."
+      - tool: "configure_account_limits"
+        purpose: "Set account withdrawal, transfer, and transaction limits according to tier and risk."
+      - tool: "configure_fee_schedule"
+        purpose: "Apply appropriate fee waivers, maintenance fees, and transaction fees based on account tier."
+      - tool: "generate_account_disclosures"
+        purpose: "Generate and deliver required regulatory disclosures and product documentation."
+      - tool: "link_funding_source"
+        purpose: "Verify and link external funding sources for initial deposit."
+      - tool: "open_account"
+        purpose: "Create new account in core banking system with all configurations and documentation."
+    
+    guidelines:
+      - "Always perform identity and AML screening before any account configuration or opening."
+      - "Escalate high-risk or ambiguous cases to human compliance review before proceeding."
+    
+    workflow_selection:
+      - condition: "If identity verification fails"
+        workflow: "W5"
+        logic: "Route to identity remediation and fraud detection workflow."
+      - condition: "If AML screening returns high risk or sanctions match"
+        workflow: "W4"
+        logic: "Escalate to enhanced due diligence and compliance review."
+      - condition: "If application type is 'business' and multiple owners provided"
+        workflow: "W3"
+        logic: "Trigger business account workflow with multi-signer setup."
+      - condition: "If account type is 'student checking' and applicant age < 25"
+        workflow: "W2"
+        logic: "Apply student checking workflow with special fee structure."
+      - condition: "If account type is 'joint savings' and multiple owners provided"
+        workflow: "W6"
+        logic: "Trigger joint account workflow with survivorship rights."
+      - condition: "If funding source verification fails or is pending"
+        workflow: "W7"
+        logic: "Hold account in restricted mode until funding is verified."
+      - condition: "If initial deposit is cash and amount >= 10000"
+        workflow: "W8"
+        logic: "File CTR and process same-day account opening."
+      - condition: "If deposit amount >= 5000 and applicant is individual"
+        workflow: "W1"
+        logic: "Apply premium savings account workflow."
+      - condition: "If none of the above conditions are met"
+        workflow: "W1"
+        logic: "Default to standard account opening workflow."
+    
+    failure_points:
+      - scenario: "Identity verification fails or documents are fraudulent"
+        recovery: "Request additional documents, escalate to fraud team, and decline application if fraud confirmed."
+      - scenario: "AML screening returns sanctions or high-risk match"
+        recovery: "Escalate to compliance for enhanced due diligence and manual review."
+      - scenario: "Funding source cannot be verified"
+        recovery: "Hold account in restricted mode, notify customer, and retry verification."
+      - scenario: "Core banking system integration fails"
+        recovery: "Retry operation, escalate to IT support if persistent."
+    
+    success_criteria:
+      - "Account opened with all compliance checks passed and disclosures delivered."
+      - "Customer receives confirmation and account details within 15 minutes of application submission."
+
+  tools:
+    system_tools:
+      - name: "SUCCESS"
+        signature: "SUCCESS(message, result_data?)"
+        purpose: "Signal successful operation/result"
+        args:
+          - name: "message"
+            type: "string"
+            required: true
+          - name: "result_data"
+            type: "object"
+            required: false
+        returns:
+          exit_status: "success"
+          message: "string"
+          data: "object"
+      
+      - name: "FAILED"
+        signature: "FAILED(message, error_details?)"
+        purpose: "Report an operation failure/error"
+        args:
+          - name: "message"
+            type: "string"
+            required: true
+          - name: "error_details"
+            type: "object"
+            required: false
+        returns:
+          exit_status: "failed"
+          message: "string"
+          error: "object"
+      
+      - name: "CANCELLED"
+        signature: "CANCELLED(message, reason?)"
+        purpose: "Indicate process was cancelled/interrupted"
+        args:
+          - name: "message"
+            type: "string"
+            required: true
+          - name: "reason"
+            type: "string"
+            required: false
+        returns:
+          exit_status: "cancelled"
+          message: "string"
+          reason: "string"
+      
+      - name: "HUMAN_IN_THE_LOOP"
+        signature: "HUMAN_IN_THE_LOOP(ai_message)"
+        purpose: "Escalate cases requiring human review or decision"
+        args:
+          - name: "ai_message"
+            type: "string"
+            required: true
+        returns:
+          exit_status: "escalated"
+          ai_message: "string"
+          human_response: "string"
+    
+    domain_tools:
+      - name: "validate_customer_identity"
+        signature: "validate_customer_identity(application_id, customer_data)"
+        purpose: "Verify customer identity using credit bureau, government ID, and enrollment databases."
+        args:
+          - name: "application_id"
+            type: "string"
+            description: "Unique application identifier. Format: ACC-XXXX where X is numeric."
+            required: true
+          - name: "customer_data"
+            type: "object"
+            description: "Customer data object containing: name (string), dob (ISO 8601), ssn (string, 9 digits), address (string), email (string, valid format), phone (string, E.164 format), id_type (string, enum: driver's_license, passport, state_id), id_number (string)"
+            required: true
+        returns:
+          description: "Identity verification result: status (string: verified|failed|pending), match_score (number, 0-100), details (object)"
+      
+      - name: "perform_aml_screening"
+        signature: "perform_aml_screening(application_id, customer_data)"
+        purpose: "Screen customer against OFAC, sanctions, and PEP lists for AML compliance."
+        args:
+          - name: "application_id"
+            type: "string"
+            description: "Unique application identifier. Format: ACC-XXXX where X is numeric."
+            required: true
+          - name: "customer_data"
+            type: "object"
+            description: "Customer data object containing: name (string), dob (ISO 8601), country_of_residence (string, ISO 3166-1 alpha-2), business_type (string, optional), owners (array of objects, optional)"
+            required: true
+        returns:
+          description: "AML screening result: status (string: clear|match|high_risk|medium_risk|low_risk), details (object)"
+      
+      - name: "calculate_account_tier"
+        signature: "calculate_account_tier(application_id, deposit_amount, customer_profile)"
+        purpose: "Determine account product tier based on deposit amount, age, and customer profile."
+        args:
+          - name: "application_id"
+            type: "string"
+            description: "Unique application identifier. Format: ACC-XXXX where X is numeric."
+            required: true
+          - name: "deposit_amount"
+            type: "number"
+            description: "Initial deposit amount in USD, must be >= 0, max 2 decimal places."
+            required: true
+          - name: "customer_profile"
+            type: "object"
+            description: "Profile object: age (integer), student_status (boolean), business_type (string, optional), relationship_value (number, optional)"
+            required: true
+        returns:
+          description: "Account tier result: tier (string: premium|standard|student|business_basic), eligibility (boolean), details (object)"
+      
+      - name: "configure_account_limits"
+        signature: "configure_account_limits(application_id, tier, risk_level, owners?)"
+        purpose: "Set account withdrawal, transfer, and transaction limits according to tier and risk."
+        args:
+          - name: "application_id"
+            type: "string"
+            description: "Unique application identifier. Format: ACC-XXXX where X is numeric."
+            required: true
+          - name: "tier"
+            type: "string"
+            description: "Account tier. Must be one of: premium, standard, student, business_basic"
+            enum: ["premium", "standard", "student", "business_basic"]
+            required: true
+          - name: "risk_level"
+            type: "string"
+            description: "Risk level. Must be one of: low, medium, high"
+            enum: ["low", "medium", "high"]
+            required: true
+          - name: "owners"
+            type: "array"
+            description: "List of owner IDs (strings), minimum 1, maximum 5 items"
+            required: false
+        returns:
+          description: "Limits configuration: withdrawal_limit (number, USD), transfer_limit (number, USD), transaction_limit (number, USD), owner_access (object)"
+      
+      - name: "configure_fee_schedule"
+        signature: "configure_fee_schedule(application_id, tier, special_conditions?)"
+        purpose: "Apply appropriate fee waivers, maintenance fees, and transaction fees based on account tier."
+        args:
+          - name: "application_id"
+            type: "string"
+            description: "Unique application identifier. Format: ACC-XXXX where X is numeric."
+            required: true
+          - name: "tier"
+            type: "string"
+            description: "Account tier. Must be one of: premium, standard, student, business_basic"
+            enum: ["premium", "standard", "student", "business_basic"]
+            required: true
+          - name: "special_conditions"
+            type: "object"
+            description: "Special conditions object: fee_waivers (boolean), overdraft_protection (boolean), atm_network (string, enum: free, paid, waived), transaction_fee_override (number, optional)"
+            required: false
+        returns:
+          description: "Fee schedule: monthly_fee (number, USD), atm_fee (number, USD), overdraft_fee (number, USD), transaction_fee (number, USD), waivers (object)"
+      
+      - name: "generate_account_disclosures"
+        signature: "generate_account_disclosures(application_id, tier, fee_schedule, limits, account_type, owners?)"
+        purpose: "Generate and deliver required regulatory disclosures and product documentation."
+        args:
+          - name: "application_id"
+            type: "string"
+            description: "Unique application identifier. Format: ACC-XXXX where X is numeric."
+            required: true
+          - name: "tier"
+            type: "string"
+            description: "Account tier. Must be one of: premium, standard, student, business_basic"
+            enum: ["premium", "standard", "student", "business_basic"]
+            required: true
+          - name: "fee_schedule"
+            type: "object"
+            description: "Fee schedule object as returned by configure_fee_schedule"
+            required: true
+          - name: "limits"
+            type: "object"
+            description: "Limits object as returned by configure_account_limits"
+            required: true
+          - name: "account_type"
+            type: "string"
+            description: "Type of account. Must be one of: savings, checking, business_checking, joint_savings, student_checking"
+            enum: ["savings", "checking", "business_checking", "joint_savings", "student_checking"]
+            required: true
+          - name: "owners"
+            type: "array"
+            description: "List of owner IDs (strings), minimum 1, maximum 5 items"
+            required: false
+        returns:
+          description: "Disclosure package: documents (array of strings: document IDs), delivery_status (string: delivered|pending|failed), timestamp (ISO 8601)"
+      
+      - name: "link_funding_source"
+        signature: "link_funding_source(application_id, funding_source, verification_method)"
+        purpose: "Verify and link external funding sources for initial deposit."
+        args:
+          - name: "application_id"
+            type: "string"
+            description: "Unique application identifier. Format: ACC-XXXX where X is numeric."
+            required: true
+          - name: "funding_source"
+            type: "object"
+            description: "Funding source object: type (string, enum: external_bank, wire, check, cash, parent_account), account_number (string), routing_number (string, optional), bank_name (string, optional)"
+            required: true
+          - name: "verification_method"
+            type: "string"
+            description: "Method of verification. Must be one of: instant, micro_deposit, manual, in_person"
+            enum: ["instant", "micro_deposit", "manual", "in_person"]
+            required: true
+        returns:
+          description: "Funding verification result: status (string: verified|pending|failed), details (object), estimated_completion (ISO 8601)"
+      
+      - name: "open_account"
+        signature: "open_account(application_id, customer_data, tier, limits, fee_schedule, disclosures, funding_status, owners?)"
+        purpose: "Create new account in core banking system with all configurations and documentation."
+        args:
+          - name: "application_id"
+            type: "string"
+            description: "Unique application identifier. Format: ACC-XXXX where X is numeric."
+            required: true
+          - name: "customer_data"
+            type: "object"
+            description: "Customer data object as used in validate_customer_identity"
+            required: true
+          - name: "tier"
+            type: "string"
+            description: "Account tier. Must be one of: premium, standard, student, business_basic"
+            enum: ["premium", "standard", "student", "business_basic"]
+            required: true
+          - name: "limits"
+            type: "object"
+            description: "Limits object as returned by configure_account_limits"
+            required: true
+          - name: "fee_schedule"
+            type: "object"
+            description: "Fee schedule object as returned by configure_fee_schedule"
+            required: true
+          - name: "disclosures"
+            type: "object"
+            description: "Disclosure package as returned by generate_account_disclosures"
+            required: true
+          - name: "funding_status"
+            type: "string"
+            description: "Funding verification status. Must be one of: verified, pending, failed"
+            enum: ["verified", "pending", "failed"]
+            required: true
+          - name: "owners"
+            type: "array"
+            description: "List of owner IDs (strings), minimum 1, maximum 5 items"
+            required: false
+        returns:
+          description: "Account opening result: account_id (string, format: XXXX-XXXX-XXXX), status (string: opened|restricted|failed), confirmation (object), timestamp (ISO 8601)"
+
+  workflows:
+    - id: "W1"
+      name: "Premium/Standard Savings or Checking Account Opening"
+      purpose: "Automates the opening of individual savings or checking accounts for standard or premium tiers."
+      trigger_conditions:
+        - "Applicant is individual"
+        - "Deposit amount >= 5000 for premium, else standard"
+      steps:
+        - step: 1
+          description: "Validate customer identity using credit bureau and ID verification."
+          tools_used: ["validate_customer_identity"]
+        - step: 2
+          description: "Perform AML screening against OFAC and sanctions lists."
+          tools_used: ["perform_aml_screening"]
+        - step: 3
+          description: "Calculate account tier based on deposit amount and profile."
+          tools_used: ["calculate_account_tier"]
+        - step: 4
+          description: "Configure account limits according to tier and risk."
+          tools_used: ["configure_account_limits"]
+        - step: 5
+          description: "Configure fee schedule based on tier and waivers."
+          tools_used: ["configure_fee_schedule"]
+        - step: 6
+          description: "Generate required disclosures (Truth in Savings, privacy notice, fee schedule)."
+          tools_used: ["generate_account_disclosures"]
+        - step: 7
+          description: "Link funding source and verify via instant or micro-deposit."
+          tools_used: ["link_funding_source"]
+        - step: 8
+          description: "Open account in core banking system and send confirmation."
+          tools_used: ["open_account", "SUCCESS"]
+      exit_conditions:
+        success: "Account opened, disclosures delivered, funding verified."
+        escalation: "If AML returns medium/high risk, escalate to HUMAN_IN_THE_LOOP."
+        failure: "If identity or funding verification fails, use FAILED."
+    
+    - id: "W2"
+      name: "Student Checking Account Opening"
+      purpose: "Processes student checking applications with special fee structure and limits."
+      trigger_conditions:
+        - "Applicant age < 25"
+        - "Student status verified"
+      steps:
+        - step: 1
+          description: "Validate customer identity and student status (enrollment verification, .edu email)."
+          tools_used: ["validate_customer_identity"]
+        - step: 2
+          description: "Perform AML screening."
+          tools_used: ["perform_aml_screening"]
+        - step: 3
+          description: "Calculate account tier as student."
+          tools_used: ["calculate_account_tier"]
+        - step: 4
+          description: "Configure account limits for student tier."
+          tools_used: ["configure_account_limits"]
+        - step: 5
+          description: "Configure fee schedule with student waivers."
+          tools_used: ["configure_fee_schedule"]
+        - step: 6
+          description: "Generate student checking disclosures."
+          tools_used: ["generate_account_disclosures"]
+        - step: 7
+          description: "Link funding source (parent account or external bank)."
+          tools_used: ["link_funding_source"]
+        - step: 8
+          description: "Open account and send confirmation."
+          tools_used: ["open_account", "SUCCESS"]
+      exit_conditions:
+        success: "Student account opened with special fee waivers."
+        escalation: "If AML returns medium/high risk, escalate to HUMAN_IN_THE_LOOP."
+        failure: "If identity or funding verification fails, use FAILED."
+    
+    - id: "W3"
+      name: "Business Checking Account Opening (Multi-Signer)"
+      purpose: "Automates business checking account opening for multiple owners/signers."
+      trigger_conditions:
+        - "Application type is business"
+        - "Multiple owners provided"
+      steps:
+        - step: 1
+          description: "Validate identity for all business owners (EIN, business license, personal IDs)."
+          tools_used: ["validate_customer_identity"]
+        - step: 2
+          description: "Perform AML screening for business and all owners."
+          tools_used: ["perform_aml_screening"]
+        - step: 3
+          description: "Calculate account tier as business_basic."
+          tools_used: ["calculate_account_tier"]
+        - step: 4
+          description: "Configure account limits for business tier and multi-signers."
+          tools_used: ["configure_account_limits"]
+        - step: 5
+          description: "Configure fee schedule for business account."
+          tools_used: ["configure_fee_schedule"]
+        - step: 6
+          description: "Generate business account disclosures (agreement, fee schedule, CIP notice)."
+          tools_used: ["generate_account_disclosures"]
+        - step: 7
+          description: "Link funding source (wire transfer, business savings)."
+          tools_used: ["link_funding_source"]
+        - step: 8
+          description: "Open account with all authorized signers."
+          tools_used: ["open_account", "SUCCESS"]
+      exit_conditions:
+        success: "Business account opened with all signers and disclosures."
+        escalation: "If AML returns medium/high risk, escalate to HUMAN_IN_THE_LOOP."
+        failure: "If identity or funding verification fails, use FAILED."
+    
+    - id: "W4"
+      name: "High-Risk Customer - Enhanced Due Diligence"
+      purpose: "Handles high-risk customers requiring enhanced monitoring and compliance review."
+      trigger_conditions:
+        - "AML screening returns high risk or sanctions match"
+        - "Customer from high-risk country or cash-intensive business"
+      steps:
+        - step: 1
+          description: "Validate customer identity."
+          tools_used: ["validate_customer_identity"]
+        - step: 2
+          description: "Perform AML screening and flag for EDD."
+          tools_used: ["perform_aml_screening"]
+        - step: 3
+          description: "Escalate case to compliance for manual review."
+          tools_used: ["HUMAN_IN_THE_LOOP"]
+        - step: 4
+          description: "If approved, configure account tier and limits with enhanced monitoring."
+          tools_used: ["calculate_account_tier", "configure_account_limits"]
+        - step: 5
+          description: "Configure standard fee schedule."
+          tools_used: ["configure_fee_schedule"]
+        - step: 6
+          description: "Generate disclosures including enhanced monitoring notice."
+          tools_used: ["generate_account_disclosures"]
+        - step: 7
+          description: "Link funding source."
+          tools_used: ["link_funding_source"]
+        - step: 8
+          description: "Open account with enhanced monitoring flag."
+          tools_used: ["open_account", "SUCCESS"]
+      exit_conditions:
+        success: "Account opened with enhanced monitoring and compliance approval."
+        escalation: "If compliance does not approve, use FAILED."
+        failure: "If identity or funding verification fails, use FAILED."
+    
+    - id: "W5"
+      name: "Identity Verification Failure and Fraud Detection"
+      purpose: "Handles failed identity verification, requests remediation, and detects fraud."
+      trigger_conditions:
+        - "Identity verification fails"
+      steps:
+        - step: 1
+          description: "Attempt identity verification."
+          tools_used: ["validate_customer_identity"]
+        - step: 2
+          description: "If failed, request additional documents from customer."
+          tools_used: ["HUMAN_IN_THE_LOOP"]
+        - step: 3
+          description: "Review submitted documents for authenticity."
+          tools_used: ["validate_customer_identity"]
+        - step: 4
+          description: "If documents are fraudulent, flag for fraud and decline application."
+          tools_used: ["FAILED"]
+        - step: 5
+          description: "File fraud report to compliance and regulatory authorities."
+          tools_used: ["HUMAN_IN_THE_LOOP"]
+      exit_conditions:
+        success: "If identity is remediated and verified, proceed to account opening (W1)."
+        escalation: "If fraud suspected, escalate to compliance and use FAILED."
+        failure: "If identity cannot be verified, use FAILED."
+    
+    - id: "W6"
+      name: "Joint Account Opening"
+      purpose: "Automates joint account opening for multiple owners with survivorship rights."
+      trigger_conditions:
+        - "Account type is joint_savings"
+        - "Multiple owners provided"
+      steps:
+        - step: 1
+          description: "Validate identity for all owners."
+          tools_used: ["validate_customer_identity"]
+        - step: 2
+          description: "Perform AML screening for all owners."
+          tools_used: ["perform_aml_screening"]
+        - step: 3
+          description: "Calculate account tier based on deposit and profile."
+          tools_used: ["calculate_account_tier"]
+        - step: 4
+          description: "Configure account limits for joint ownership."
+          tools_used: ["configure_account_limits"]
+        - step: 5
+          description: "Configure fee schedule for joint account."
+          tools_used: ["configure_fee_schedule"]
+        - step: 6
+          description: "Generate joint account disclosures (agreement, survivorship rights)."
+          tools_used: ["generate_account_disclosures"]
+        - step: 7
+          description: "Link funding source (transfer from existing account)."
+          tools_used: ["link_funding_source"]
+        - step: 8
+          description: "Open joint account with survivorship rights."
+          tools_used: ["open_account", "SUCCESS"]
+      exit_conditions:
+        success: "Joint account opened with all owners and disclosures."
+        escalation: "If AML returns medium/high risk, escalate to HUMAN_IN_THE_LOOP."
+        failure: "If identity or funding verification fails, use FAILED."
+    
+    - id: "W7"
+      name: "Funding Source Verification Hold"
+      purpose: "Handles cases where funding source verification is pending or failed, restricting account access."
+      trigger_conditions:
+        - "Funding source verification fails or is pending"
+      steps:
+        - step: 1
+          description: "Validate customer identity."
+          tools_used: ["validate_customer_identity"]
+        - step: 2
+          description: "Perform AML screening."
+          tools_used: ["perform_aml_screening"]
+        - step: 3
+          description: "Calculate account tier."
+          tools_used: ["calculate_account_tier"]
+        - step: 4
+          description: "Link funding source and initiate micro-deposit verification."
+          tools_used: ["link_funding_source"]
+        - step: 5
+          description: "Configure account limits for restricted access."
+          tools_used: ["configure_account_limits"]
+        - step: 6
+          description: "Open account in restricted mode (no withdrawals until funding verified)."
+          tools_used: ["open_account"]
+        - step: 7
+          description: "Generate disclosures including funding verification requirements."
+          tools_used: ["generate_account_disclosures", "SUCCESS"]
+      exit_conditions:
+        success: "Account opened in restricted mode, disclosures delivered."
+        escalation: "If funding verification fails after retries, escalate to HUMAN_IN_THE_LOOP."
+        failure: "If identity or AML fails, use FAILED."
+    
+    - id: "W8"
+      name: "Same-Day Account Opening with Cash Deposit and CTR Filing"
+      purpose: "Processes walk-in or digital accounts with large cash deposits, filing CTR as required."
+      trigger_conditions:
+        - "Initial deposit is cash and amount >= 10000"
+      steps:
+        - step: 1
+          description: "Validate customer identity (in-person or digital)."
+          tools_used: ["validate_customer_identity"]
+        - step: 2
+          description: "Perform AML screening."
+          tools_used: ["perform_aml_screening"]
+        - step: 3
+          description: "File Currency Transaction Report (CTR) for cash deposit >$10K."
+          tools_used: ["HUMAN_IN_THE_LOOP"]
+        - step: 4
+          description: "Calculate account tier as premium."
+          tools_used: ["calculate_account_tier"]
+        - step: 5
+          description: "Configure account limits for immediate access."
+          tools_used: ["configure_account_limits"]
+        - step: 6
+          description: "Configure fee schedule with premium waivers."
+          tools_used: ["configure_fee_schedule"]
+        - step: 7
+          description: "Generate paper or digital disclosures."
+          tools_used: ["generate_account_disclosures"]
+        - step: 8
+          description: "Open account and process cash deposit."
+          tools_used: ["open_account", "SUCCESS"]
+      exit_conditions:
+        success: "Account opened, cash deposit processed, CTR filed."
+        escalation: "If AML returns medium/high risk, escalate to HUMAN_IN_THE_LOOP."
+        failure: "If identity verification fails, use FAILED."
+
+  input_variables:
+    - name: "application_id"
+      type: "string"
+      description: "Unique identifier for the account application. Format: ACC-XXXX where X is numeric."
+      required: true
+      default: null
+      examples:
+        - "ACC-8821"
+        - "ACC-8862"
+    - name: "customer_data"
+      type: "object"
+      description: "Customer data object containing: name, dob (ISO 8601), ssn, address, email, phone, id_type, id_number, country_of_residence, business_type (optional), student_status (optional), owners (optional array of owner objects)."
+      required: true
+      default: null
+      examples:
+        - "{'name': 'David Martinez', 'dob': '1985-04-12', 'ssn': '123456789', 'address': '123 Main St', 'email': 'david.martinez@email.com', 'phone': '+15551234567', 'id_type': 'driver's_license', 'id_number': 'D1234567', 'country_of_residence': 'US'}"
+        - "{'name': 'Jane Smith', 'dob': '2003-09-22', 'student_status': true, 'email': 'jane.smith@university.edu', ...}"
+    - name: "account_type"
+      type: "string"
+      description: "Type of account to open. Must be one of: savings, checking, business_checking, joint_savings, student_checking."
+      required: true
+      default: null
+      examples:
+        - "savings"
+        - "business_checking"
+    - name: "deposit_amount"
+      type: "number"
+      description: "Initial deposit amount in USD, must be >= 0, max 2 decimal places."
+      required: true
+      default: null
+      examples:
+        - 10000
+        - 500
+    - name: "funding_source"
+      type: "object"
+      description: "Funding source object: type (external_bank, wire, check, cash, parent_account), account_number, routing_number (optional), bank_name (optional)."
+      required: true
+      default: null
+      examples:
+        - "{'type': 'external_bank', 'account_number': '987654321', 'routing_number': '021000021', 'bank_name': 'Wells Fargo'}"
+        - "{'type': 'cash', 'amount': 15000}"
+    - name: "owners"
+      type: "array"
+      description: "List of owner objects for joint or business accounts. Each owner: name, dob, ssn, id_type, id_number."
+      required: false
+      default: null
+      examples:
+        - "[{'name': 'John Doe', ...}, {'name': 'Jane Doe', ...}]"
+        - "[{'name': 'Alice Smith', ...}, {'name': 'Bob Jones', ...}, {'name': 'Carol Lee', ...}]"
+    - name: "student_status"
+      type: "boolean"
+      description: "Indicates if applicant is a student (for student checking accounts)."
+      required: false
+      default: null
+      examples:
+        - true
+        - false
+
+  output_variables:
+    - name: "account_id"
+      type: "string"
+      description: "Unique identifier for the newly opened account. Format: XXXX-XXXX-XXXX."
+      conditions: "Populated when account is successfully opened."
+      examples:
+        - "4455-6677-8899"
+        - "1122-3344-5566"
+    - name: "status"
+      type: "string"
+      description: "Final status of the account opening process. Must be one of: opened, restricted, failed, escalated."
+      conditions: "Populated for all workflows."
+      examples:
+        - "opened"
+        - "restricted"
+        - "failed"
+        - "escalated"
+    - name: "confirmation"
+      type: "object"
+      description: "Confirmation object containing: timestamp (ISO 8601), disclosures (array of document IDs), funding_status (string: verified|pending|failed), fee_schedule (object), limits (object)."
+      conditions: "Populated when account is opened or restricted."
+      examples:
+        - "{'timestamp': '2024-06-01T14:22:00Z', 'disclosures': ['DOC-123', 'DOC-456'], 'funding_status': 'verified', 'fee_schedule': {...}, 'limits': {...}}"
+    - name: "error_details"
+      type: "object"
+      description: "Error details object containing: error_code (string), error_message (string), remediation_steps (array of strings)."
+      conditions: "Populated when status is failed or escalated."
+      examples:
+        - "{'error_code': 'ID_FAIL', 'error_message': 'Identity verification failed', 'remediation_steps': ['Request additional documents', 'Escalate to compliance']}"
+    - name: "escalation_details"
+      type: "object"
+      description: "Details of escalation to human review, including ai_message, human_response, timestamp."
+      conditions: "Populated when status is escalated."
+      examples:
+        - "{'ai_message': 'AML screening returned high risk', 'human_response': 'Approved with conditions', 'timestamp': '2024-06-01T15:00:00Z'}"
+
+  input_format:
+    format: "JSON"
+    required_fields:
+      - "application_id"
+      - "customer_data"
+      - "account_type"
+      - "deposit_amount"
+      - "funding_source"
+    optional_fields:
+      - "owners"
+      - "student_status"
+    example: |
+      {
+        "application_id": "ACC-8821",
+        "customer_data": {
+          "name": "David Martinez",
+          "dob": "1985-04-12",
+          "ssn": "123456789",
+          "address": "123 Main St",
+          "email": "david.martinez@email.com",
+          "phone": "+15551234567",
+          "id_type": "driver's_license",
+          "id_number": "D1234567",
+          "country_of_residence": "US"
+        },
+        "account_type": "savings",
+        "deposit_amount": 10000,
+        "funding_source": {
+          "type": "external_bank",
+          "account_number": "987654321",
+          "routing_number": "021000021",
+          "bank_name": "Wells Fargo"
+        }
+      }
