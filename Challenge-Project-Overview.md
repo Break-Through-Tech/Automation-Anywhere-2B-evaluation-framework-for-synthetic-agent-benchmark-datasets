@@ -1,8 +1,8 @@
 # Evaluation Framework for Synthetic Agent Benchmark Datasets
 
 **Company / Org:** Automation Anywhere  
-**Challenge Advisor:** Sandra Wang  
-**AI Studio Coach:** Ananya Devarakonda ([ananya.devarakonda@breakthroughtech.org](mailto:ananya.devarakonda@breakthroughtech.org))  
+**Challenge Advisor:** Sandra Wang, sandra.wang@automationanywhere.com     
+**AI Studio Coach:** Ananya Devarakonda, [ananya.devarakonda@breakthroughtech.org](mailto:ananya.devarakonda@breakthroughtech.org)    
 **Program:** Break Through Tech AI Studio - Fall 2026
 
 ---
