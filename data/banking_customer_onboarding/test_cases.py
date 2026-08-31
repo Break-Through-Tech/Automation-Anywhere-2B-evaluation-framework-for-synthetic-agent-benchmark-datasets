@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict, Any
 from typing_extensions import TypedDict
-from generator_v5.core.system_tools_base import SystemToolsBaseClass
+from system_tools_base import SystemToolsBaseClass
 
 # TypedDict definitions for structured object parameters
 
