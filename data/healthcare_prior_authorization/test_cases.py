@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Any
 from typing_extensions import TypedDict
-from generator_v5.core.system_tools_base import SystemToolsBaseClass
+from system_tools_base import SystemToolsBaseClass
 
 
 class AlternateCodes(TypedDict, total=False):
