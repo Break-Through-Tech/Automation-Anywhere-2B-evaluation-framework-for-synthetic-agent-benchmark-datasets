@@ -23,6 +23,9 @@ from dotenv import load_dotenv
 current_dir = Path(__file__).parent
 sys.path.insert(0, str(current_dir))
 
+# Load configuration before agent_runner checks credentials during import.
+load_dotenv(dotenv_path=current_dir.parent / ".env")
+
 from agent_runner import run_test_case_local
 
 
@@ -243,9 +246,6 @@ async def main(agent_names: List[str], max_turns: int = 20, verbose: bool = True
         max_turns: Maximum number of turns for the agent (default: 20)
         verbose: Whether to print verbose output (default: True)
     """
-    # Load environment variables from .env file
-    load_dotenv()
-
     # Get OpenAI configuration from environment variables
     openai_api_key = os.getenv('OPENAI_API_KEY')
     base_url = os.getenv('BASE_URL')
@@ -280,29 +280,47 @@ async def main(agent_names: List[str], max_turns: int = 20, verbose: bool = True
         return
 
     print(f"\n✓ Loaded {len(testcases)} test case(s)\n")
-    print("=" * 60)
-    print("Running test case...")
-    print("=" * 60)
+    results = []
+    for index, testcase in enumerate(testcases, start=1):
+        inputs = testcase["inputs"]
+        print("=" * 60)
+        print(f"Running test case {index}/{len(testcases)}: "
+              f"{inputs['agent_name']}/{inputs['test_id']}")
+        print("=" * 60)
 
-    # Run the first test case
-    result, tools = await run_local_testcases_async(
-        testcases[0]["inputs"],
-        test_agent_llm_model=model_agent,
-        system_prompt=None,
-        verbose=verbose,
-        max_turns=max_turns,
-        agent_type="staticremem"
-    )
+        try:
+            result, tools = await run_local_testcases_async(
+                inputs,
+                test_agent_llm_model=model_agent,
+                system_prompt=None,
+                verbose=verbose,
+                max_turns=max_turns,
+                agent_type="staticremem"
+            )
+
+            print("\nTest Case Results")
+            print(f"Completed: {result.completed}")
+            print(f"Turns: {result.turns}")
+            print(f"Total messages: {len(result.messages)}")
+            print(f"Tools available: {len(tools)}")
+            results.append({"inputs": inputs, "result": result, "tools": tools})
+        except Exception as exc:
+            print(f"❌ Test case failed: {exc}")
+            results.append({"inputs": inputs, "error": str(exc)})
 
     print("\n" + "=" * 60)
-    print("Test Case Results")
+    print("All Test Cases Summary")
     print("=" * 60)
-    print(f"Completed: {result.completed}")
-    print(f"Turns: {result.turns}")
-    print(f"Total messages: {len(result.messages)}")
-    print(f"Tools available: {len(tools)}")
+    completed = sum(
+        1 for entry in results if "result" in entry and entry["result"].completed
+    )
+    errors = sum(1 for entry in results if "error" in entry)
+    print(f"Total: {len(results)}")
+    print(f"Completed: {completed}")
+    print(f"Not completed: {len(results) - completed - errors}")
+    print(f"Errors: {errors}")
 
-    return result, tools
+    return results
 
 
 if __name__ == "__main__":
@@ -312,6 +330,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '--agents',
+        '--agent_names',
         '-a',
         nargs='+',
         default=["banking_customer_onboarding"],
