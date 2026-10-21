@@ -83,6 +83,12 @@ The script will display:
    - Total messages exchanged
    - Number of tools available
 
+All loaded test cases run sequentially across the selected agents. Each case
+displays its index and test ID, followed by its results. A case that raises an
+error is reported without stopping the remaining cases. The final summary shows
+the total, completed, not-completed, and errored case counts. Completion indicates
+that the agent finished; it is not a separate correctness evaluation.
+
 ### Example Output
 
 ```
