@@ -31,7 +31,6 @@ import logging
 # Setup logging
 logger = logging.getLogger(__name__)
 
-
 class AgentResult(BaseModel):
     messages: List[BaseMessage]  # All messages are now BaseMessage objects
     completed: bool
