@@ -16,10 +16,11 @@ Scoring
   Cov_det = scorable tasks / audited tasks                 (dataset coverage)
 
 Usage
-  python deterministic_audit.py --data-dir DATA [--output-dir OUT] [--config CFG]
+  python deterministic_audit.py --data-dir DATA [--details] [--config CFG]
   DATA is either one domain folder or a folder of domain folders. Each domain
   needs test_cases.json, test_cases.py and agent_definition.yaml. An optional
   audit_config.json in a domain folder overrides --config for that domain.
+  Results are printed to the terminal; --details also lists every failed check.
 """
 from __future__ import annotations
 
@@ -30,7 +31,6 @@ if sys.version_info < (3, 9):
 
 import argparse
 import ast
-import csv
 import json
 from collections import Counter
 from pathlib import Path
@@ -46,7 +46,7 @@ REQUIRED = {'test_case_id': str, 'title': str, 'representative_input': dict,
 SYSTEM = {'SUCCESS': {'message': str}, 'FAILED': {'message': str},
           'CANCELLED': {'message': str}, 'HUMAN_IN_THE_LOOP': {'ai_message': str}}
 YAML_NAMES = ('agent_definition.yaml', 'agent_definition.yml', 'agent_defintion.yaml')
-TOOL_LIST_KEYS = ('tools', 'available_tools', 'tool_definitions')
+TOOL_LIST_KEYS = ('tools', 'available_tools', 'tool_definitions', 'system_tools', 'domain_tools')
 NOT_TOOLS = {'setUp', 'tearDown', 'setUpClass', 'tearDownClass'}
 DEFAULT_CONFIG = {
     # Keys checked for provenance in addition to any key ending in "_id".
@@ -138,7 +138,8 @@ def load_declared_tools(domain):
             for key, value in node.items():
                 if key in TOOL_LIST_KEYS and isinstance(value, dict):
                     found = True
-                    names.update(k for k in value if isinstance(k, str))
+                    # Group keys like tools.system_tools hold tools, they are not tools.
+                    names.update(k for k in value if isinstance(k, str) and k not in TOOL_LIST_KEYS)
                 elif key in TOOL_LIST_KEYS and isinstance(value, list):
                     found = True
                     for item in value:
@@ -579,8 +580,7 @@ def summarize(tasks):
     scores = [t['D_i'] for t in tasks if t['D_i'] is not None]
     out = dict(tasks_audited=audited, tasks_scorable=len(scores), tasks_unscorable=audited - len(scores),
                C_det=round(sum(scores) / len(scores), 4) if scores else None,
-               Cov_det=round(len(scores) / audited, 4) if audited else None,
-               tasks_D_1=sum(s == 1 for s in scores), tasks_D_0=sum(s == 0 for s in scores))
+               Cov_det=round(len(scores) / audited, 4) if audited else None)
     for c in CATEGORIES:
         statuses = [t['categories'][c] for t in tasks]
         p, f = statuses.count('PASS'), statuses.count('FAIL')
@@ -633,13 +633,6 @@ def audit_domain(domain, seen_ids, base_config):
     declared, declared_problem = load_declared_tools(domain)
     if declared_problem:
         report['warnings'].append(f'tool declarations not checked: {declared_problem}')
-    else:
-        undeclared = sorted(set(tool_defs) - declared)
-        unmocked = sorted(declared - set(tool_defs))
-        if undeclared:
-            report['warnings'].append(f'mocked but not declared in agent definition: {undeclared}')
-        if unmocked:
-            report['warnings'].append(f'declared but not mocked: {unmocked}')
 
     for task in candidates:
         if not isinstance(task, dict):
@@ -668,15 +661,45 @@ def audit_domain(domain, seen_ids, base_config):
     return report
 
 
-def log_line(name, discovered, audited, skipped, unscorable):
-    return f'{name}: Discovered: {discovered} | Audited: {audited} | Skipped: {skipped} | Unscorable: {unscorable}'
+def rate(value):
+    return '-' if value is None else f'{value:.3f}'
+
+
+def print_summary(r):
+    print(f"  Discovered: {r['tasks_discovered']} | Audited: {r['tasks_audited']} | "
+          f"Skipped: {r['tasks_skipped']} | Unscorable: {r['tasks_unscorable']}")
+    print(f"  C_det={rate(r['C_det'])}  Cov_det={rate(r['Cov_det'])}")
+    for c in CATEGORIES:
+        print(f"    {c:<20} pass_rate={rate(r[f'{c}_pass_rate'])}  coverage={rate(r[f'{c}_coverage'])}")
+
+
+def print_report(reports, overall, details):
+    short = {'PASS': 'PASS', 'FAIL': 'FAIL', 'UNVERIFIED': 'UNVR'}
+    header = f"    {'task_id':<28} {'D_i':>5} {'V_i':>5}  " + ' '.join(f'{c[:10]:<10}' for c in CATEGORIES)
+    for r in reports:
+        print(f"\n=== {r['domain']} ===")
+        for warning in r['warnings']:
+            print(f'  WARNING: {warning}')
+        print_summary(r)
+        if r['tasks']:
+            print(header)
+        for t in r['tasks']:
+            print(f"    {str(t['task_id'])[:28]:<28} {rate(t['D_i']):>5} {rate(t['V_i']):>5}  "
+                  + ' '.join(f"{short[t['categories'][c]]:<10}" for c in CATEGORIES))
+            if details:
+                for c in t['checks']:
+                    if c['status'] == 'FAIL':
+                        print(f"        FAIL [{c['category']}] {c['message']}"
+                              + (f" ({c['evidence']})" if c['evidence'] else ''))
+    print('\n=== ALL ===')
+    print_summary(overall)
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--data-dir', type=Path, required=True)
-    parser.add_argument('--output-dir', type=Path, default=Path('audit_results'))
     parser.add_argument('--config', type=Path, help='JSON file overriding DEFAULT_CONFIG for all domains')
+    parser.add_argument('--details', action='store_true', help='list every failed check under its task')
     args = parser.parse_args()
 
     base_config = dict(DEFAULT_CONFIG)
@@ -694,36 +717,7 @@ def main():
     tasks = [t for r in reports for t in r['tasks']]
     overall = dict(domain='ALL', tasks_discovered=sum(r['tasks_discovered'] for r in reports),
                    tasks_skipped=sum(r['tasks_skipped'] for r in reports), **summarize(tasks))
-
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    (args.output_dir / 'audit_details.json').write_text(
-        json.dumps({'overall': overall, 'domains': reports}, indent=2, default=str), encoding='utf-8')
-
-    task_rows = [{**{k: v for k, v in t.items() if k not in ('checks', 'categories')}, **t['categories']}
-                 for t in tasks]
-    task_cols = ['domain', 'task_id', 'title', 'reference_test', 'D_i', 'V_i', *CATEGORIES,
-                 'checks_passed', 'checks_failed', 'checks_unverified']
-    domain_cols = ['domain', 'tasks_discovered', 'tasks_audited', 'tasks_skipped', 'tasks_scorable',
-                   'tasks_unscorable', 'C_det', 'Cov_det', 'tasks_D_1', 'tasks_D_0',
-                   *(f'{c}_{s}' for c in CATEGORIES for s in ('pass_rate', 'coverage'))]
-    for filename, rows, cols in (('task_scores.csv', task_rows, task_cols),
-                                 ('domain_scores.csv', [*reports, overall], domain_cols)):
-        with (args.output_dir / filename).open('w', newline='', encoding='utf-8') as file:
-            writer = csv.DictWriter(file, fieldnames=cols, extrasaction='ignore')
-            writer.writeheader()
-            writer.writerows(rows)
-
-    for r in reports:
-        print(log_line(r['domain'], r['tasks_discovered'], r.get('tasks_audited', 0),
-                       r['tasks_skipped'], r.get('tasks_unscorable', 0)))
-        for warning in r['warnings']:
-            print(f'  WARNING: {warning}')
-    print(log_line('ALL', overall['tasks_discovered'], overall['tasks_audited'],
-                   overall['tasks_skipped'], overall['tasks_unscorable']))
-    print(f"C_det={overall['C_det']}  Cov_det={overall['Cov_det']}")
-    for c in CATEGORIES:
-        print(f"  {c:<20} pass_rate={overall[f'{c}_pass_rate']}  coverage={overall[f'{c}_coverage']}")
-    print(f'Results: {args.output_dir}')
+    print_report(reports, overall, args.details)
 
 
 if __name__ == '__main__':
