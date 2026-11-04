@@ -187,6 +187,18 @@ class AuditDomainTest(unittest.TestCase):
         task = self.audit(milestones=bad)['tasks'][0]
         self.assertEqual(task['categories']['schema'], 'FAIL')
 
+    def test_test_class_mock_override_is_used(self):
+        # The test class's own ship_item replaces the shared mock, so FedEx is correct here.
+        override = ('    def ship_item(self, item_id: str, profile: Profile):\n'
+                    '        return {"shipment_id": "S-1", "carrier": "FedEx"}\n\n'
+                    '    expected_tool_calls = [')
+        py = MOCK_PY.replace('    expected_tool_calls = [', override)
+        outcome = {'final_status': 'SUCCESS', 'key_outputs': {'shipment_id': 'S-1', 'carrier': 'FedEx'}}
+        with tempfile.TemporaryDirectory() as tmp:
+            domain = write_domain(Path(tmp) / 'd', mock_task(expected_success_outcome=outcome), py=py)
+            task = da.audit_domain(domain, {}, da.DEFAULT_CONFIG)['tasks'][0]
+        self.assertEqual(task['categories']['output_consistency'], 'PASS')
+
     def test_duplicate_ids_across_domains(self):
         seen = {}
         with tempfile.TemporaryDirectory() as tmp:
