@@ -83,6 +83,12 @@ def load_config(domain, base):
 
 # ---------------------------------------------------------------- source reading
 
+def tool_methods(cls):
+    """Public methods of a class that could be mock tools."""
+    return [s for s in cls.body if isinstance(s, (ast.FunctionDef, ast.AsyncFunctionDef))
+            and not s.name.startswith(('_', 'test')) and s.name not in NOT_TOOLS]
+
+
 def source_model(path, id_fields):
     """Split test_cases.py into reference tests, mock tool methods and TypedDicts."""
     tree = ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
@@ -103,19 +109,18 @@ def source_model(path, id_fields):
             elif isinstance(stmt, ast.AnnAssign) and isinstance(stmt.target, ast.Name) and stmt.value:
                 assigns[stmt.target.id] = stmt.value
         if 'expected_tool_calls' in assigns:
-            # A reference test class. Its methods are test plumbing, never tools.
+            # A reference test class. Tools it defines override the shared mocks for this test only.
             calls = literal(assigns['expected_tool_calls'])
             title = literal(assigns['title']) if 'title' in assigns else None
             test_id = next((literal(assigns[f]) for f in id_fields if f in assigns), None)
             tests.append(dict(cls=cls.name,
+                              overrides={m.name: [(cls.name, m)] for m in tool_methods(cls)},
                               title=title if isinstance(title, str) else None,
                               test_id=test_id if isinstance(test_id, str) else None,
                               calls=calls if isinstance(calls, list) else None))
             continue
-        for stmt in cls.body:
-            if (isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef))
-                    and not stmt.name.startswith(('_', 'test')) and stmt.name not in NOT_TOOLS):
-                tool_defs.setdefault(stmt.name, []).append((cls.name, stmt))
+        for method in tool_methods(cls):
+            tool_defs.setdefault(method.name, []).append((cls.name, method))
     return tests, tool_defs, typed_dicts
 
 
@@ -650,8 +655,9 @@ def audit_domain(domain, seen_ids, base_config):
             checks.append(check('output_consistency', 'UNVERIFIED', 'expected_tool_calls is not a plain literal list'))
         else:
             calls = reference['calls']
-            responses = predict_responses(calls, tool_defs)
-            checks += signature_checks(calls, tool_defs, typed_dicts, declared, declared_problem)
+            test_tools = {**tool_defs, **reference['overrides']}
+            responses = predict_responses(calls, test_tools)
+            checks += signature_checks(calls, test_tools, typed_dicts, declared, declared_problem)
             checks += provenance_checks(task, calls, responses, config)
             checks += output_checks(task, calls, responses, config)
         report['tasks'].append(dict(domain=domain.name, task_id=task.get('test_case_id'), title=task.get('title'),
