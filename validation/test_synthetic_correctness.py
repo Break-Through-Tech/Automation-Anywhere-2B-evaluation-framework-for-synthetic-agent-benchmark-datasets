@@ -5,7 +5,7 @@ import unittest
 
 from validation.correctness_checker import run_experiment
 from evaluation.synthetic import (annotation_matches, corruption_manifest,
-    evaluate, evaluate_dataset, load_dataset, python_inventory)
+    evaluate, evaluate_dataset, load_dataset, match_fixture, python_inventory)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -14,10 +14,10 @@ def clean_task():
     tool = {'name': 'lookup', 'args': [{'name': 'customer_id', 'type': 'string', 'required': True}]}
     case = {'test_case_id': 'a', 'title': 'Look up customer',
             'representative_input': {'customer_id': 'C1'},
-            'expected_success_outcome': {'final_status': 'found'},
+            'expected_success_outcome': {'final_status': 'found', 'key_outputs': {}},
             'milestones': [{'step': 1, 'expected_state': {'found': True}}]}
     fixture = {'class_name': 'TestCaseA', 'attributes': {
-        'test_case_id': 'a', 'workflow': 'W1', 'input_data': {'customer_id': 'C1'},
+        'test_case_id': 'a', 'title': case['title'], 'workflow': 'W1', 'input_data': {'customer_id': 'C1'},
         'expected_tool_calls': [{'name': 'lookup', 'tool_inputs': {'customer_id': 'C1'}}],
         'milestones': deepcopy(case['milestones']),
         'expected_success_outcome': deepcopy(case['expected_success_outcome'])},
@@ -27,11 +27,45 @@ def clean_task():
 
 
 class DatasetTests(unittest.TestCase):
+    def test_invalid_outcome_fails_even_when_files_agree(self):
+        for outcome in ({}, {'final_status': 'found'}, {'key_outputs': {}},
+                        {'final_status': 123, 'key_outputs': {}},
+                        {'final_status': 'found', 'key_outputs': []}):
+            with self.subTest(outcome=outcome):
+                task = clean_task()
+                task['case']['expected_success_outcome'] = deepcopy(outcome)
+                task['python_fixture']['attributes']['expected_success_outcome'] = deepcopy(outcome)
+                result = evaluate(task)
+                self.assertEqual(result['checks']['schema'], 0)
+                self.assertLess(result['score'], 1)
+                self.assertTrue(any(p['path'].startswith('case.expected_success_outcome.')
+                                    for p in result['evidence']['schema']))
+
+    def test_keyword_only_tool_parameters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / 'test_cases.py'
+            source.write_text('class TestCaseA:\n'
+                              '    def lookup(self, *, customer_id: str, verbose: bool = False):\n'
+                              '        return {"customer_id": customer_id}\n')
+            fixture = python_inventory(source)[0]
+        task = clean_task()
+        task['python_fixture']['methods'] = fixture['methods']
+        # Make YAML optional so missing customer_id exercises Python validation.
+        task['tools']['lookup']['args'][0]['required'] = False
+        task['tools']['lookup']['args'].append({'name': 'verbose', 'type': 'boolean'})
+        for inputs, expected in (({'customer_id': 'C1'}, 1),
+                                 ({'customer_id': 'C1', 'verbose': False}, 1),
+                                 ({'customer_id': 'C1', 'verbose': 'wrong'}, 0),
+                                 ({}, 0)):
+            with self.subTest(inputs=inputs):
+                task['python_fixture']['attributes']['expected_tool_calls'][0]['tool_inputs'] = inputs
+                self.assertEqual(evaluate(task)['checks']['signatures'], expected)
+
     def test_four_categories_and_dataset_average(self):
         task = clean_task()
         self.assertEqual(evaluate(task)['score'], 1)
         changed = deepcopy(task)
-        changed['python_fixture']['attributes']['test_case_id'] = 'bad'
+        changed['python_fixture']['attributes']['input_data'] = {'customer_id': 'bad'}
         self.assertEqual(evaluate(changed)['score'], .75)
         dataset = {'dataset': 'fixture', 'tasks': [{'id': 'a', 'task': task}, {'id': 'b', 'task': changed}],
                    'sources': {}, 'unmatched_python_classes': []}
@@ -42,7 +76,7 @@ class DatasetTests(unittest.TestCase):
         result = run_experiment(corruption_manifest(dataset), evaluate, rates=(0, 1))
         self.assertTrue(result['passed'])
         self.assertEqual({r['kind'] for r in result['campaigns']}, {
-            'invalid_title_type', 'unknown_tool', 'inconsistent_case_id', 'inconsistent_expected_output'})
+            'invalid_title_type', 'unknown_tool', 'unmatched_python_reference', 'inconsistent_expected_output'})
         self.assertIn('coverage_limits', result['audit'][0]['result'])
 
     def test_references_validate_partial_baseline(self):
@@ -50,7 +84,7 @@ class DatasetTests(unittest.TestCase):
         task['case']['title'] = 123
         dataset = {'tasks': [{'id': 'a', 'task': task}]}
         result = run_experiment(corruption_manifest(dataset), evaluate, rates=(1,))
-        row = next(r for r in result['campaigns'] if r['kind'] == 'inconsistent_case_id')
+        row = next(r for r in result['campaigns'] if r['kind'] == 'unmatched_python_reference')
         self.assertEqual(row['eligible_tasks'], 1)
         self.assertTrue(row['passed'])
 
@@ -63,11 +97,60 @@ class DatasetTests(unittest.TestCase):
         self.assertEqual(result['score'], 1)
         self.assertTrue(result['coverage_limits']['output_consistency'])
 
-    def test_signature_types_and_enum(self):
+    def test_signatures_use_python_types_not_yaml_argument_constraints(self):
         task = clean_task()
         task['tools']['lookup']['args'][0]['enum'] = ['C2']
-        self.assertEqual(evaluate(task)['checks']['signatures'], 0)
+        task['tools']['lookup']['args'][0]['type'] = 'integer'
+        self.assertEqual(evaluate(task)['checks']['signatures'], 1)
         task['python_fixture']['attributes']['expected_tool_calls'][0]['tool_inputs']['customer_id'] = 1
+        self.assertEqual(evaluate(task)['checks']['signatures'], 0)
+
+    def test_title_fallback_accepts_different_ids_and_rejects_unmatched_fixture(self):
+        task = clean_task()
+        fixture = task['python_fixture']
+        fixture['attributes']['test_case_id'] = 'namespaced_a'
+        self.assertEqual(match_fixture(task['case'], [fixture]), (fixture, 'unique_title'))
+        self.assertEqual(evaluate(task)['checks']['references'], 1)
+        fixture['attributes']['title'] = 'Unrelated title'
+        self.assertIsNone(match_fixture(task['case'], [fixture])[0])
+        self.assertEqual(evaluate(task)['checks']['references'], 0)
+
+    def test_title_matched_corruption_campaigns_have_expected_check_vectors(self):
+        task = clean_task()
+        task['python_fixture']['attributes']['test_case_id'] = 'namespaced_a'
+        manifest = corruption_manifest({'tasks': [{'id': 'a', 'task': task}]})
+        result = run_experiment(manifest, evaluate, rates=(0, 1))
+        self.assertTrue(result['passed'])
+        title_mutation = next(m for m in manifest['mutations'] if m['kind'] == 'invalid_title_type')
+        self.assertEqual(title_mutation['expected_checks'], {'schema': 0, 'references': 0})
+
+    def test_matching_rejects_ambiguous_ids_and_requires_exact_title(self):
+        task = clean_task()
+        fixture = task['python_fixture']
+        duplicate = deepcopy(fixture)
+        duplicate['class_name'] = 'TestCaseB'
+        duplicate['attributes']['title'] = 'Other title'
+        self.assertIsNone(match_fixture(task['case'], [fixture, duplicate])[0])
+        fixture['attributes']['test_case_id'] = 'namespaced_a'
+        fixture['attributes']['title'] += '.'
+        self.assertIsNone(match_fixture(task['case'], [fixture])[0])
+
+    def test_python_optional_parameter_accepts_none_despite_yaml_string(self):
+        task = clean_task()
+        task['python_fixture']['methods']['lookup']['args']['customer_id']['annotation'] = 'Optional[str]'
+        task['python_fixture']['attributes']['expected_tool_calls'][0]['tool_inputs']['customer_id'] = None
+        self.assertEqual(evaluate(task)['checks']['signatures'], 1)
+
+    def test_python_kwargs_and_builtin_system_tool_arguments(self):
+        task = clean_task()
+        task['python_fixture']['methods']['lookup']['accepts_kwargs'] = True
+        call = task['python_fixture']['attributes']['expected_tool_calls'][0]
+        call['tool_inputs']['extra'] = 123
+        self.assertEqual(evaluate(task)['checks']['signatures'], 1)
+        task['python_fixture']['attributes']['expected_tool_calls'] = [
+            {'name': 'SUCCESS', 'tool_inputs': {'message': 'done', 'result_data': {}}}]
+        self.assertEqual(evaluate(task)['checks']['signatures'], 1)
+        task['python_fixture']['attributes']['expected_tool_calls'][0]['tool_inputs'] = {}
         self.assertEqual(evaluate(task)['checks']['signatures'], 0)
 
     def test_typed_dict_and_nested_types(self):

@@ -10,6 +10,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from correctness_op import deterministic_audit as audit
 from validation.correctness_checker import CHECKS, score_checks
 
 
@@ -72,18 +73,36 @@ def python_inventory(path):
         attrs.update(literals(node, attrs))
         for method in node.body:
             if isinstance(method, ast.FunctionDef) and not method.name.startswith('_'):
-                args = [a for a in method.args.args if a.arg != 'self']
                 defaults = [None] * (len(method.args.args) - len(method.args.defaults)) + list(method.args.defaults)
-                by_name = dict(zip([a.arg for a in method.args.args], defaults))
+                parameters = list(zip(method.args.args, defaults))
+                parameters += list(zip(method.args.kwonlyargs, method.args.kw_defaults))
                 methods[method.name] = {
                     'args': {a.arg: {'annotation': ast.unparse(a.annotation) if a.annotation else None,
-                                    'required': by_name[a.arg] is None} for a in args},
+                                    'required': default is None}
+                             for a, default in parameters if a.arg != 'self'},
+                    'accepts_kwargs': method.args.kwarg is not None,
                     'source': ast.get_source_segment(Path(path).read_text(), method),
                 }
         return attrs, methods
 
     return [{'class_name': name, 'attributes': collect(name)[0], 'methods': collect(name)[1], 'typed_dicts': typed_dicts}
             for name in classes if name.startswith('TestCase')]
+
+
+def match_fixture(case, fixtures):
+    """Use the PR's unique ID, then exact unique title matching convention."""
+    references = []
+    for fixture in fixtures:
+        attrs = fixture['attributes']
+        task_id = next((attrs[k] for k in audit.DEFAULT_CONFIG['python_id_fields'] if k in attrs), None)
+        references.append({'cls': fixture['class_name'], 'fixture': fixture,
+                           'test_id': task_id if isinstance(task_id, str) else None,
+                           'title': attrs.get('title') if isinstance(attrs.get('title'), str) else None})
+    reference, _ = audit.match_reference(case, references)
+    if reference is None:
+        return None, 'unmatched'
+    method = 'id' if reference['test_id'] == case.get('test_case_id') else 'unique_title'
+    return reference['fixture'], method
 
 
 def load_dataset(directory):
@@ -107,14 +126,7 @@ def load_dataset(directory):
             if not isinstance(task_id, str) or task_id in ids:
                 raise ValueError('JSON test_case_id must be a unique string')
             ids.add(task_id)
-            matches = [f for f in fixtures if f['attributes'].get('test_case_id') == task_id]
-            match_method = 'id'
-            if not matches:
-                matches = [f for f in fixtures if isinstance(case.get('title'), str)
-                           and isinstance(f['attributes'].get('title'), str)
-                           and f['attributes']['title'].strip().rstrip('.') == case['title'].strip().rstrip('.')]
-                match_method = 'unique_title'
-            fixture = matches[0] if len(matches) == 1 else None
+            fixture, match_method = match_fixture(case, fixtures)
             if fixture:
                 used.add(fixture['class_name'])
             tasks.append({'id': task_id, 'task': {
@@ -139,55 +151,14 @@ def leaves(value, path=()):
         yield path, value
 
 
-def type_matches(value, name):
-    types = {'string': str, 'str': str, 'integer': int, 'int': int,
-             'number': (int, float), 'float': (int, float), 'boolean': bool,
-             'bool': bool, 'object': dict, 'dict': dict, 'array': list, 'list': list}
-    if name not in types:
-        return None
-    return isinstance(value, types[name]) and not (isinstance(value, bool) and name in ('integer', 'int', 'number', 'float'))
-
-
 def annotation_matches(value, annotation, definitions):
-    """Validate supported typing/TypedDict annotations; None means unsupported."""
+    """Use the PR's Python annotation rules; None means unsupported."""
     if not annotation:
         return None
-    node = ast.parse(annotation, mode='eval').body
-
-    def match(item, spec):
-        if isinstance(spec, ast.Constant) and spec.value is None:
-            return item is None
-        if isinstance(spec, ast.Name):
-            if spec.id == 'Any':
-                return True
-            if spec.id in definitions:
-                definition = definitions[spec.id]
-                if not isinstance(item, dict):
-                    return False
-                fields = definition['fields']
-                if definition['total'] and not set(fields) <= set(item):
-                    return False
-                results = [annotation_matches(item[k], v, definitions) for k, v in fields.items() if k in item]
-                return False if False in results else (None if None in results else True)
-            return type_matches(item, spec.id)
-        if isinstance(spec, ast.Subscript) and isinstance(spec.value, ast.Name):
-            name = spec.value.id
-            params = list(spec.slice.elts) if isinstance(spec.slice, ast.Tuple) else [spec.slice]
-            if name == 'Optional':
-                return True if item is None else match(item, params[0])
-            if name in ('List', 'list'):
-                if not isinstance(item, list):
-                    return False
-                results = [match(v, params[0]) for v in item]
-            elif name in ('Dict', 'dict') and len(params) == 2:
-                if not isinstance(item, dict):
-                    return False
-                results = [match(k, params[0]) for k in item] + [match(v, params[1]) for v in item.values()]
-            else:
-                return None
-            return False if False in results else (None if None in results else True)
-        return None
-    return match(value, node)
+    typed_dicts = {name: (definition['total'], {
+        key: ast.parse(spec, mode='eval').body for key, spec in definition['fields'].items()})
+        for name, definition in definitions.items()}
+    return audit.annotation_matches(value, ast.parse(annotation, mode='eval').body, typed_dicts)
 
 
 def evaluate(task):
@@ -206,6 +177,12 @@ def evaluate(task):
     for key, kind in required.items():
         if not isinstance(case.get(key), kind):
             fail('schema', f'case.{key}', f'Required {kind.__name__} value missing or invalid')
+    outcome = case.get('expected_success_outcome')
+    if isinstance(outcome, dict):
+        for key, kind in (('final_status', str), ('key_outputs', dict)):
+            if not isinstance(outcome.get(key), kind):
+                fail('schema', f'case.expected_success_outcome.{key}',
+                     f'Required {kind.__name__} value missing or invalid')
     milestones = case.get('milestones')
     if isinstance(milestones, list):
         steps = []
@@ -231,44 +208,38 @@ def evaluate(task):
                 fail('signatures', path, 'Cannot validate malformed call')
                 continue
             name, args = call['name'], call['tool_inputs']
-            if name not in tools:
-                fail('signatures', path, f'Unknown YAML tool: {name}')
-                continue
-            specs = {a['name']: a for a in tools[name].get('args', [])}
-            for key in args.keys() - specs.keys():
-                fail('signatures', path, f'Unexpected YAML argument: {key}')
-            for key, spec in specs.items():
-                if spec.get('required', False) and key not in args:
-                    fail('signatures', path, f'Missing YAML argument: {key}')
-                if key in args:
-                    match = type_matches(args[key], spec.get('type'))
-                    if match is False:
-                        fail('signatures', path, f'{key} must have YAML type {spec["type"]}')
-                    elif match is None:
-                        coverage['signatures'].append(f'Unsupported YAML type for {name}.{key}: {spec.get("type")}')
-                    if 'enum' in spec and args[key] not in spec['enum']:
-                        fail('signatures', path, f'{key} is outside declared enum')
-            method = fixture['methods'].get(name)
-            if method:
+            if name in audit.SYSTEM:
+                params = {key: {'required': True, 'annotation': kind.__name__}
+                          for key, kind in audit.SYSTEM[name].items()}
+                accepts_kwargs = True
+            else:
+                if name not in tools:
+                    fail('signatures', path, f'Unknown YAML tool: {name}')
+                    continue
+                method = fixture['methods'].get(name)
+                if method is None:
+                    fail('signatures', path, f'No Python tool method: {name}')
+                    continue
                 params = method['args']
-                if args.keys() - params.keys() or any(v['required'] and k not in args for k, v in params.items()):
-                    fail('signatures', path, f'Arguments disagree with Python method {name}')
-                for key, value in args.items():
-                    if key in params:
-                        match = annotation_matches(value, params[key]['annotation'], fixture.get('typed_dicts', {}))
-                        if match is False:
-                            fail('signatures', path, f'{key} disagrees with Python type {params[key]["annotation"]}')
-                        elif match is None:
-                            coverage['signatures'].append(f'Unsupported Python annotation: {name}.{key}')
-            elif name not in {t['name'] for t in task['agent']['tools'].get('system_tools', [])}:
-                fail('signatures', path, f'No Python tool method: {name}')
+                accepts_kwargs = method.get('accepts_kwargs', False)
+            if ((not accepts_kwargs and args.keys() - params.keys())
+                    or any(v['required'] and k not in args for k, v in params.items())):
+                fail('signatures', path, f'Arguments disagree with Python method {name}')
+            for key, value in args.items():
+                if key in params and params[key]['annotation']:
+                    match = annotation_matches(value, params[key]['annotation'], fixture.get('typed_dicts', {}))
+                    if match is False:
+                        fail('signatures', path, f'{key} disagrees with Python type {params[key]["annotation"]}')
+                    elif match is None:
+                        coverage['signatures'].append(f'Unsupported Python annotation: {name}.{key}')
 
     # Cross-file identities and workflow references are verifiable without a database.
     applicable['references'] = True
     if fixture:
-        for key, expected in (('test_case_id', case.get('test_case_id')), ('input_data', case.get('representative_input'))):
-            if attrs.get(key) != expected:
-                fail('references', f'python_fixture.attributes.{key}', 'Python value disagrees with JSON')
+        if match_fixture(case, [fixture])[0] is None:
+            fail('references', 'python_fixture', 'Python counterpart matches neither task ID nor title')
+        if attrs.get('input_data') != case.get('representative_input'):
+            fail('references', 'python_fixture.attributes.input_data', 'Python value disagrees with JSON')
         if str(attrs.get('workflow', '')).split(' - ')[0] != task['workflow']:
             fail('references', 'python_fixture.attributes.workflow', 'Python workflow disagrees with JSON group')
     else:
@@ -326,7 +297,9 @@ def corruption_manifest(dataset):
         fixture = task['python_fixture']
         cases = [('invalid_title_type', 'schema', ['case', 'title'], 123)]
         if fixture:
-            cases.append(('inconsistent_case_id', 'references', ['python_fixture', 'attributes', 'test_case_id'], '__corrupted_id__'))
+            unmatched = {**fixture['attributes'], 'title': '__corrupted_title__',
+                         **{key: '__corrupted_id__' for key in audit.DEFAULT_CONFIG['python_id_fields']}}
+            cases.append(('unmatched_python_reference', 'references', ['python_fixture', 'attributes'], unmatched))
             calls = fixture['attributes'].get('expected_tool_calls')
             if calls:
                 cases.append(('unknown_tool', 'signatures', ['python_fixture', 'attributes', 'expected_tool_calls', 0, 'name'], '__unknown_tool__'))
@@ -337,7 +310,13 @@ def corruption_manifest(dataset):
             for component in path:
                 original = original[component]
             if original != replacement:
-                mutations.append({'task_id': key, 'kind': kind, 'expected_check': check, 'path': path, 'replacement': replacement})
+                mutation = {'task_id': key, 'kind': kind, 'expected_check': check,
+                            'path': path, 'replacement': replacement}
+                if (kind == 'invalid_title_type' and fixture
+                        and match_fixture(task['case'], [fixture])[1] == 'unique_title'):
+                    # Breaking the title also breaks a pairing that depends on it.
+                    mutation['expected_checks'] = {'schema': 0, 'references': 0}
+                mutations.append(mutation)
     return {'tasks': dataset['tasks'], 'mutations': mutations}
 
 
