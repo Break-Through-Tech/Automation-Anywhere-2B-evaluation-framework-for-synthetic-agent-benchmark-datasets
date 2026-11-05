@@ -1,9 +1,36 @@
 import unittest
 
-from validation.correctness_checker import CHECKS, LLM_CHECKS, run_experiment, verdict
+from validation.correctness_checker import CHECKS, LLM_CHECKS, demo_manifest, reference_evaluator, run_experiment, verdict
 
 
 class ScoringTests(unittest.TestCase):
+    def test_nested_subsets_rounding_and_unexercised_campaigns(self):
+        manifest = demo_manifest(3)
+        report = run_experiment(manifest, reference_evaluator, rates=(0, .1, .5, 1))
+        for kind in {row['kind'] for row in report['campaigns']}:
+            selected = []
+            for rate in (0, .1, .5, 1):
+                selected.append({a['task_id'] for a in report['audit'] if a['kind'] == kind and a['rate'] == rate and a['corrupted']})
+            self.assertEqual([len(s) for s in selected], [0, 0, 2, 3])
+            self.assertTrue(all(a <= b for a, b in zip(selected, selected[1:])))
+        manifest['campaign_names'] = ['unsupported']
+        report = run_experiment(manifest, reference_evaluator)
+        self.assertEqual(report['status'], 'inconclusive')
+        self.assertIn('unsupported', report['unexercised_campaigns'])
+
+    def test_crashes_propagate_and_false_positives_fail_validation(self):
+        def crash(task):
+            raise RuntimeError('evaluator crashed')
+        with self.assertRaisesRegex(RuntimeError, 'evaluator crashed'):
+            run_experiment(demo_manifest(), crash)
+        def false_positive(task):
+            result = reference_evaluator(task)
+            result['checks']['schema'] = 0
+            return result
+        report = run_experiment(demo_manifest(), false_positive)
+        self.assertEqual(report['status'], 'fail')
+        self.assertEqual(report['baseline_false_positive_rate'], 1)
+
     def test_deterministic_partial_credit_and_inapplicable(self):
         checks = dict(zip(CHECKS, (1, 0, 1, None)))
         result = verdict(lambda task: {"checks": checks}, {})

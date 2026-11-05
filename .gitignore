@@ -2,6 +2,18 @@
 .env
 .vscode/settings.json
 /venv
+.venv/
 *.pyc
 
-/data/__pycache__
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+/build/
+/dist/
+/htmlcov/
+.coverage
+.coverage.*
+
+# Generated evaluation outputs and reports.
+/output/

@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "Andrei Magno", email = "andrei.b.magno@gmail.com" }
 ]
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "annotated-types==0.8.0",
     "anyio==4.15.1",
@@ -53,6 +53,13 @@ dependencies = [
     "websockets==16.1.1",
     "xxhash==4.0.1",
     "zstandard==0.25.0",
+]
+
+[project.optional-dependencies]
+tau2 = [
+    "tau2 @ git+https://github.com/sierra-research/tau2-bench.git@5ade54e282a4555e4d6c52d6b9b861ea8872afa6",
+    "jsonschema>=4.23,<5",
+    "audioop-lts>=0.2.1; python_version >= '3.13'",
 ]
 
 [project.scripts]

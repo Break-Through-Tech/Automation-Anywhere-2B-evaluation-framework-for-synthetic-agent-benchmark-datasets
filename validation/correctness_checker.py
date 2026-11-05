@@ -8,7 +8,8 @@ not a benchmark adapter. External evaluators can be supplied with --evaluator.
 
 Evaluator contract: evaluate(task: dict) -> {"checks": {category: score}}.
 Deterministic scores are 0 or 1; LLM scores are 0, 0.5, or 1. Use None
-for an inapplicable check. Every configured category must be present and at
+for an unavailable/inapplicable check, with an explanatory coverage reason.
+Every configured category must be present and at
 least one must be applicable. The harness calculates each task's mean over
 applicable checks, then averages task scores. Run each evaluator separately.
 
@@ -21,7 +22,6 @@ drops therefore follow check-level partial credit, not whole-task rejection.
 import argparse
 from collections import Counter
 from copy import deepcopy
-import csv
 import importlib
 import json
 from pathlib import Path
@@ -104,7 +104,11 @@ task is applied in each campaign. Campaigns isolate corruption kinds.
     baseline_total = sum(v["score"] for v in baseline.values())
     clean_ids = [key for key, label in labels.items() if label]
     false_positives = sum(not baseline[key]["passed"] for key in clean_ids)
-    campaigns = {}
+    from validation.reporting import baseline_summary, metadata
+    declared = manifest.get("campaign_names", [])
+    if any(not isinstance(kind, str) or not kind for kind in declared):
+        raise ValueError("Campaign names must be nonempty strings")
+    campaigns = {kind: {} for kind in declared}
     for mutation in manifest["mutations"]:
         key, kind, check = mutation["task_id"], mutation["kind"], mutation["expected_check"]
         if key not in tasks or check not in categories or not isinstance(kind, str) or not kind:
@@ -127,7 +131,8 @@ task is applied in each campaign. Campaigns isolate corruption kinds.
     if not campaigns:
         raise ValueError("At least one mutation campaign is required")
 
-    rows, audit, exclusions = [], [], []
+    rows, audit = [], []
+    exclusions = deepcopy(manifest.get("excluded_mutations", []))
     for kind, group in sorted(campaigns.items()):
         eligible = sorted(key for key in group
                           if baseline[key]["checks"][group[key]["expected_check"]] == 1)
@@ -174,11 +179,16 @@ task is applied in each campaign. Campaigns isolate corruption kinds.
             rows.append({
                 "kind": kind, "requested_rate": rate, "eligible_tasks": len(eligible),
                 "corrupted_tasks": count, "effective_dataset_rate": count / len(tasks),
+                "effective_eligible_rate": count / len(eligible) if eligible else None,
                 "expected_score": expected, "observed_score": observed,
                 "expected_check_vectors_matched": expected_matches,
                 "detected": detected, "detection_rate": detected / count if count else None,
+                "targeted_detected": targeted,
                 "targeted_check_detection_rate": targeted / count if count else None,
                 "false_positive_rate": clean_failed / clean_count if clean_count else None,
+                "clean_tasks": clean_count, "false_positives": clean_failed,
+                "passed_tasks": sum(v["passed"] for v in outcomes.values()),
+                "task_pass_rate": sum(v["passed"] for v in outcomes.values()) / len(tasks),
                 "check_failures": dict(failures),
                 "passed": bool(eligible) and detected == count and targeted == count
                           and expected_matches == count
@@ -195,6 +205,8 @@ task is applied in each campaign. Campaigns isolate corruption kinds.
         "mode": mode, "categories": categories,
         "seed": seed, "task_count": len(tasks), "baseline_score": baseline_total / len(tasks),
         "baseline_results": baseline,
+        "baseline_summary": baseline_summary(baseline, categories),
+        "metadata": metadata(manifest), "clean_labeled_tasks": len(clean_ids),
         "baseline_false_positive_rate": false_positives / len(clean_ids) if clean_ids else None,
         "excluded_mutations": exclusions, "campaigns": rows, "audit": audit,
         "passed": exercised and all(row["passed"] for row in rows)
@@ -279,22 +291,19 @@ def main():
         report = run_experiment(manifest, evaluator, args.rates, args.seed, args.mode)
         report["evaluator"] = args.evaluator or "validation.correctness_checker:reference_evaluator"
         report["input"] = str(args.input) if args.input else "controlled_demo_fixtures"
-        args.output.mkdir(parents=True, exist_ok=True)
-        (args.output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
-        (args.output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
-        rows = [{**row, "check_failures": json.dumps(row["check_failures"], sort_keys=True)}
-                for row in report["campaigns"]]
-        with (args.output / "summary.csv").open("w", newline="") as stream:
-            writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
-            writer.writeheader()
-            writer.writerows(rows)
-        print(f"Baseline: {report['baseline_score']:.1%}; validation: "
-              f"{report['status'].upper()}; report: {args.output / 'report.json'}")
+        from validation.reporting import terminal_summary, write_reports
+        write_reports(report, manifest, args.output)
+        print(terminal_summary(report, args.output))
         return 0 if report["passed"] else (3 if report["status"] == "inconclusive" else 1)
     except Exception as error:
         # Crashes, missing data, and invalid verdicts are experiment errors, not
         # evidence that a corrupted trajectory was successfully detected.
-        parser.exit(2, f"Validation error: {type(error).__name__}: {error}\n")
+        from validation.reporting import write_error
+        try:
+            diagnostic = str(write_error(error, args.output))
+        except OSError:
+            diagnostic = "unavailable (output directory is not writable)"
+        parser.exit(2, f"Validation error: {type(error).__name__}: {error}\nDiagnostics: {diagnostic}\n")
 
 
 if __name__ == "__main__":
