@@ -1,0 +1,3 @@
+domain,task_count,mean_correctness,uncertain_dimensions,violated_dimensions
+banking_accounts_deposits,7,0.8036,11,0
+OVERALL,7,0.8036,11,0

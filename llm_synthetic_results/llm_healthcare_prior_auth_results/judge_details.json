@@ -1,0 +1,426 @@
+[
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W1_TC1",
+    "title": "Standard MRI PA - All Documentation Present, Criteria Met",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The representative diagnosis code is M54.5, but the check_pa_requirements tool documents its diagnosis_code format as XNN.NN. The workflow otherwise has internally consistent milestones and expected outputs; whether the stated format is strict is not specified.",
+        "evidence": [
+          "task.representative_input.diagnosis_code = \"M54.5\"",
+          "tools.domain_tools.check_pa_requirements.args[3].description: \"Format: XNN.NN\"",
+          "python_reference.reference_tool_calls.check_pa_requirements.tool_inputs.diagnosis_code = \"M54.5\""
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The task states that required documentation is available and medical necessity criteria are met; the milestones then require complete documentation, validation, submission, and tracking. The expected approval and associated outputs are consistent with that stated success scenario.",
+        "evidence": [
+          "task.input_conditions: \"all required clinical documentation available\" and \"medical necessity criteria met\"",
+          "task.milestones.steps 3–7",
+          "task.expected_success_outcome"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended flow checks PA requirements before gathering documentation, validates criteria and documentation before submission, then tracks the decision and communicates approval. The task describes no ambiguity, urgency, missing documentation, or denial that would require escalation or another workflow.",
+        "evidence": [
+          "policy.action_plan.guidelines: verify PA requirements first and submit only when criteria and documentation are met",
+          "python_reference.reference_tool_calls: check_pa_requirements precedes gather_clinical_documentation and submit_pa_request",
+          "task.milestones.steps 3–7"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied tools provide a plausible sequence for checking, gathering, validating, preparing, submitting, and tracking the request. However, the documented diagnosis-code format conflicts with the provided M54.5 input, and the tool definitions do not establish whether that format is enforced.",
+        "evidence": [
+          "tools.domain_tools: definitions for check_pa_requirements through track_pa_status",
+          "task.representative_input.diagnosis_code = \"M54.5\"",
+          "tools.domain_tools.check_pa_requirements.args[3].description: \"Format: XNN.NN\""
+        ]
+      }
+    }
+  },
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W1_TC2",
+    "title": "Standard Sleep Study PA - Alternate Documentation Path",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The stated standard service, CPT/diagnosis, alternate-documentation path, milestones, and expected approval are internally aligned.",
+        "evidence": [
+          "task.input_conditions",
+          "task.milestones.steps 2–7",
+          "task.expected_success_outcome"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The approval fields match the intended progression, but the expected validity date (2025-01-15) is earlier than the supplied current date (2026-11-11). With no submission date or indication that this is a historical case, whether that validity date is appropriate cannot be verified.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs.valid_through",
+          "task.milestones.step 7"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference path checks PA requirements first, obtains criteria, gathers required documents, validates them, and then submits and tracks the request. The policy also requires provider communication, but the supplied tools do not include a notification action, and the reference's SUCCESS message alone does not establish that notification occurred.",
+        "evidence": [
+          "policy.action_plan.guidelines",
+          "policy.success_criteria",
+          "python_reference.reference_tool_calls",
+          "tools.system_tools.SUCCESS",
+          "tools.domain_tools"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied domain tools support the requirement-check, criteria, documentation, validation, preparation, submission, and tracking sequence. However, no supplied tool documents how to notify the provider, so the complete milestone-7 outcome is not established as reachable through the available tools.",
+        "evidence": [
+          "tools.domain_tools.check_pa_requirements",
+          "tools.domain_tools.retrieve_medical_necessity_criteria",
+          "tools.domain_tools.gather_clinical_documentation",
+          "tools.domain_tools.validate_clinical_criteria",
+          "tools.domain_tools.prepare_pa_submission",
+          "tools.domain_tools.submit_pa_request",
+          "tools.domain_tools.track_pa_status",
+          "task.milestones.step 7"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W2_TC1",
+    "title": "Documentation Completion After Initial EHR Deficiency",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The workflow-selection rules overlap: CPT 72148 matches the W1 condition, while additional_docs_needed=true matches W2, and no precedence is specified. The diagnosis code also conflicts with the check_pa_requirements format XNN.NN: the input is M54.5.",
+        "evidence": [
+          "policy.action_plan.workflow_selection: CPT 72148 routes to W1; additional_docs_needed=true routes to W2",
+          "representative_input.diagnosis_code: M54.5",
+          "tools.domain_tools.check_pa_requirements diagnosis_code format: XNN.NN"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The approval result is consistent with the stated objective and milestones, but the reference calls provide no returned validation, submission, or tracking results to verify that criteria were met or that the listed authorization details followed. The expected approval is asserted in the final SUCCESS data rather than demonstrated by tool outputs.",
+        "evidence": [
+          "milestones steps 4–6",
+          "expected_success_outcome",
+          "python_reference.reference_tool_calls: validate_clinical_criteria, submit_pa_request, and track_pa_status calls have no recorded returns"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended sequence checks PA requirements, requests and waits for missing documentation, validates criteria after the documents arrive, and only then prepares, submits, tracks, and communicates the decision. That matches the policy’s documentation, submission, and notification requirements.",
+        "evidence": [
+          "policy.action_plan.guidelines: verify requirements and submit only when criteria and documentation are addressed",
+          "policy.action_plan.failure_points: request missing documentation and pause submission until received",
+          "milestones steps 1–6"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The listed tools provide a plausible path through documentation retrieval, validation, submission, and status tracking. However, the input diagnosis code does not match the documented format for the requirements-check tool, and no tool returns are supplied to establish that the sequence actually succeeds.",
+        "evidence": [
+          "available_tool_definitions: check_pa_requirements, gather_clinical_documentation, validate_clinical_criteria, prepare_pa_submission, submit_pa_request, and track_pa_status",
+          "representative_input.diagnosis_code: M54.5",
+          "check_pa_requirements diagnosis_code format: XNN.NN",
+          "python_reference.reference_tool_calls: calls are listed without returned results"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W3_TC1",
+    "title": "Specialty Drug PA - High-Cost Medication, All Criteria Met",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.375,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The input conditions, specialty-drug milestones, and approval outcome are internally aligned; no contradictory requirement is stated.",
+        "evidence": [
+          "task.input_conditions",
+          "task.milestones",
+          "task.expected_success_outcome"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The approval, authorization number, and reference ID match the stated expected result, but the final milestone also requires provider notification, which the reference calls do not demonstrate.",
+        "evidence": [
+          "task.milestones[step=7]",
+          "task.expected_success_outcome.key_outputs",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference workflow checks requirements, gathers and validates documentation, submits, and tracks the PA, but it does not perform the policy-required communication of the decision to the provider.",
+        "evidence": [
+          "policy.action_plan.success_criteria",
+          "task.milestones[step=7]",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.0,
+        "explanation": "The supplied tools plausibly support the PA checks through status tracking, but none is for notifying the provider; SUCCESS signals a result and does not document provider notification.",
+        "evidence": [
+          "tools.domain_tools",
+          "tools.system_tools.SUCCESS",
+          "task.milestones[step=7]"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W4_TC1",
+    "title": "Appeal After Initial PA Denial - Additional Evidence Provided",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The appeal sequence is generally coherent, but the reference identifiers used in the milestones do not match the documented reference format for status tracking.",
+        "evidence": [
+          "track_pa_status documents reference_id format as PA-XXXXXX",
+          "Milestones use PA-445641-J0135 and APPEAL-223344 as tracking references"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The mocked appeal tracking result supports the expected approval and its listed outputs. However, the final milestone requires provider notification, which is neither represented in the expected result nor demonstrated by the reference calls.",
+        "evidence": [
+          "Milestone 4 and the appeal track_pa_status mock return approved status and AUTH-991122",
+          "Milestone 5 expects the provider to be notified",
+          "Reference tool calls contain no provider-notification result"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The appeal is supported by additional documentation, consistent with the guideline to initiate appeals when additional evidence is available. But the stated guideline to verify PA requirements before gathering documentation is not demonstrated for the supplemental-document gathering step.",
+        "evidence": [
+          "Guideline: “Always verify PA requirements before gathering documentation”",
+          "Reference calls gather_clinical_documentation without a preceding check_pa_requirements call",
+          "Guideline: “Initiate appeals only when additional evidence is available or denial appears incorrect”"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied tools plausibly support obtaining denial status, gathering evidence, submitting an appeal, and tracking its result. The complete intended workflow is not demonstrated as feasible because no supplied tool performs the required provider notification, and the tracking references conflict with the documented identifier format.",
+        "evidence": [
+          "Available domain tools include gather_clinical_documentation, appeal_pa_denial, and track_pa_status, but no provider-notification tool",
+          "track_pa_status documents reference_id format as PA-XXXXXX; the reference calls use PA-445641-J0135 and APPEAL-223344"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W5_TC1",
+    "title": "DME PA - Home Oxygen, All Clinical Criteria Met",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task identifies the workflow as W5, but the policy’s workflow-selection rule routes non-urgent E1390 requests to W1. This creates ambiguity about which workflow the case should follow.",
+        "evidence": [
+          "task.workflow: \"W5 - Durable Medical Equipment PA Workflow\"",
+          "policy.workflow_selection: E1390 with input.urgent != true routes to W1"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The stated clinical criteria and complete documentation support proceeding to submission, but the provided evidence does not establish that the payer actually approved the request or returned the specified authorization details. The reference calls show tracking was requested, not its result.",
+        "evidence": [
+          "task.input_conditions: \"all required DME documentation present\" and \"criteria met\"",
+          "milestones step 6 expects approved status and AUTH-556677",
+          "reference_tool_calls: track_pa_status inputs are given, but no returned status is shown"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The described sequence checks PA requirements before gathering documentation, validates criteria, and submits with documentation, consistent with the stated guidelines. However, the policy routes non-urgent E1390 requests to W1 while this task is designated W5, leaving compliance with the required workflow selection unclear.",
+        "evidence": [
+          "policy.guidelines: verify PA requirements first and submit only when criteria and documentation are met",
+          "python_reference.reference_tool_calls: requirement check precedes documentation gathering and submission",
+          "policy.workflow_selection: E1390 with input.urgent != true routes to W1",
+          "task.workflow: W5"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools provide a plausible path from checking requirements through criteria validation, preparation, submission, and status tracking. This establishes plausibility, not that the calls were executed or that approval is assured.",
+        "evidence": [
+          "tools.domain_tools: check_pa_requirements, retrieve_medical_necessity_criteria, gather_clinical_documentation, validate_clinical_criteria, prepare_pa_submission, submit_pa_request, and track_pa_status are available",
+          "milestones steps 1–6 follow those tool capabilities"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W6_TC1",
+    "title": "Urgent Cardiac Cath PA - Expedited Approval",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The urgent input routes to W6, and the milestones progress coherently from requirement check through expedited submission, tracking, and provider notification. The reference uses the permitted phone channel and the expected reference/authentication identifiers match the documented formats.",
+        "evidence": [
+          "workflow_selection routes service_type = \"urgent\" to W6",
+          "Milestones 1–6",
+          "submit_pa_request allows delivery_method \"phone\"",
+          "track_pa_status requires reference format PA-XXXXXX"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The stated inputs and milestones are consistent with the target approval, but the reference provides no tool return values demonstrating that the request was submitted or that the payer approved it. The approval details appear as expected values and in the final SUCCESS call, not as a demonstrated payer decision.",
+        "evidence": [
+          "expected_success_outcome",
+          "Milestones 4–6",
+          "python_reference.reference_tool_calls contains inputs but no outputs for submit_pa_request or track_pa_status"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference checks PA requirements before gathering documentation and uses an expedited channel, consistent with policy. However, it skips retrieving payer criteria and validating clinical criteria before submission; the input asserts criteria are met, but the workflow does not show how that assertion was verified.",
+        "evidence": [
+          "policy.action_plan.guidelines: verify PA requirements before gathering documentation",
+          "policy.action_plan.guidelines: submit only when required criteria and documentation are met or missing data is addressed",
+          "python_reference.reference_tool_calls omits retrieve_medical_necessity_criteria and validate_clinical_criteria",
+          "task.input_conditions asserts \"criteria met\" and ER notes and labs present"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The available tools support the listed sequence: check requirements, gather documentation, prepare the request, submit by phone, and track using the returned reference ID. The required identifiers and phone delivery method are compatible with the tool definitions.",
+        "evidence": [
+          "available_tool_definitions for check_pa_requirements, gather_clinical_documentation, prepare_pa_submission, submit_pa_request, and track_pa_status",
+          "submit_pa_request permits \"phone\" and returns a reference_id",
+          "track_pa_status accepts a reference_id and payer_id"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W7_TC1",
+    "title": "Bariatric Surgery PA - All Multi-Step Criteria Met",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The W7 task and milestones are coherent, but the workflow-selection rules overlap for CPT 43644: one routes it to W1 and another to W7, with no precedence specified.",
+        "evidence": [
+          "policy.workflow_selection: CPT list containing 43644 routes to W1",
+          "policy.workflow_selection: CPT 43644 routes to W7"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The approval outcome matches the stated criteria-met condition and milestone 7, but the reference calls show inputs rather than tracking-tool outputs, so the approval result is not independently evidenced. The specified valid-through date is also earlier than the supplied current date, leaving its usefulness for this request unclear.",
+        "evidence": [
+          "task.input_conditions: all required multi-step documentation present; criteria met",
+          "task.milestones[7].expected_state: pa_status approved; auth_number AUTH-991122",
+          "task.expected_success_outcome.key_outputs.valid_through: 2025-01-15",
+          "python_reference.reference_tool_calls: track_pa_status and SUCCESS are listed as calls, without tool return data"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference workflow checks PA requirements before gathering documentation and submits only after validation, consistent with the guidelines. However, policy routing matches both W1 and W7 for this CPT, and the policy does not resolve which route governs.",
+        "evidence": [
+          "policy.guidelines: verify PA requirements before gathering documentation; submit only when criteria and documentation are met",
+          "python_reference.reference_tool_calls: check, retrieve criteria, gather, validate, prepare, submit, and track",
+          "policy.workflow_selection: overlapping W1 and W7 conditions for CPT 43644"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied tools plausibly support checking requirements, gathering and validating records, preparing a submission, submitting it, and tracking status. But the reference preparation call supplies attachment strings where the tool definition requires document objects, and no tool explicitly sends a provider notification.",
+        "evidence": [
+          "tools.domain_tools.prepare_pa_submission: attachments are document objects",
+          "python_reference.reference_tool_calls: prepare_pa_submission attachments are strings",
+          "task.milestones[7].description: provider notified",
+          "tools.domain_tools: no provider-notification tool is defined"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "healthcare_prior_authorization",
+    "task_id": "HealthcarePA_W8_TC1",
+    "title": "Status Check for Approved PA",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The approval status, milestones, and expected outputs agree. However, representative_input omits reference_id, even though tracking requires it; the identifier appears only in the expected outcome and reference call.",
+        "evidence": [
+          "task.representative_input",
+          "task.input_conditions",
+          "tools.domain_tools.track_pa_status signature",
+          "task.expected_success_outcome.key_outputs.reference_id"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected status and details match the supplied mock response. But valid_through is 2024-09-10, before the stated current date, and the evidence does not clarify whether the expected approved status is historical or current; the tool also allows an expired status.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "python_reference.reference_tool_calls[0].mock_response",
+          "tools.domain_tools.track_pa_status returns status enum",
+          "Current date: 2026-11-11"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "Routing a status check to W8 is explicitly specified, and the intended flow tracks the PA and communicates the result. The submission-related checks do not apply to this existing-PA status follow-up.",
+        "evidence": [
+          "policy.action_plan.workflow_selection: pa_status_check routes to W8",
+          "policy.action_plan.success_criteria: status tracked and communicated; provider notified",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied status tool accepts the PA reference and payer ID, both of which are available in the task data, and its mock response supplies the required approval details. SUCCESS can then communicate those details.",
+        "evidence": [
+          "tools.domain_tools.track_pa_status signature",
+          "task.expected_success_outcome.key_outputs.reference_id",
+          "task.representative_input.payer_id",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  }
+]

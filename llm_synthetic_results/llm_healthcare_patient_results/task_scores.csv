@@ -1,0 +1,10 @@
+domain,task_id,task_score,task_consistency,expected_outcome_validity,policy_compliance,workflow_feasibility,uncertain_count
+healthcare_patient_onboarding,HealthcareOnboarding_W1_TC1,0.5,0.5,0.5,0.5,0.5,4
+healthcare_patient_onboarding,HealthcareOnboarding_W1_TC2,0.5,0.5,0.5,0.5,0.5,4
+healthcare_patient_onboarding,HealthcareOnboarding_W2_TC1,0.5,0.5,0.5,0.5,0.5,4
+healthcare_patient_onboarding,HealthcareOnboarding_W3_TC1,0.5,0.5,0.5,0.5,0.5,4
+healthcare_patient_onboarding,HealthcareOnboarding_W4_TC1,0.5,0.5,0.5,0.5,0.5,4
+healthcare_patient_onboarding,HealthcareOnboarding_W5_TC1,0.5,0.5,1.0,0.5,0.0,2
+healthcare_patient_onboarding,HealthcareOnboarding_W6_TC1,0.5,1.0,0.0,0.0,1.0,0
+healthcare_patient_onboarding,HealthcareOnboarding_W7_TC1,0.5,0.5,0.5,0.5,0.5,4
+healthcare_patient_onboarding,HealthcareOnboarding_W8_TC1,0.5,0.5,0.5,0.5,0.5,4

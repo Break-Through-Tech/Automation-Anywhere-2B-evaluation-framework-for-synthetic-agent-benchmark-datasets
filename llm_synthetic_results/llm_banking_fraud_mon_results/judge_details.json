@@ -1,0 +1,619 @@
+[
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W1_TC1",
+    "title": "Low-Risk Card Present Transaction with Typical Device",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The low-risk inputs, milestone states, and expected approval are mutually consistent: the expected score of 15 is below the policy’s auto-approve threshold of 30.",
+        "evidence": [
+          "task.input_conditions: fraud_risk_score = 15 and no blacklist hits",
+          "task.milestones: device_risk_score = 10, no VPN/TOR, and fraud_risk_score = 15 with no risk factors",
+          "policy.guidelines: scores <30 are auto-approved"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Given the stated low score and absence of anomalies or blacklist hits, the expected approve action and no customer notification follow the low-risk workflow.",
+        "evidence": [
+          "task.expected_success_outcome: auto_approved, recommended_action = approve, customer_notification_status = not_required",
+          "policy.workflow_selection: fraud_risk_score <30 routes to W1 with no escalation or customer contact"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference calls pass false fraud-database hits to scoring but do not show a call to the fraud-database check. Because the task also states there are no blacklist hits, the evidence does not establish whether that information was already available or whether the required enrichment was skipped.",
+        "evidence": [
+          "policy.guidelines: always enrich alerts with data from all relevant systems before scoring",
+          "policy.action_plan.tools_and_resources: cross_reference_fraud_databases checks fraud lists and blacklists",
+          "python_reference.reference_tool_calls: calculate_fraud_risk_score includes fraud_database_hits, but no cross_reference_fraud_databases call is listed",
+          "task.input_conditions: No blacklist hits"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The available tools support retrieving the transaction, customer, history, and device data, checking fraud databases, calculating the score, and signaling success with the expected result. The reference call sequence is plausible, though it does not demonstrate actual execution.",
+        "evidence": [
+          "available_tool_names: retrieve_transaction_details, get_customer_profile, analyze_transaction_history, check_device_intelligence, cross_reference_fraud_databases, and calculate_fraud_risk_score are available",
+          "tools.system_tools: SUCCESS accepts result_data",
+          "python_reference.reference_tool_calls: includes the enrichment and scoring calls followed by SUCCESS"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W1_TC2",
+    "title": "Low-Risk Card Not Present Transaction with Recent Customer Travel",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The low-risk inputs and milestones are consistent with the expected approval: travel matches Miami, device signals are normal, and the expected score of 25 is below the stated auto-approve threshold.",
+        "evidence": [
+          "task.input_conditions",
+          "task.milestones",
+          "policy.action_plan.guidelines",
+          "policy.action_plan.workflow_selection"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Given the stated score of 25, auto-approval with no customer contact matches the policy’s <30 routing rule and the task’s low-risk objective.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "policy.action_plan.guidelines",
+          "policy.action_plan.workflow_selection"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference workflow scores the alert without first checking the fraud databases, despite the policy requiring enrichment from all relevant systems and listing fraud-database checks as an available resource. The reference call to calculate_fraud_risk_score also omits the optional fraud_database_hits input.",
+        "evidence": [
+          "policy.action_plan.guidelines: “Always enrich alerts with data from all relevant systems before scoring.”",
+          "policy.action_plan.tools_and_resources: cross_reference_fraud_databases",
+          "python_reference.reference_tool_calls: calculate_fraud_risk_score is called without a prior cross_reference_fraud_databases call"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.0,
+        "explanation": "The supplied tools can gather data and calculate a score, but none performs or records an approval or alert closure. SUCCESS only signals a successful result, so it cannot by itself carry out the expected auto-approval.",
+        "evidence": [
+          "tools.domain_tools: available tools include auto_decline_transaction but no approval or case-closure tool",
+          "tools.system_tools.SUCCESS: purpose is “Signal successful operation/result”",
+          "python_reference.reference_tool_calls: final call is SUCCESS with case_status set to auto_approved"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W2_TC1",
+    "title": "Obvious Fraud - Blacklisted Merchant, Card Not Present",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.375,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The risk-score, alert type, blacklist hit, and auto-decline milestones align. However, milestone 4 says to block the card/account, while its expected state and the final outputs only specify transaction block status, leaving the required scope of blocking unclear.",
+        "evidence": [
+          "task.milestones[4].description and expected_state",
+          "task.expected_success_outcome.key_outputs",
+          "auto_decline_transaction returns a transaction-level block_status"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected score of 99 exceeds the policy's >95 auto-decline threshold, and the reference success payload reports auto-declined status, decline recommendation, and customer notification sent.",
+        "evidence": [
+          "task.input_conditions: fraud_risk_score = 99 and blacklist hit",
+          "policy.action_plan.workflow_selection: score >95 selects W2 auto-decline and notification",
+          "python_reference.reference_tool_calls: auto_decline_transaction followed by SUCCESS with matching key outputs"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference sequence enriches the alert before scoring and follows W2's auto-decline threshold, but it does not perform the policy-required immediate card/account block. The supplied auto-decline tool blocks transactions, and no supplied tool blocks a card or account.",
+        "evidence": [
+          "policy.action_plan.workflow_selection: W2 requires blocking the account or card immediately and notifying the customer",
+          "python_reference.reference_tool_calls: auto_decline_transaction is the only blocking action",
+          "tools.domain_tools.auto_decline_transaction: purpose is to block transactions; no card/account-blocking tool is defined"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.0,
+        "explanation": "The supplied tools plausibly support enrichment, scoring, transaction decline, and notification, but they cannot fulfill milestone 4's stated card/account-blocking action. No available tool definition provides that capability.",
+        "evidence": [
+          "task.milestones[4].description: 'block card/account'",
+          "tools.available_tool_names",
+          "tools.domain_tools.auto_decline_transaction: blocks the transaction, not the card/account"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W2_TC2",
+    "title": "Obvious Fraud - Account Takeover Detected on ATM Transaction",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task selects W2 for a score of 98, consistent with the >95 threshold, but the same account_takeover alert also matches W5, which requires immediate account blocking and analyst escalation. The task does not specify how to resolve these overlapping workflow rules.",
+        "evidence": [
+          "Policy.workflow_selection: fraud_risk_score > 95 selects W2; alert_type == 'account_takeover' selects W5.",
+          "task.expected_success_outcome and milestones specify auto-decline/blocking but no analyst escalation."
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "Auto-decline and customer notification fit W2 for a score of 98, but the expected result does not include W5's analyst escalation for an account-takeover alert. Thus the expected outcome is plausible under one matching rule but incomplete under another.",
+        "evidence": [
+          "Policy.workflow_selection: W2 requires auto-decline, block account or card, and notify customer for scores >95.",
+          "Policy.workflow_selection: W5 requires immediate account-access blocking and analyst escalation for account_takeover alerts.",
+          "task.expected_success_outcome.key_outputs omits analyst escalation."
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference workflow follows the high-score W2 auto-decline path, but does not perform the analyst escalation required by the overlapping W5 account-takeover rule. The reference also scores before cross-referencing fraud databases despite the enrichment-before-scoring guideline; however, the task does not establish that every available system is relevant in this case.",
+        "evidence": [
+          "Policy.workflow_selection: account_takeover selects W5, which calls for analyst escalation.",
+          "Policy.guidelines: enrich alerts with data from all relevant systems before scoring.",
+          "python_reference.reference_tool_calls: calculate_fraud_risk_score occurs before cross_reference_fraud_databases; the reference then auto-declines without route_to_analyst."
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied tools support retrieval, enrichment, scoring, and transaction auto-decline, so the W2 result is plausibly reachable. But no listed tool blocks account access, as milestone 4 requires; moreover, route_to_analyst is defined under domain_tools but absent from available_tool_names, leaving the W5 escalation path's availability unclear.",
+        "evidence": [
+          "task.milestones[4].expected_state requires block_status = blocked.",
+          "tools.domain_tools.auto_decline_transaction blocks transactions and returns transaction block status; no account-access blocking tool is listed.",
+          "tools.domain_tools includes route_to_analyst, but tools.available_tool_names omits it."
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W3_TC1",
+    "title": "High-Risk Online Transaction with Device Mismatch",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The score, routing threshold, and escalation milestones agree, but the expected investigation package is only a transaction ID, risk factors, and summary, while the route tool documents a package with transaction, customer, device, history, risk score, and notes.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs.investigation_package",
+          "tools.domain_tools.route_to_analyst.purpose and investigation_package description",
+          "policy.success_criteria: all escalated cases include complete investigation packages"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "Escalation is appropriate for score 85 under W3, and the proposed action is an allowed route action. However, the expected package omits information required for the documented full investigation package, so the stated success result is not fully supported.",
+        "evidence": [
+          "policy.workflow_selection: 70 < fraud_risk_score <= 95 selects W3",
+          "task.expected_success_outcome.key_outputs.investigation_package",
+          "tools.domain_tools.route_to_analyst: investigation package includes transaction, customer, device, history, risk score, and notes"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference calls enrich the alert and route it for analyst review as required for a score of 85, but the package passed to routing does not meet the stated requirement for a complete investigation package.",
+        "evidence": [
+          "policy.guidelines: enrich alerts with all relevant systems before scoring",
+          "policy.workflow_selection: score 85 selects W3",
+          "python_reference.reference_tool_calls: route_to_analyst investigation_package contains only transaction_id, risk_factors, and summary",
+          "policy.success_criteria: all escalated cases include complete investigation packages"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The available tools support a plausible sequence to retrieve transaction, customer, history, device, and database data, calculate the score, compile a complete package, and route the case. The reference call sequence demonstrates the enrichment and routing path, though its submitted package is incomplete.",
+        "evidence": [
+          "tools.domain_tools: retrieve_transaction_details, get_customer_profile, analyze_transaction_history, check_device_intelligence, cross_reference_fraud_databases, calculate_fraud_risk_score, and route_to_analyst",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W3_TC2",
+    "title": "High-Risk Card Present Transaction with Location Anomaly",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The location-anomaly narrative is not fully reconciled with milestone 1, which lists NV among the states visited, while the expected investigation summary calls NV a new location. It is unclear whether that state list includes the flagged transaction or only prior history.",
+        "evidence": [
+          "input_conditions: “Location anomaly detected”",
+          "milestones[0].expected_state.states_visited: [\"CA\", \"NV\"]",
+          "expected_success_outcome.key_outputs.investigation_package.summary: “High-risk in-person transaction in new location for customer.”"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The score of 90 falls in W3’s escalation range, and the expected normal-level analyst routing is consistent with the route tool. However, the expected investigation package contains only three fields, so the evidence does not establish that it meets the stated requirement for a complete package.",
+        "evidence": [
+          "policy.workflow_selection: W3 applies when 70 < fraud_risk_score <= 95",
+          "milestones[3].expected_state: case_id CASE-60006 and escalation_level normal",
+          "expected_success_outcome.key_outputs.investigation_package",
+          "policy.success_criteria: “All escalated cases include complete investigation packages and recommended actions.”"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference workflow enriches the alert with transaction, customer, history, device, and fraud-database data before scoring, then routes it to an analyst. But the package actually supplied to the routing tool is only transaction_id, risk_factors, and summary, leaving compliance with the complete-package requirement unverified.",
+        "evidence": [
+          "policy.guidelines: “Always enrich alerts with data from all relevant systems before scoring.”",
+          "python_reference.reference_tool_calls: enrichment and database lookup precede calculate_fraud_risk_score and route_to_analyst",
+          "route_to_analyst tool purpose: package includes transaction, customer, device, history, risk score, and notes",
+          "policy.success_criteria: “All escalated cases include complete investigation packages and recommended actions.”"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools support a plausible sequence to retrieve the necessary data, score the alert, and route it with the allowed contact_customer recommendation. The reference calls demonstrate that the required inputs can be passed through those tools; this establishes plausibility, not successful execution.",
+        "evidence": [
+          "available_tool_names: retrieve_transaction_details, get_customer_profile, analyze_transaction_history, check_device_intelligence, cross_reference_fraud_databases, calculate_fraud_risk_score, route_to_analyst",
+          "route_to_analyst tool definition: contact_customer is an allowed recommended_action",
+          "python_reference.reference_tool_calls: enrichment, scoring, and analyst-routing sequence"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W4_TC1",
+    "title": "Moderate-Risk Transaction, Customer Verifies via SMS",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The score of 65 falls in the W4 range, and the SMS method, successful customer response, and verification milestone agree with the stated success path.",
+        "evidence": [
+          "task.input_conditions",
+          "policy.action_plan.workflow_selection: 50 <= fraud_risk_score <= 70",
+          "task.milestones[4]",
+          "task.success_path_differences"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected score and verified SMS response match the task conditions, but the policy does not specify that successful verification results in approval; W4 describes verification before escalation. Thus the expected approval is plausible but not established by the policy.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "policy.action_plan.workflow_selection: W4",
+          "policy.action_plan.failure_points"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference sequence scores the case without first calling the listed fraud-database check, despite the requirement to enrich alerts from all relevant systems before scoring.",
+        "evidence": [
+          "policy.action_plan.guidelines: “Always enrich alerts with data from all relevant systems before scoring.”",
+          "policy.action_plan.tools_and_resources: cross_reference_fraud_databases",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied tools plausibly support enrichment, scoring, and SMS verification, but none is defined to approve a transaction or update case status; SUCCESS can report a result but is only described as signaling success.",
+        "evidence": [
+          "tools.domain_tools",
+          "tools.system_tools: SUCCESS",
+          "task.expected_success_outcome"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W4_TC2",
+    "title": "Moderate-Risk Transaction, Customer Verifies via Email",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The stated score of 55 falls in W4’s 50–70 band, and the email preference, successful customer response, and verification milestone agree with the task’s stated approval path.",
+        "evidence": [
+          "task.input_conditions",
+          "task.milestones[3].expected_state",
+          "policy.action_plan.workflow_selection[3]"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Given the task’s stated successful verification, a verified case and an approve recommendation are consistent with the W4 verification path and the objective of minimizing false positives.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "task.success_path_differences",
+          "task.input_conditions",
+          "policy.action_plan.guidelines"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "W4 requires verification in this score band, which the reference path requests; however, policy says to enrich with all relevant systems before scoring, while the reference calls omit the available fraud-database check. The policy does not clearly state whether a successful verification permits direct approval without analyst escalation, so full compliance is uncertain.",
+        "evidence": [
+          "policy.action_plan.guidelines[0]",
+          "policy.action_plan.workflow_selection[3]",
+          "policy.action_plan.tools_and_resources: cross_reference_fraud_databases",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied retrieval, scoring, and verification tools can plausibly produce the expected verified status and approve recommendation. But the reference success message also says the transaction was approved and the alert closed, and no supplied domain tool performs either action; it is unclear whether this is only a reported result or an intended real-world action.",
+        "evidence": [
+          "tools.domain_tools",
+          "tools.system_tools: SUCCESS",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W5_TC1",
+    "title": "Account Takeover - Immediate Block and Escalation",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.25,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The account-takeover input, urgent block-and-escalate objective, and listed milestones are internally aligned. The separate risk-score threshold also does not conflict with W5, which is selected by alert type.",
+        "evidence": [
+          "task.input_conditions",
+          "task.milestones",
+          "policy.workflow_selection: alert_type == 'account_takeover' selects W5"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.0,
+        "explanation": "The expected result claims account access was blocked, but the only blocking tool, auto_decline_transaction, is documented as blocking a transaction, not account access. The analyst package in the reference calls also lacks the customer, device, history, and score details called for in the tool definition and success criteria.",
+        "evidence": [
+          "task.expected_success_outcome.final_status",
+          "task.milestones[3]",
+          "tools.domain_tools.auto_decline_transaction.purpose",
+          "tools.domain_tools.route_to_analyst.purpose",
+          "policy.success_criteria"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference workflow does not establish that account access was blocked, as W5 requires, and its analyst package is not complete under the documented package purpose and success criteria. The reference calls also do not include fraud-database enrichment before scoring, so compliance with the requirement to enrich from all relevant systems is not established.",
+        "evidence": [
+          "policy.workflow_selection: W5 logic",
+          "policy.guidelines: enrich alerts with data from all relevant systems before scoring",
+          "policy.success_criteria: all escalated cases include complete investigation packages",
+          "python_reference.reference_tool_calls: calculate_fraud_risk_score called without fraud_database_hits",
+          "python_reference.reference_tool_calls: route_to_analyst package contains only transaction_id, risk_factors, and summary"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.0,
+        "explanation": "The listed tools plausibly support enrichment, scoring, transaction blocking, and analyst routing, but no supplied tool blocks account access. Therefore the intended W5 result of immediately blocking account access cannot be reached using the documented tools under the stated initial conditions.",
+        "evidence": [
+          "tools.domain_tools.auto_decline_transaction.purpose",
+          "tools.domain_tools: available blocking tool is auto_decline_transaction",
+          "policy.workflow_selection: W5 requires immediately blocking account access"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W6_TC1",
+    "title": "Velocity Fraud - Rapid Transactions Across States",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The milestones and expected outcome consistently describe an escalation for the stated velocity-fraud alert: the score is 80, which falls in the policy’s escalation range, and the final status is escalated.",
+        "evidence": [
+          "task.input_conditions",
+          "task.milestones",
+          "task.expected_success_outcome",
+          "task.policy.action_plan.guidelines",
+          "task.policy.action_plan.workflow_selection"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.0,
+        "explanation": "The expected investigation package contains only a transaction ID, risk factors, and summary, rather than the full context required for an escalated case. The reference route call uses this same incomplete package, so the expected result does not meet the stated success criterion.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs.investigation_package",
+          "task.policy.action_plan.success_criteria",
+          "tools.domain_tools.route_to_analyst.purpose",
+          "python_reference.reference_tool_calls[4]"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference flow scores before cross-referencing fraud databases, despite the requirement to enrich with all relevant systems before scoring. It also routes an incomplete investigation package, contrary to the requirement that escalated cases include complete packages.",
+        "evidence": [
+          "task.policy.action_plan.guidelines",
+          "task.policy.action_plan.success_criteria",
+          "python_reference.reference_tool_calls[2]",
+          "python_reference.reference_tool_calls[3]",
+          "python_reference.reference_tool_calls[4]",
+          "tools.domain_tools.route_to_analyst.purpose"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools plausibly support a compliant route to the intended escalation: relevant data can be retrieved and cross-referenced, a score calculated, and the case routed with the allowed block_card recommendation. The reference calls do not demonstrate every required enrichment step, but the tools for those steps are available.",
+        "evidence": [
+          "tools.domain_tools",
+          "task.policy.action_plan.tools_and_resources",
+          "task.expected_success_outcome.key_outputs"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W7_TC1",
+    "title": "Synthetic Identity - New Account Device and Identity Anomalies",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.375,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The expected score of 92 falls within the policy’s analyst-escalation band, and the synthetic-identity workflow also calls for escalation. The milestones and expected final status do not directly contradict one another.",
+        "evidence": [
+          "policy.guidelines: scores 30–95 escalate or verify",
+          "policy.workflow_selection: scores 70–95 route to W3; synthetic_identity routes to W7 for analyst escalation",
+          "task.milestones: step 4 expects escalation_level normal"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.0,
+        "explanation": "The expected investigation package contains only a transaction ID, risk factors, and summary, so it is not the complete package required for escalated cases. The tool definition specifies transaction, customer, device, history, risk score, and notes as package contents.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs.investigation_package",
+          "policy.success_criteria: all escalated cases include complete investigation packages and recommended actions",
+          "tools.domain_tools.route_to_analyst: investigation package includes transaction, customer, device, history, risk score, and notes"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference calls calculate the risk score without calls to retrieve_transaction_details or analyze_transaction_history, despite the policy requiring enrichment from all relevant systems before scoring. Supplying those records inline to the scoring call does not demonstrate that the required systems were queried.",
+        "evidence": [
+          "policy.guidelines: always enrich alerts with data from all relevant systems before scoring",
+          "python_reference.reference_tool_calls: no retrieve_transaction_details or analyze_transaction_history calls before calculate_fraud_risk_score"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied tools support a plausible path to retrieve transaction, customer, history, device, and fraud data, calculate a score, and route the case. However, no tool is explicitly defined for checking an identity database as milestone 2 requires; cross_reference_fraud_databases includes a phone fraud list, but the context does not establish that this satisfies that milestone.",
+        "evidence": [
+          "task.milestones: step 2 requires device intelligence and identity databases to be checked",
+          "tools.domain_tools: retrieve_transaction_details, get_customer_profile, analyze_transaction_history, check_device_intelligence, cross_reference_fraud_databases, calculate_fraud_risk_score, and route_to_analyst are available",
+          "tools.domain_tools.cross_reference_fraud_databases: returns phone_fraud_list, but is described as checking fraud blacklists and attack lists"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W8_TC1",
+    "title": "Friendly Fraud - Chargeback Investigation, Evidence Provided",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The stated conditions and milestones agree with the expected escalation: the case is friendly fraud, evidence is provided, and the milestones progress from enrichment to analyst routing. The risk score of 10 and normal escalation level are also consistent with the listed expected states.",
+        "evidence": [
+          "task.input_conditions",
+          "task.representative_input.additional_context",
+          "task.milestones",
+          "task.expected_success_outcome"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.0,
+        "explanation": "The expected investigation package is not complete as required for escalated cases: it includes only a transaction ID, risk factors, and summary, omitting customer, device, history, and risk-score context. This conflicts with the route tool’s package description and the policy success criterion for complete investigation packages.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs.investigation_package",
+          "tools.domain_tools.route_to_analyst.purpose",
+          "policy.success_criteria"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The intended escalation at score 10 conflicts with the general policy threshold that scores below 30 are auto-approved without escalation, while the friendly-fraud workflow separately calls for analyst review; no precedence between these rules is specified. The evidence does not resolve that conflict.",
+        "evidence": [
+          "policy.guidelines[1]",
+          "policy.workflow_selection[0]",
+          "policy.workflow_selection[7]",
+          "task.expected_success_outcome"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible tool sequence exists: retrieve transaction and customer data, analyze history and device intelligence, calculate the score, then route the alert with deny_chargeback. The route tool permits that action, and the scoring tool’s fraud-database input is optional.",
+        "evidence": [
+          "python_reference.reference_tool_calls",
+          "tools.domain_tools.calculate_fraud_risk_score",
+          "tools.domain_tools.route_to_analyst"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_fraud_monitoring",
+    "task_id": "BankingFraud_W9_TC1",
+    "title": "APP Fraud - Large Wire Transfer Held and Escalated",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The expected result describes a transfer held for review, while milestone 5 expects `block_status: blocked`, a state associated with the separate auto-decline tool. The data does not clarify whether “blocked” is intended to mean “held,” leaving the expected state ambiguous.",
+        "evidence": [
+          "expected_success_outcome.key_outputs.recommended_action: `hold_transfer`",
+          "milestones[5].expected_state: `block_status: blocked`",
+          "auto_decline_transaction purpose: block transactions identified as obvious fraud"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "A score of 93 supports escalation under the stated thresholds, and the W9 workflow calls for holding a wire and escalating. However, the expected milestone’s blocked status is not shown to be equivalent to a hold, so the complete expected progression is not verifiable.",
+        "evidence": [
+          "policy.guidelines: scores 30–95 escalate or verify; scores >95 auto-decline",
+          "policy.workflow_selection: `authorized_push_payment` uses W9 to hold wire and escalate",
+          "milestones[4-6]: score 93, blocked status, urgent escalation"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference calls `auto_decline_transaction` even though the reported risk score is 93, outside the policy’s stated >95 auto-decline threshold; this conflicts with W9’s hold-and-escalate path. It also scores without calling `check_device_intelligence`, although the guideline requires enrichment from all relevant systems and the scoring tool requires device intelligence; whether the supplied data was retrieved elsewhere is not established.",
+        "evidence": [
+          "python_reference.reference_tool_calls: `auto_decline_transaction` is called before routing",
+          "policy.guidelines: `>95 auto-decline`, `30-95 escalate or verify`",
+          "policy.workflow_selection: authorized_push_payment → W9, hold wire and escalate",
+          "policy.guidelines: always enrich from all relevant systems before scoring",
+          "tools.domain_tools.calculate_fraud_risk_score: device_intelligence is required",
+          "python_reference.reference_tool_calls: no `check_device_intelligence` call"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The tools plausibly support enrichment, scoring, and analyst routing with `hold_transfer` as the recommendation, but none is documented as actually placing a transfer on hold. The available blocking tool is explicitly an auto-decline tool, so the intended hold action is not demonstrably executable through the supplied tools.",
+        "evidence": [
+          "tools.domain_tools.route_to_analyst: escalates a case and accepts `hold_transfer` as a recommendation",
+          "tools.domain_tools.auto_decline_transaction: blocks a transaction",
+          "tools.domain_tools: no tool is defined to execute a transfer hold"
+        ]
+      }
+    }
+  }
+]

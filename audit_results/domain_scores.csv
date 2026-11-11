@@ -1,0 +1,8 @@
+domain,task_count,score,verification_coverage,passed,failed,unverified
+banking_accounts_deposits,8,0.9864,0.79,657,9,177
+banking_customer_onboarding,6,0.9649,0.8204,388,14,88
+banking_fraud_monitoring,13,0.8892,0.9512,675,85,39
+healthcare_patient_onboarding,9,0.9461,0.7926,623,38,173
+healthcare_prior_authorization,9,0.9538,0.8998,554,30,65
+insurance_claims_intake,10,0.9264,0.9154,663,62,67
+manufacturing_purchase_to_pay,9,0.9582,0.8655,594,24,96

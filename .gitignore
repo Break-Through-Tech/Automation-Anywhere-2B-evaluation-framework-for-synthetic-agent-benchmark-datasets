@@ -2,6 +2,10 @@
 .env
 .vscode/settings.json
 /venv
+.venv
 *.pyc
+handoff
+.pytest_cache
+/correctness_op/__pycache__
 
 /data/__pycache__

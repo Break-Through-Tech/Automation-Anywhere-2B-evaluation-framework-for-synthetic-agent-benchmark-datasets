@@ -1,0 +1,10 @@
+domain,task_id,task_score,task_consistency,expected_outcome_validity,policy_compliance,workflow_feasibility,uncertain_count
+manufacturing_purchase_to_pay,P2P_W1_TC1,0.625,0.5,0.5,0.5,1.0,3
+manufacturing_purchase_to_pay,P2P_W1_TC2,0.625,0.5,0.5,1.0,0.5,3
+manufacturing_purchase_to_pay,P2P_W2_TC1,0.625,0.5,1.0,0.0,1.0,1
+manufacturing_purchase_to_pay,P2P_W3_TC1,0.75,1.0,0.5,1.0,0.5,2
+manufacturing_purchase_to_pay,P2P_W4_TC1,0.5,0.5,0.5,0.5,0.5,4
+manufacturing_purchase_to_pay,P2P_W5_TC1,0.5,1.0,1.0,0.0,0.0,0
+manufacturing_purchase_to_pay,P2P_W6_TC1,0.5,0.5,0.5,0.5,0.5,4
+manufacturing_purchase_to_pay,P2P_W7_TC1,0.5,0.5,0.5,0.5,0.5,4
+manufacturing_purchase_to_pay,P2P_W8_TC1,0.5,0.5,0.5,0.5,0.5,4
