@@ -2,8 +2,7 @@
 
 This harness evaluates original tasks, applies known mutations, and checks
 per-category detection and expected score changes. It does not generate agent
-runs. Dataset evaluators and LLM judges are separate integrations; they are not
-included in this folder. The built-in --demo remains a small executable fixture,
+runs. Dataset evaluators and the semantic judge live in the evaluation package. The built-in --demo remains a small executable fixture,
 not a benchmark adapter. External evaluators can be supplied with --evaluator.
 
 Evaluator contract: evaluate(task: dict) -> {"checks": {category: score}}.
@@ -281,7 +280,7 @@ def main():
     if not args.demo and not args.evaluator:
         parser.error("--input requires --evaluator module:function")
     if args.mode == "llm" and not args.evaluator:
-        parser.error("LLM mode requires an external --evaluator; no LLM judge is built in")
+        parser.error("LLM mode requires --evaluator module:function")
     try:
         manifest = demo_manifest() if args.demo else json.loads(args.input.read_text())
         evaluator = reference_evaluator

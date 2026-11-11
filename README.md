@@ -12,18 +12,22 @@ Markdown reports, and terminal summaries are available. See the
 
 The command writes `report.md`, detailed JSON, a CSV summary, and its input manifest.
 
-Open [Correctness validation](notebooks/correctness_validation.ipynb) to rerun the
-demo, check that the reports match across runs, and plot observed versus expected
-scores. From the repository root, install the `notebook` extra and launch
-JupyterLab in the project environment.
+Open the [benchmark validation report](notebooks/correctness_validation.ipynb)
+and run all cells to evaluate all seven synthetic domains and the three τ²-bench
+base splits. The notebook plots baseline scores, check coverage, independent
+outcomes, corruption experiments, and tool-diversity perturbations. It also runs
+the harness demo, constructed clean controls, and an available recorded sample.
 
 ```bash
-uv sync --locked --extra notebook
+uv sync --locked --extra notebook --extra tau2
 uv run --no-sync jupyter lab notebooks/correctness_validation.ipynb
 ```
 
-Include `--extra tau2` on the sync command if you also use the benchmark integration.
-Restart any running notebook kernels after syncing the environment.
+The notebook looks for a sibling `tau2-bench` checkout at the pinned revision in
+the [evaluation guide](validation/README.md). Set `TAU2_BENCHMARK_ROOT` for a
+different location. Restart running notebook kernels after syncing. Each run saves
+its manifests, reports, and audit evidence under `output/validation-notebook/`.
+The full benchmark replay and integration tests can take several minutes.
 
 ## Clean before a release
 
