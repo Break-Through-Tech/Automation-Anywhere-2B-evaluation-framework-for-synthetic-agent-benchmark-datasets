@@ -156,7 +156,7 @@ outcome evidence are separate measurements.
 
 For deterministic evaluation, each configured check is `1` (pass), `0` (fail),
 or `null` (unavailable/inapplicable). External LLM mode also permits `0.5`;
-this scoring contract does not implement an LLM judge.
+the semantic judge described below implements this rubric.
 
 ```text
 Task score = sum of non-null check values / number of non-null checks
@@ -366,7 +366,7 @@ title; its expected check vector records both schema and reference failures.
 Contract: `evaluate(task: dict) -> {"checks": {category: score}}`. Additional
 JSON-serializable evidence is preserved. Deterministic categories are `schema`,
 `signatures`, `references`, `output_consistency`. Optional external LLM mode keeps
-its existing 0/0.5/1 rubric and separate category names; no judge is implemented here.
+the 0/0.5/1 rubric and semantic category names described below.
 
 ## Verification and exit codes
 
@@ -386,3 +386,30 @@ Exit codes: **0** validation passed or baseline-only evaluation completed;
 A baseline-only report says `NOT RUN` for validation and is not an assertion that
 all tasks passed. Errors print a concise cause and write `error.json` when possible;
 existing completed reports in a reused directory may belong to an earlier attempt.
+
+## Semantic correctness judge
+
+`evaluation.llm_judge` implements the metric specification's four semantic
+dimensions. A verdict contains four scores of 0, 0.5, or 1, with an explanation
+and source references per dimension. The adapter retains an optional quote
+when its text appears in the cited input field. The task mean weights all four scores equally.
+Semantic scores measure evidence-based judgments about reference tasks.
+
+Run the constructed controls and a seeded one-task sample from each synthetic
+and τ² domain using the configured project API.
+
+```bash
+.venv/bin/python -m validation.llm_judge_validation \
+  --tau-root ../tau2-bench \
+  --limit 1 --output output/llm-judge-notebook
+```
+
+Omit `--tau-root` to score only the synthetic domains. Use `--limit 0` for a
+full run. Use `--controls-only` to run just the constructed fixtures. The judge
+uses `JUDGE_MODEL` or `MODEL_NAME` (default
+GPT‑6 Luna), `OPENAI_API_KEY`, and the optional `JUDGE_BASE_URL` or `BASE_URL`.
+That mode sends task evidence, policies, and tool definitions to the configured
+API endpoint. The report records model, prompt version and hash, input hashes,
+sample IDs, decoding settings, rubric score counts, and individual judgments.
+The controls report also records independently declared corruptions, detection
+rates, exact check-vector agreement, and clean false positives.
