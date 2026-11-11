@@ -1,0 +1,282 @@
+[
+  {
+    "domain": "banking_customer_onboarding",
+    "task_id": "BankOnboard_W1_TC1",
+    "title": "Low-Risk Personal Account: Standard KYC, Driver License",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The personal-checking application, stated KYC documents, and low-risk success path agree with the milestones and final outcome; no internal contradiction is apparent.",
+        "evidence": [
+          "task.input_conditions",
+          "task.representative_input",
+          "task.success_path_differences",
+          "task.milestones",
+          "task.expected_success_outcome"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The stated milestones and final success status fit the onboarding objective, but the reference calls show only inputs, not tool results demonstrating the exact risk score, created IDs, or sent communication. Those specific expected outputs cannot be verified from the supplied evidence.",
+        "evidence": [
+          "task.milestones steps 1–7",
+          "task.expected_success_outcome.key_outputs",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended sequence verifies identity and screens sanctions before core banking creation, then creates CRM, sends a welcome communication, and signals SUCCESS. This aligns with the policy’s required checks, escalation rules for adverse cases, and requirement to end with a system outcome signal.",
+        "evidence": [
+          "policy.guidelines",
+          "policy.workflow_selection",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools support a plausible route from the uploaded documents through identity, sanctions, and AML checks to core banking, CRM, communication, and SUCCESS. The reference sequence is feasible under the stated assumption that integration endpoints are available and reliable, though it does not demonstrate actual execution.",
+        "evidence": [
+          "policy.action_plan.assumptions",
+          "tools.domain_tools",
+          "tools.system_tools",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_customer_onboarding",
+    "task_id": "BankOnboard_W1_TC2",
+    "title": "Medium-Risk Personal Account: Passport KYC, Foreign National, Higher Volume",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The conditions and milestones otherwise align, but the task describes the customer as a “Foreign National” while listing nationality as UK; without a stated bank jurisdiction, whether that is consistent cannot be determined.",
+        "evidence": [
+          "task.title: “Foreign National”",
+          "task.input_conditions: “Nationality: UK”"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected medium-risk W1 outcome is compatible with the policy, but the provided evidence does not establish that the AML score is exactly 55 or that the specified IDs and communication status would result; the reference calls contain no tool outputs.",
+        "evidence": [
+          "task.milestones step 4: expected score 55 and risk_level medium",
+          "task.expected_success_outcome.key_outputs",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended sequence verifies identity and screens sanctions before core account creation, routes the expected medium-risk, clear-screening case through W1, and ends with SUCCESS. This follows the stated checks and escalation rules.",
+        "evidence": [
+          "policy.guidelines: identity and sanctions checks before account creation; high-risk, fraud, or sanctions-match cases escalated; workflows end with a system tool",
+          "policy.workflow_selection: low- or medium-risk cases with passing identity and clear sanctions use W1",
+          "python_reference.reference_tool_calls: verification and screening precede core banking creation; final call is SUCCESS"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The defined tools support a plausible sequence from extracting the listed files through verification, screening, risk assessment, core banking and CRM creation, communication, and a final outcome signal. The reference calls illustrate that sequence, though they do not demonstrate actual tool execution.",
+        "evidence": [
+          "tools.domain_tools: definitions for extraction, identity validation, sanctions screening, AML scoring, core banking, CRM, and welcome communication",
+          "tools.system_tools: SUCCESS definition",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_customer_onboarding",
+    "task_id": "BankOnboard_W4_TC1",
+    "title": "Business Account: Multiple Owners, All Pass Screening",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The case inputs and W4 objective otherwise align, but the policy routing conditions overlap: this case meets both the general W1 condition and the multiple-owner W4 condition, with no precedence rule specified.",
+        "evidence": [
+          "policy.workflow_selection: W1 applies when documents, identity, sanctions, and AML conditions pass",
+          "policy.workflow_selection: W4 applies to business accounts with multiple beneficial owners"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The checks and account/profile milestones are consistent with the stated case, but the reference communication call does not establish the milestone requirement to welcome both the business and its owners; it supplies only the business customer_id and a single message.",
+        "evidence": [
+          "task.milestones[7]: communication is to the business and owners",
+          "python_reference.reference_tool_calls: send_welcome_communication includes one customer_id and no owner recipients"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended sequence performs identity verification and sanctions screening before account creation, assesses AML risk, and ends with SUCCESS. The case states the checks pass and risk is low, so no escalation is indicated by the supplied policy.",
+        "evidence": [
+          "policy.guidelines: verify identity and screen sanctions before creating any account; escalate high-risk, fraud, or sanctions-match cases",
+          "python_reference.reference_tool_calls: identity checks, sanctions screening, and AML calculation precede create_core_banking_customer; SUCCESS is last"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.0,
+        "explanation": "The supplied tools and input do not provide a documented way to send the required welcome communication to both owners: the communication tool accepts one customer_id and no recipient list, and the input has no owner contact details. Thus the full milestone cannot be reached as specified, even though the business can be contacted.",
+        "evidence": [
+          "task.milestones[7]: requires communication to the business and owners",
+          "tools.domain_tools.send_welcome_communication: arguments include customer_id, communication_type, content, and delivery_method, but no owner recipients",
+          "task.representative_input: includes a business contact_email but no owner contact details"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_customer_onboarding",
+    "task_id": "BankOnboard_W4_TC2",
+    "title": "Business Account: Single Owner, Medium AML Risk",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The case consistently describes a single beneficial owner, but that conflicts with the policy’s stated W4 eligibility condition. The W4 workflow name mentions multiple documents, so the intended meaning of W4 is ambiguous across the task and policy.",
+        "evidence": [
+          "task.title: “Business Account: Single Owner, Medium AML Risk”",
+          "task.input_conditions: “Beneficial owner: Maria Gomez”",
+          "policy.workflow_selection: W4 applies “if application is for a business account with multiple beneficial owners”"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "A successful onboarding is consistent with the stated valid documents, expected verified identity, clear sanctions screening, and medium AML risk. The milestones put identity and sanctions checks before account creation and include CRM creation and welcome communication.",
+        "evidence": [
+          "task.input_conditions: “All documents valid”",
+          "task.milestones: steps 2–7 specify verified identity, no sanctions match, medium risk, account and CRM creation, and communication sent",
+          "policy.success_criteria: requires completed KYC/compliance checks, account creation, and welcome communication"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The case is designated W4 despite having one beneficial owner. Under the supplied routing rules, a business with one owner that passes identity and sanctions checks and has low or medium AML risk meets the W1 condition, while W4 is reserved for multiple beneficial owners.",
+        "evidence": [
+          "policy.workflow_selection: W1 applies when documents are present, identity passes, sanctions are clear, and AML risk is low or medium",
+          "policy.workflow_selection: W4 applies to a business account “with multiple beneficial owners”",
+          "task.title: “Single Owner”"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The documented tools plausibly support extraction, identity and sanctions checks, AML scoring, account and CRM creation, and sending a welcome communication in the referenced order. However, the final milestone calls for communication to both the business and owner, while the communication tool exposes only a customer_id and no recipient field; the supplied evidence does not establish that it can reach both.",
+        "evidence": [
+          "tools.domain_tools.send_welcome_communication: arguments include customer_id, communication_type, content, and delivery_method, but no recipient field",
+          "task.milestones: step 7 requires communication “to business and owner”",
+          "python_reference.reference_tool_calls: lists the communication call but provides no return output or evidence of its recipients"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_customer_onboarding",
+    "task_id": "BankOnboard_W6_TC1",
+    "title": "Personal Account: Missing Proof of Address, Provided After Request",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The milestones and stated flow are internally coherent, but the reference document-request call conflicts with the communication tool contract: it supplies a null customer_id where the tool requires a string in CUST-XXXXXX format.",
+        "evidence": [
+          "Milestone 2 expects communication_status: sent and communication_type: document_request",
+          "reference_tool_calls[1] supplies customer_id: null",
+          "send_welcome_communication requires customer_id as a string; its tool definition specifies format CUST-XXXXXX"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "Successful onboarding is a plausible result if the later checks return the expected clear/low results, but the provided evidence does not include actual tool outputs establishing those results or the expected IDs. The reference calls show inputs only.",
+        "evidence": [
+          "Milestones 4–7 expect identity verified, no sanctions match, low AML risk, and customer creation",
+          "reference_tool_calls provide tool_inputs but no returned results",
+          "expected_success_outcome.key_outputs specifies fixed customer, account, and CRM IDs"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference sequence places identity verification, sanctions screening, and AML assessment before account creation, consistent with the stated checks. However, the required document request is attempted with an invalid null customer_id, so the evidence does not establish that the policy-required request could be sent.",
+        "evidence": [
+          "Policy guidelines require requesting additional documentation when required fields are missing and pausing onboarding until received",
+          "Policy guidelines require identity verification and sanctions screening before account creation",
+          "reference_tool_calls[1] uses customer_id: null, despite the send_welcome_communication contract requiring a CUST-XXXXXX string"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The later extraction, checks, account creation, CRM creation, and welcome communication have corresponding tools. But the supplied initial conditions provide no customer ID, and the only communication tool requires one; no documented tool can send the pre-onboarding document request using the available application ID or contact information.",
+        "evidence": [
+          "representative_input provides application_id and contact details but no customer_id",
+          "send_welcome_communication requires customer_id",
+          "create_core_banking_customer, which could return a customer_id, occurs only after receipt of the missing document in the reference sequence",
+          "reference_tool_calls[1] uses null for customer_id"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_customer_onboarding",
+    "task_id": "BankOnboard_W7_TC1",
+    "title": "Address Mismatch: Customer Provides Explanation and Valid New Document",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The expected document-request milestone conflicts with the supplied call: it passes customer_id=null, although the communication tool requires a customer ID in CUST-XXXXXX format. Also, the representative input already includes the explanation and rental agreement that the milestone says to request.",
+        "evidence": [
+          "representative_input.address_explanation and representative_input.additional_documents",
+          "milestones[step=2].expected_state",
+          "send_welcome_communication tool definition: customer_id is required and must be CUST-XXXXXX",
+          "python_reference.reference_tool_calls[1].tool_inputs.customer_id"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "Successful onboarding is consistent with the stated objective if identity, sanctions, and AML checks return the expected results. However, the reference calls provide no tool return values demonstrating those results, successful creation, or sent communications; the final IDs and statuses are asserted rather than evidenced.",
+        "evidence": [
+          "milestones[step=4].expected_state",
+          "milestones[step=5].expected_state",
+          "expected_success_outcome.key_outputs",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended progression performs identity verification, sanctions screening, and AML assessment before core account creation, and ends with the required SUCCESS signal. The expected states are verified identity, no sanctions match, and low AML risk, so no stated escalation condition is triggered.",
+        "evidence": [
+          "policy.guidelines: verify identity and screen for sanctions before creating any account; escalate high-risk, fraud, or sanctions-match cases",
+          "milestones[step=4].expected_state",
+          "milestones[step=5].expected_state",
+          "python_reference.reference_tool_calls: checks precede create_core_banking_customer; final SUCCESS call"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The onboarding objective is plausibly reachable by processing the already supplied documents and explanation, then performing checks and creating the records. But the specified document-request milestone cannot be executed as shown: no customer ID exists before account creation, and the supplied call uses null where the tool requires a CUST-XXXXXX ID.",
+        "evidence": [
+          "representative_input.additional_documents and representative_input.address_explanation",
+          "python_reference.reference_tool_calls[1]",
+          "send_welcome_communication tool definition",
+          "milestones[step=2]"
+        ]
+      }
+    }
+  }
+]

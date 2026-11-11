@@ -1,0 +1,10 @@
+domain,task_id,task_score,task_consistency,expected_outcome_validity,policy_compliance,workflow_feasibility,uncertain_count
+healthcare_prior_authorization,HealthcarePA_W1_TC1,0.75,0.5,1.0,1.0,0.5,2
+healthcare_prior_authorization,HealthcarePA_W1_TC2,0.625,1.0,0.5,0.5,0.5,3
+healthcare_prior_authorization,HealthcarePA_W2_TC1,0.625,0.5,0.5,1.0,0.5,3
+healthcare_prior_authorization,HealthcarePA_W3_TC1,0.375,1.0,0.5,0.0,0.0,1
+healthcare_prior_authorization,HealthcarePA_W4_TC1,0.5,0.5,0.5,0.5,0.5,4
+healthcare_prior_authorization,HealthcarePA_W5_TC1,0.625,0.5,0.5,0.5,1.0,3
+healthcare_prior_authorization,HealthcarePA_W6_TC1,0.75,1.0,0.5,0.5,1.0,2
+healthcare_prior_authorization,HealthcarePA_W7_TC1,0.5,0.5,0.5,0.5,0.5,4
+healthcare_prior_authorization,HealthcarePA_W8_TC1,0.75,0.5,0.5,1.0,1.0,2

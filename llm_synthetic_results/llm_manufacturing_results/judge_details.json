@@ -1,0 +1,429 @@
+[
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W1_TC1",
+    "title": "Standard requisition, preferred supplier, exact invoice match",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The reference call supplies contract_id CONT-PRF12345, which does not match the create_purchase_order tool’s documented CONT-XXXXXX format. The task does not otherwise require that specific ID, so a valid ID could still be used.",
+        "evidence": [
+          "tools.domain_tools.create_purchase_order: contract_id format CONT-XXXXXX",
+          "python_reference.reference_tool_calls: create_purchase_order uses contract_id CONT-PRF12345"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The exact-match, auto-approval, and completed-payment progression is consistent with the reference calls. However, the reference tool definitions mention early-payment discount terms and a discount applied during payment, while the expected payment amount remains $15,000 and no discount amount or calculation is given.",
+        "evidence": [
+          "task.milestones steps 7–10",
+          "task.expected_success_outcome.key_outputs.payment_details.amount",
+          "python_reference.available_tool_definitions.match_invoice_to_po: early payment discount terms present",
+          "python_reference.available_tool_definitions.process_payment: early payment discount applied"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The workflow validates budget and supplier status, performs a 3-way match, routes approval, and records an audit trail. The evidence does not establish whether cash position permits early payment, so compliance with the conditional early-payment guideline cannot be verified; the discount-related handling is also unspecified.",
+        "evidence": [
+          "policy.action_plan.guidelines: recommend early payment when terms offer discounts and cash flow allows",
+          "policy.action_plan.guidelines: maintain segregation of duties and audit trail",
+          "task.expected_success_outcome.key_outputs.audit_log"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools support the requisition-to-payment sequence, and the receipt ID is provided as input to the matching tool. Although the reference call’s contract ID does not match the documented format, the contract-check tool can return a contract ID and the format mismatch does not prevent a plausible valid sequence.",
+        "evidence": [
+          "tools.domain_tools.read_purchase_requisition through process_payment",
+          "task.representative_input.receipt_id",
+          "python_reference.available_tool_definitions.check_supplier_contracts: may return contract_id",
+          "tools.domain_tools.create_purchase_order: contract_id is optional"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W1_TC2",
+    "title": "Standard requisition, preferred supplier, small price variance within tolerance",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The expected match status is not among the statuses documented for match_invoice_to_po, although it is accepted by route_payment_approval. Also, milestone 6 says the goods receipt is recorded, but the expected audit_log.steps does not include that step.",
+        "evidence": [
+          "tools.domain_tools.match_invoice_to_po returns match_status values: exact|price_mismatch|quantity_mismatch|duplicate_detected|blanket_release|early_payment|exception",
+          "tools.domain_tools.route_payment_approval accepts small_variance",
+          "milestones[6] expects goods receipt recorded; expected_success_outcome.key_outputs.audit_log.steps omits a receipt-recording step"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The supplied input and milestones support the intended $50 variance and auto-approval, but the documented match tool does not list small_variance as a possible result, so the expected progression is not fully supported by the tool contract.",
+        "evidence": [
+          "input_conditions specifies invoice_match_status: small_variance and variance_amount: 50",
+          "milestones[7-8] expect small_variance followed by auto-approval",
+          "tools.domain_tools.match_invoice_to_po does not list small_variance among its return statuses"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The path validates the budget, checks preferred-supplier status, performs a 3-way match, routes the stated within-tolerance variance for auto-approval, and records approvals and the exception in the audit log. The match tool also documents duplicate detection as part of its result.",
+        "evidence": [
+          "policy.action_plan.guidelines requires budget validation, preferred-supplier compliance, 3-way match tolerance rules, duplicate-invoice rejection, and an audit trail",
+          "reference_tool_calls invokes validate_budget_availability, check_supplier_contracts, match_invoice_to_po, and route_payment_approval",
+          "expected_success_outcome.key_outputs.audit_log records the auto approval and price-variance resolution",
+          "tools.domain_tools.match_invoice_to_po lists duplicate_detected as a possible match status"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied tools support the main requisition-to-payment sequence, and the receipt ID is provided for matching. However, the documented match result does not include the small_variance status required by the expected milestone, and there is no tool to record a goods receipt if that milestone requires an action during this workflow.",
+        "evidence": [
+          "tools.domain_tools provides requisition, budget, contract, PO, transmission, matching, approval, and payment tools",
+          "representative_input provides receipt_id: GR-445501",
+          "tools.domain_tools.match_invoice_to_po return statuses omit small_variance",
+          "tools.domain_tools contains no goods-receipt recording tool"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W2_TC1",
+    "title": "Budget exceeded, CFO override granted, PO created and sent",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The stated initial condition says CFO approval is already granted, but the reference call to HUMAN_IN_THE_LOOP says it is requesting CFO override approval. The milestones are otherwise consistent with the expected outcome; the reference call could be a redundant confirmation, so the conflict is ambiguous.",
+        "evidence": [
+          "task.input_conditions: \"CFO approval: granted\"",
+          "python_reference.reference_tool_calls: HUMAN_IN_THE_LOOP message requests CFO override approval",
+          "task.milestones: step 3 expects approval_status \"approved\" by CFO"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected result follows the stated objective: resolve the budget exception through CFO override, check the supplier contract, create and email the PO, then signal completion. The $2,000 variance is consistently reflected in the expected budget milestone and audit exception.",
+        "evidence": [
+          "task.expected_success_outcome: completed status, PO workflow steps, CFO approval, and $2,000 budget exception",
+          "task.milestones: steps 2–6 specify the matching variance, approval, preferred contract, sent PO, and completion"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The W2 policy says to escalate for approval and reallocation before PO creation, but the expected exception resolution records only an approved override. The reference sequence proceeds from the approval request to contract checking and PO creation without evidence of budget reallocation.",
+        "evidence": [
+          "policy.action_plan.workflow_selection: W2 logic requires \"approval and reallocation before PO creation\"",
+          "task.expected_success_outcome.key_outputs.audit_log.exceptions: resolution is only \"override approved\"",
+          "python_reference.reference_tool_calls: create_purchase_order follows HUMAN_IN_THE_LOOP, with no reallocation recorded"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools plausibly support reading the requisition, validating the budget, obtaining human approval, checking the contract, creating the PO, and sending it by email. This establishes plausibility, not that the calls actually returned the expected approval, contract, PO, or delivery results.",
+        "evidence": [
+          "tools.domain_tools: definitions for read_purchase_requisition, validate_budget_availability, check_supplier_contracts, create_purchase_order, and send_po_to_supplier",
+          "tools.system_tools: HUMAN_IN_THE_LOOP supports escalation",
+          "python_reference.available_tool_definitions: contract, PO creation, and email-sending tools are available"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W3_TC1",
+    "title": "Invoice price mismatch > $500, AP resolves and payment processed",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The milestones and expected outcome agree: the $800 price mismatch is routed to AP, approved, and followed by payment and workflow completion. The $12,800 payment amount is consistent with a $12,000 requisition plus the stated $800 variance.",
+        "evidence": [
+          "task.input_conditions: variance_amount 800 and AP review resolved",
+          "task.milestones: steps 1–4",
+          "task.expected_success_outcome.key_outputs.payment_details.amount: 12800.0"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The stated progression and payment arithmetic are plausible, but the evidence does not establish that payment would complete on the specified date or for the specified amount. The reference tool definitions mention early-payment discount terms and discount application, without giving discount details that would verify the expected payment amount.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs.payment_details",
+          "python_reference.available_tool_definitions.match_invoice_to_po.docstring",
+          "python_reference.available_tool_definitions.process_payment.docstring"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended handling follows W3: a variance above $500 is routed for AP review, resolved before payment, and recorded in the audit log. The match step also supports the policy’s three-way-match and duplicate-detection checks.",
+        "evidence": [
+          "policy.action_plan.workflow_selection: W3 condition and logic",
+          "policy.action_plan.guidelines: apply 3-way match tolerance rules; maintain audit trail",
+          "task.expected_success_outcome.key_outputs.audit_log"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The required matching, approval, and payment tools are available, and a PO could plausibly be obtained through the supplied requisition and PO tools. However, the reference match call uses an unresolved PO identifier that does not meet the tool’s documented PO-ID format, so that exact sequence is not executable as written.",
+        "evidence": [
+          "python_reference.reference_tool_calls[0].tool_inputs.po_id: PO-TO-BE-DETERMINED",
+          "tools.domain_tools.match_invoice_to_po.args.po_id: format PO-XXXXXX",
+          "tools.domain_tools.read_purchase_requisition",
+          "tools.domain_tools.create_purchase_order"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W4_TC1",
+    "title": "Partial receipt, quantity mismatch, backorder received and payments processed",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The input condition says the backorder is received, while milestone 5 places that receipt later in the workflow. Also, the quantity variance of 40 is not explicitly identified as units or dollars.",
+        "evidence": [
+          "task.input_conditions: \"backorder received\"",
+          "task.milestones[5]: Backorder received and reconciled; received_quantity: 40",
+          "task.milestones[2]: variance_amount: 40"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The two expected payments sum to the stated invoice amount, and their amounts fit the 60/40 quantity split if the unit price is $100. However, the supplied data does not establish that unit price or show a receipt/reconciliation for the backorder in the reference calls.",
+        "evidence": [
+          "task.milestones[1]: received_quantity: 60, ordered_quantity: 100",
+          "task.milestones[4]: received_quantity: 40",
+          "task.milestones[3] and task.milestones[5]: payments of 6000.0 and 4000.0",
+          "python_reference.reference_tool_calls: no call records receipt GR-654322 or its reconciliation"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The W4 policy calls for holding payment and initiating partial payment if the backorder is confirmed; the planned partial and final payments are broadly consistent, but confirmation timing is ambiguous. The evidence also does not establish whether duplicate-invoice checks and other applicable requisition controls were completed.",
+        "evidence": [
+          "policy.action_plan.workflow_selection: W4 logic says \"hold payment, initiate partial payment if backorder confirmed\"",
+          "task.input_conditions: \"backorder received\"",
+          "policy.action_plan.guidelines: reject duplicate invoices and maintain segregation of duties and an audit trail",
+          "python_reference.reference_tool_calls: payment approval and payment calls, but no duplicate-check result"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The tools can perform matching, approval routing, and payments, but the reference approval call supplies a match status excluded by the provided tool definition. No supplied tool records the receipt milestones, so feasibility of the complete milestone sequence is not established; those receipts could, however, be pre-existing system facts.",
+        "evidence": [
+          "tools.domain_tools.route_payment_approval: match_status enum excludes quantity_mismatch",
+          "python_reference.reference_tool_calls: route_payment_approval uses match_status: quantity_mismatch",
+          "tools.domain_tools: no tool for recording goods receipts or backorder receipt"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W5_TC1",
+    "title": "Duplicate invoice detected and rejected, supplier notified",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The duplicate-detected, already-paid input aligns with the milestones and the rejected, completed outcome; a rejected invoice can still have a completed workflow.",
+        "evidence": [
+          "task.input_conditions",
+          "task.expected_success_outcome",
+          "task.milestones"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Rejecting and notifying the supplier without processing payment matches the stated objective and the W5 policy logic.",
+        "evidence": [
+          "task.success_path_differences",
+          "policy.action_plan.workflow_selection: W5",
+          "policy.action_plan.guidelines: Reject duplicate invoices based on PO, amount, and payment history"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The intended calls match and route the invoice, but no documented tool or reference call notifies the supplier, despite W5 requiring notification. The success result claims notice without a documented action supporting it.",
+        "evidence": [
+          "policy.action_plan.workflow_selection: W5 logic says reject invoice and notify supplier",
+          "python_reference.reference_tool_calls",
+          "tools.domain_tools"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.0,
+        "explanation": "The match tool requires a PO ID, but the representative input supplies none and no supplied tool retrieves one; the reference call uses PO-PLACEHOLDER, which does not match the documented PO-XXXXXX format. Also, no supplied tool documents supplier notification.",
+        "evidence": [
+          "tools.domain_tools.match_invoice_to_po: required po_id with format PO-XXXXXX",
+          "task.representative_input",
+          "python_reference.reference_tool_calls: po_id is PO-PLACEHOLDER",
+          "tools.domain_tools"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W6_TC1",
+    "title": "Early payment discount available, cash sufficient, payment processed early",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The milestone expects the match result to be `early_payment`, but the reference routes approval with `match_status: exact`. The approval tool’s documented enum permits `exact` but not `early_payment`, leaving the intended handoff inconsistent or underspecified.",
+        "evidence": [
+          "milestones[0].expected_state.match_status",
+          "python_reference.reference_tool_calls[1].tool_inputs.match_status",
+          "tools.domain_tools.route_payment_approval.args[1].enum"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The $6,930 payment is consistent with a 1% discount on $7,000, but the task does not specify whether `discount_rate: 1` means 1% or a fraction of 1. The reference’s `exact` approval input also does not clearly reflect the expected `early_payment` match state.",
+        "evidence": [
+          "representative_input.amount",
+          "milestones[0].expected_state.invoice_terms.discount_rate",
+          "expected_success_outcome.key_outputs.payment_details.amount",
+          "python_reference.reference_tool_calls[1].tool_inputs.match_status"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference workflow performs a 3-way match, routes approval, and processes the discounted payment, consistent with the policy’s matching and early-payment guidance. However, it provides no evidence that the requisition budget and supplier compliance checks were completed, so compliance with the broader stated process is not verifiable.",
+        "evidence": [
+          "policy.action_plan.tools_and_resources",
+          "policy.action_plan.guidelines",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The listed tools can plausibly support matching, approval, and payment, but the input provides no PO ID while the reference calls `match_invoice_to_po` with `PO-100001`. A PO could potentially be created using retrieved requisition details, but the supplied evidence does not establish that this PO exists or is linked to the provided receipt.",
+        "evidence": [
+          "representative_input",
+          "tools.domain_tools.match_invoice_to_po.args",
+          "tools.domain_tools.create_purchase_order",
+          "python_reference.reference_tool_calls[0].tool_inputs"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W7_TC1",
+    "title": "Blanket PO release, within limits, auto-approval and payment",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The matching milestone expects match_status \"blanket_release\", but route_payment_approval accepts only exact, small_variance, medium_variance, large_variance, exception, or duplicate. The reference call uses \"exact\", so it does not follow the milestone’s stated status.",
+        "evidence": [
+          "Milestone 6 expected_state.match_status",
+          "route_payment_approval tool definition: match_status enum",
+          "python_reference.reference_tool_calls: route_payment_approval with match_status \"exact\""
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected payment amount matches the 30 × 100.0 PO lines, and the reference calls describe a path to completion. However, the evidence does not establish that the blanket-release match milestone can be routed as specified, and no tool results demonstrate the stated final statuses.",
+        "evidence": [
+          "Representative input amount: 3000.0",
+          "Milestone 3 PO items: quantity 30, unit_price 100.0",
+          "Milestone 6 expected_state.match_status",
+          "Expected success outcome payment_details and workflow_status"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The workflow includes contract checking, invoice matching, approval routing, payment, and an audit log. But it omits budget validation even though the policy calls for budget checks and auto-approval only within budget and authority limits; the supplied release-limit condition does not establish budget status.",
+        "evidence": [
+          "Policy action_plan.tools_and_resources: validate_budget_availability",
+          "Policy guidelines: \"Auto-approve requisitions within budget and authority limits; escalate overruns.\"",
+          "Task input_conditions: release_amount within_limit",
+          "python_reference.reference_tool_calls: no validate_budget_availability call"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The listed tools provide a plausible read-to-payment sequence, and the reference calls show one using an accepted \"exact\" match status. However, the supplied evidence does not verify the required blanket contract result: the available tool description says it simulates a preferred contract, while the milestone requires blanket status.",
+        "evidence": [
+          "Milestone 2 expected_state.contract_status: \"blanket\"",
+          "python_reference.available_tool_definitions.check_supplier_contracts.docstring: simulates supplier contract is preferred",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "manufacturing_purchase_to_pay",
+    "task_id": "P2P_W8_TC1",
+    "title": "Urgent requisition, expedited PO and payment, production resumes",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The milestone progression is not fully reflected in the expected audit log: milestone 6 requires recording a goods receipt, but that action is absent from the listed audit steps. Milestone 5 also describes sending by call and email, while its expected method and the reference call specify email only.",
+        "evidence": [
+          "task.milestones[5]: “Goods receipt recorded”",
+          "task.expected_success_outcome.key_outputs.audit_log.steps",
+          "task.milestones[4]: “via call and email”; expected_state.method is “email”",
+          "tools.domain_tools.send_po_to_supplier: delivery_method enum has no call option"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected approval, payment amount, method, and dates align with the stated exact match and reference calls, but the evidence does not establish that production resumed. The claimed completed path also includes a goods-receipt milestone without a corresponding recorded action in the expected audit log.",
+        "evidence": [
+          "task.title: “production resumes”",
+          "task.expected_success_outcome.key_outputs.audit_log.steps",
+          "task.milestones[5]: “Goods receipt recorded”",
+          "python_reference.reference_tool_calls: payment and SUCCESS calls specify completion, but no production-resumption action or result"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "Preferred-supplier handling, budget validation, matching, and audit logging are consistent with the policy. However, the policy permits auto-approval only within both budget and authority limits, and the task provides budget status but no authority-limit evidence.",
+        "evidence": [
+          "policy.action_plan.guidelines: “Auto-approve requisitions within budget and authority limits”",
+          "task.input_conditions: budget_status is within_limit; no authority-limit condition is provided",
+          "task.expected_success_outcome.key_outputs.audit_log: records auto approval and an expedited exception"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied tools support the reference sequence through PO creation, email transmission, matching, approval, and payment. They do not provide an operation to record a goods receipt or send a PO by call, so the full set of specified milestones cannot be reached through the documented tools alone.",
+        "evidence": [
+          "tools.domain_tools: no goods-receipt recording tool is defined",
+          "tools.domain_tools.send_po_to_supplier: supported delivery methods are edi, email, portal, and fax",
+          "task.milestones[4-5]: require call-and-email delivery and goods-receipt recording",
+          "python_reference.reference_tool_calls: uses email and an existing receipt_id without a receipt-recording call"
+        ]
+      }
+    }
+  }
+]

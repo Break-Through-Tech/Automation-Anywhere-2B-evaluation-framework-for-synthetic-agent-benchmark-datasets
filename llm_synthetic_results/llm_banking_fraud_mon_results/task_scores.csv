@@ -1,0 +1,14 @@
+domain,task_id,task_score,task_consistency,expected_outcome_validity,policy_compliance,workflow_feasibility,uncertain_count
+banking_fraud_monitoring,BankingFraud_W1_TC1,0.875,1.0,1.0,0.5,1.0,1
+banking_fraud_monitoring,BankingFraud_W1_TC2,0.5,1.0,1.0,0.0,0.0,0
+banking_fraud_monitoring,BankingFraud_W2_TC1,0.375,0.5,1.0,0.0,0.0,1
+banking_fraud_monitoring,BankingFraud_W2_TC2,0.5,0.5,0.5,0.5,0.5,4
+banking_fraud_monitoring,BankingFraud_W3_TC1,0.625,0.5,0.5,0.5,1.0,3
+banking_fraud_monitoring,BankingFraud_W3_TC2,0.625,0.5,0.5,0.5,1.0,3
+banking_fraud_monitoring,BankingFraud_W4_TC1,0.5,1.0,0.5,0.0,0.5,2
+banking_fraud_monitoring,BankingFraud_W4_TC2,0.75,1.0,1.0,0.5,0.5,2
+banking_fraud_monitoring,BankingFraud_W5_TC1,0.25,1.0,0.0,0.0,0.0,0
+banking_fraud_monitoring,BankingFraud_W6_TC1,0.5,1.0,0.0,0.0,1.0,0
+banking_fraud_monitoring,BankingFraud_W7_TC1,0.375,1.0,0.0,0.0,0.5,1
+banking_fraud_monitoring,BankingFraud_W8_TC1,0.625,1.0,0.0,0.5,1.0,1
+banking_fraud_monitoring,BankingFraud_W9_TC1,0.5,0.5,0.5,0.5,0.5,4

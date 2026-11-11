@@ -1,0 +1,8 @@
+domain,task_id,task_score,task_consistency,expected_outcome_validity,policy_compliance,workflow_feasibility,uncertain_count
+banking_accounts_deposits,DigitalAccountOpening_W1_TC1,1.0,1.0,1.0,1.0,1.0,0
+banking_accounts_deposits,DigitalAccountOpening_W1_TC2,1.0,1.0,1.0,1.0,1.0,0
+banking_accounts_deposits,DigitalAccountOpening_W2_TC1,1.0,1.0,1.0,1.0,1.0,0
+banking_accounts_deposits,DigitalAccountOpening_W2_TC2,0.875,1.0,0.5,1.0,1.0,1
+banking_accounts_deposits,DigitalAccountOpening_W3_TC1,0.5,0.5,0.5,0.5,0.5,4
+banking_accounts_deposits,DigitalAccountOpening_W6_TC1,0.5,0.5,0.5,0.5,0.5,4
+banking_accounts_deposits,DigitalAccountOpening_W7_TC1,0.75,0.5,1.0,1.0,0.5,2

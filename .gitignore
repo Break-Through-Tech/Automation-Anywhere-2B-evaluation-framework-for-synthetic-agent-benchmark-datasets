@@ -4,6 +4,9 @@
 /venv
 .venv/
 *.pyc
+handoff
+.pytest_cache
+/correctness_op/__pycache__
 
 __pycache__/
 .pytest_cache/

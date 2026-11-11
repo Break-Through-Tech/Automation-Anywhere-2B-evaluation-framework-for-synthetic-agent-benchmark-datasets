@@ -1,0 +1,480 @@
+[
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W1_TC1",
+    "title": "Emergency Property Claim – Water Intrusion, Storm Peril, Coverage Confirmed",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task says all data is present, but the supplied source and representative fields contain no loss location or claimant contact details, which later tool calls require. The reference calls supply a street address, claimant name, and email/phone that are not present in the input.",
+        "evidence": [
+          "task.representative_input.source_text",
+          "task.representative_input",
+          "tools.domain_tools.trigger_emergency_services.args.location",
+          "tools.domain_tools.send_claim_acknowledgment.args.recipient_info",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The listed outputs align with the stated objective, but the evidence does not establish that the claim can be created, dispatched, and acknowledged using the supplied information: the expected path relies on location and contact details absent from the input. The reference lists calls, not their returned results, so the stated success statuses are not demonstrated.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "task.milestones",
+          "python_reference.reference_tool_calls",
+          "tools.domain_tools.trigger_emergency_services.returns",
+          "tools.domain_tools.send_claim_acknowledgment.returns"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference order validates coverage before claim creation and vendor dispatch, consistent with the policy. However, the policy requires human review for high-severity cases, and the task marks this claim emergency while specifying no escalation; whether emergency qualifies as high-severity is not defined explicitly.",
+        "evidence": [
+          "policy.action_plan.guidelines",
+          "task.input_conditions",
+          "task.success_path_differences",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The tool sequence is structurally plausible, but reaching its later calls requires extraction to provide location and valid claimant contact details that are absent from the supplied text and fields. The reference call inputs show those values, but do not establish how they were obtained or that the tools return them.",
+        "evidence": [
+          "tools.domain_tools.extract_loss_details",
+          "tools.domain_tools.trigger_emergency_services.args",
+          "tools.domain_tools.send_claim_acknowledgment.args",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W1_TC2",
+    "title": "Emergency Property Claim – Water Intrusion, Storm Peril, Local Vendor, Alternate Address",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task marks the submission as complete, but the supplied source text contains no loss date or claimant contact details, although extraction is expected to provide a date and the acknowledgment tool requires recipient information. This leaves key task inputs unsupported rather than establishing an outright contradiction between the stated conditions.",
+        "evidence": [
+          "task.representative_input.source_text",
+          "task.representative_input.data_incomplete",
+          "tools.domain_tools.extract_loss_details.returns",
+          "tools.domain_tools.validate_policy_coverage.args",
+          "tools.domain_tools.send_claim_acknowledgment.args"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The reference path supplies a loss date and recipient contact details that are absent from the submission, so the stated coverage check and acknowledgment are not verifiable from the provided evidence. The reference lists tool calls, not their returned results, so the claimed final statuses are also not demonstrated.",
+        "evidence": [
+          "python_reference.reference_tool_calls_source: date_of_loss '2026-04-16' and recipient_info values",
+          "task.representative_input.source_text",
+          "task.expected_success_outcome",
+          "tools.domain_tools.validate_policy_coverage.returns",
+          "tools.domain_tools.send_claim_acknowledgment.returns"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The policy requires coverage validation before claim creation or vendor dispatch, and the reference orders the validation before those actions. However, it supplies an unsupported loss date and fabricated-looking contact values; the policy says to request clarification and escalate when key data is missing or ambiguous, but the reference path does neither.",
+        "evidence": [
+          "policy.action_plan.guidelines: validate coverage before creation or dispatch",
+          "policy.action_plan.failure_points: request clarification and escalate for missing or ambiguous key data",
+          "python_reference.reference_tool_calls_source: validate_policy_coverage date and send_claim_acknowledgment recipient_info"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The listed tools provide a plausible processing sequence, including extraction, validation, claim creation, dispatch, routing, and acknowledgment. But the initial submission does not support required date and recipient values, and the reference provides no tool outputs establishing that the intended success result could actually be reached.",
+        "evidence": [
+          "policy.action_plan.tools_and_resources",
+          "tools.domain_tools.validate_policy_coverage.args",
+          "tools.domain_tools.send_claim_acknowledgment.args",
+          "python_reference.reference_tool_calls_source"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W2_TC1",
+    "title": "Auto Accident with Bodily Injury – Standard BI, Coverage Confirmed",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The requested workflow is otherwise aligned with an auto injury claim, but the expected acknowledgment does not account for the missing claimant contact information required by the acknowledgment tool.",
+        "evidence": [
+          "representative_input.source_text contains no claimant name, email, or phone",
+          "extract_loss_details reference output gives claimant_name \"Unknown\" and empty email and phone",
+          "send_claim_acknowledgment requires recipient_info with valid email and phone details"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The claim number and BI routing are consistent with the reference sequence, but the evidence does not establish a valid sent acknowledgment: the reference call supplies an empty email, while the success result asserts status sent.",
+        "evidence": [
+          "expected_success_outcome.key_outputs.customer_acknowledgment_status is \"sent\"",
+          "reference_tool_calls send_claim_acknowledgment uses recipient_info.email = \"\" and delivery_method = \"email\"",
+          "send_claim_acknowledgment recipient_info description requires a valid email and phone"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference sequence validates coverage before creating the claim and routes the BI claim, but it proceeds with acknowledgment despite missing contact details. The policy calls for clarification and human escalation when key data is missing or ambiguous.",
+        "evidence": [
+          "policy.guidelines requires coverage validation before claim creation",
+          "reference_tool_calls order validates coverage before create_claim_record",
+          "policy.failure_points says missing or ambiguous key claim data should prompt clarification and, if unresolved, HUMAN_IN_THE_LOOP",
+          "reference_tool_calls send_claim_acknowledgment supplies empty email and phone"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The extraction, classification, coverage validation, severity assessment, creation, and routing sequence is supported by available tools. However, the provided contact data does not support a valid acknowledgment call as specified, so the complete expected success path is not demonstrated as feasible.",
+        "evidence": [
+          "tools.domain_tools provides the extraction, classification, validation, severity, creation, and routing operations used in reference_tool_calls",
+          "representative_input.source_text lacks claimant contact information",
+          "send_claim_acknowledgment recipient_info requires valid email and phone details"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W2_TC2",
+    "title": "Auto Accident with Bodily Injury – Multiple Injuries, Coverage Confirmed",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.25,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The input conditions, milestones, and expected routing are consistent: an active, covered auto claim with reported injuries is routed through W2, classified as auto liability, and assigned to a BI adjuster.",
+        "evidence": [
+          "task.input_conditions",
+          "task.milestones.steps 2–6",
+          "policy.workflow_selection condition for auto with injury_reported == true"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.0,
+        "explanation": "The expected acknowledgment is marked sent, but the reference call supplies null email and phone while selecting email delivery. The acknowledgment tool requires a valid email for that channel, so this expected result is not supported by the provided recipient details.",
+        "evidence": [
+          "reference_tool_calls: send_claim_acknowledgment recipient_info has email: null and phone: null, delivery_method: email",
+          "tools.domain_tools.send_claim_acknowledgment: recipient email must be valid format",
+          "expected_success_outcome.key_outputs.customer_acknowledgment_status"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The workflow attempts an email acknowledgment without a valid recipient email, contrary to the acknowledgment tool requirements and the policy success criterion that the claimant receive timely acknowledgment. The policy's failure-point guidance calls for clarification when key data is missing or ambiguous.",
+        "evidence": [
+          "policy.success_criteria: customer/claimant receives timely acknowledgment",
+          "policy.failure_points: key claim data missing or ambiguous after extraction",
+          "reference_tool_calls: send_claim_acknowledgment uses email with email: null",
+          "tools.domain_tools.send_claim_acknowledgment: recipient email must be valid format"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.0,
+        "explanation": "The supplied tools can plausibly support extraction, validation, claim creation, and routing, but the stated success path cannot validly complete its required acknowledgment using the provided null contact details. The reference email call does not meet the documented recipient requirement.",
+        "evidence": [
+          "representative_input.data_incomplete is false, but reference extraction returns contact_info with email: null and phone: null",
+          "tools.domain_tools.send_claim_acknowledgment: requires recipient_info with valid email and/or phone details",
+          "reference_tool_calls: send_claim_acknowledgment selects email delivery with null email"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W3_TC1",
+    "title": "Catastrophe Event – Batch Processing, Emergencies Flagged",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task expects complete loss details, but the supplied FNOL text does not provide a loss date, claimant name, or contact information—fields included in the documented extraction output. This leaves unclear how the expected complete extraction and downstream processing are to be achieved.",
+        "evidence": [
+          "task.milestones[0]: expected loss_details = complete",
+          "task.representative_input.source_text",
+          "tools.domain_tools.extract_loss_details: output includes date_of_loss, claimant_name, and contact_info"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected claim numbers, routing, dispatch results, and acknowledgment delivery statuses are plausible, but the reference records tool calls rather than results. The supplied evidence does not verify those exact outcomes.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs",
+          "task.milestones[7].expected_state",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference sequence validates coverage before claim creation and dispatches vendors only for the two emergency claims, which aligns with policy. However, the supplied FNOL text lacks dates and recipient details needed for documented downstream tool inputs, and the reference path shows no clarification or escalation despite the policy’s missing-data recovery requirement.",
+        "evidence": [
+          "policy.action_plan.guidelines: validate coverage before creation or dispatch; trigger emergency services only when warranted",
+          "policy.action_plan.failure_points: request clarification for key missing or ambiguous data and escalate if unresolved",
+          "tools.domain_tools.validate_policy_coverage: requires date_of_loss",
+          "tools.domain_tools.send_claim_acknowledgment: requires recipient_info",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The listed tools support the general processing sequence, but the supplied inputs do not provide a loss date for coverage validation or recipient details for acknowledgment. The evidence therefore does not establish a complete executable path to the expected final result.",
+        "evidence": [
+          "tools.domain_tools.validate_policy_coverage: requires policy_number, date_of_loss, and peril",
+          "tools.domain_tools.send_claim_acknowledgment: requires recipient_info",
+          "task.representative_input"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W4_TC1",
+    "title": "Workers Comp Claim – Lost Time Injury, Medical Dispatch",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task’s expected claim number conflicts with the claim-number format documented for the tools, so the specified outcome and downstream call inputs are not fully consistent.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs.claim_number is \"2026-WC-1123\"",
+          "create_claim_record returns a claim_number in format YYYY-XXXXXX",
+          "route_to_adjuster requires a claim_number in format YYYY-XXXXXX"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The intended claim status, routing, medical dispatch, and acknowledgment align with the milestones, but the specified claim number does not match the documented tool format. The reference contains tool inputs, not returned results, so it also does not demonstrate that the other expected values were produced.",
+        "evidence": [
+          "task.expected_success_outcome.key_outputs.claim_number is \"2026-WC-1123\"",
+          "create_claim_record return format is YYYY-XXXXXX",
+          "python_reference.reference_tool_calls lists calls but no tool return values"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference sequence validates coverage before claim creation and dispatch, and the milestone marks emergency services as needed. However, the evidence does not establish whether the required routing and acknowledgment SLAs were met.",
+        "evidence": [
+          "policy.action_plan.guidelines requires coverage validation before claim creation or vendor dispatch",
+          "python_reference.reference_tool_calls orders validate_policy_coverage before create_claim_record and trigger_emergency_services",
+          "policy.success_criteria specifies routing within 30 minutes for standard claims and timely acknowledgment, but no elapsed times or tool results are supplied"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The documented tools provide a plausible sequence for extraction, validation, assessment, creation, routing, dispatch, and acknowledgment. But the exact expected claim number does not fit the format required by the creation and routing tools, and the reference inputs do not demonstrate successful execution.",
+        "evidence": [
+          "available_tool_definitions documents tools for each listed workflow stage",
+          "create_claim_record return format and route_to_adjuster input format are YYYY-XXXXXX",
+          "python_reference.reference_tool_calls supplies inputs without tool outputs"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W5_TC1",
+    "title": "Attorney-Represented Slip & Fall – Liability, Legal Notification",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The workflow steps mostly align, but the expected claim number conflicts with the documented claim-number format. Also, the reference labels a message to the insured representative as legal notification, although the milestone specifies that the legal team is notified.",
+        "evidence": [
+          "expected_success_outcome.key_outputs.claim_number = \"2026-GL-9988\"",
+          "create_claim_record returns a claim number in format YYYY-XXXXXX; route_to_adjuster also documents that format",
+          "Milestone 6 specifies \"legal team notified\"; the reference sends the attorney_notification to \"Insured Representative\""
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The reference supports claim creation, routing, preservation messaging, and an acknowledgment, but it does not demonstrate notification to the legal team. The fixed claim number also conflicts with the documented format, so the stated success result is not fully supported.",
+        "evidence": [
+          "Reference tool calls send attorney_notification to \"Insured Representative\" and acknowledgment to \"Jane Doe's Attorney\"",
+          "Milestone 6 requires legal team notification",
+          "expected_success_outcome.key_outputs.claim_number = \"2026-GL-9988\"; create_claim_record documents format YYYY-XXXXXX"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The workflow validates coverage before creating the claim and routes it to a senior liability adjuster, but the supplied progression does not show the required human-review escalation for litigation. The record does not establish whether an escalation occurred outside the listed calls.",
+        "evidence": [
+          "Policy guidelines require human review for high-severity or complex cases, explicitly including litigation",
+          "Reference tool calls assess severity as litigation and proceed to SUCCESS without a HUMAN_IN_THE_LOOP call",
+          "Policy guidelines require specialized routing for attorney-represented scenarios; the reference routes the claim to an adjuster"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The listed tools support extraction, validation, severity assessment, creation, routing, and sending communications. However, the reference’s claim number conflicts with the documented format, and no dedicated legal-team notification tool is defined; the generic communication tool could potentially serve that purpose if recipient details were available.",
+        "evidence": [
+          "Tool definitions provide extract_loss_details, validate_policy_coverage, assess_claim_severity, create_claim_record, route_to_adjuster, and send_claim_acknowledgment",
+          "create_claim_record and route_to_adjuster document claim-number format YYYY-XXXXXX; the reference uses 2026-GL-9988",
+          "send_claim_acknowledgment supports attorney_notification but no tool is specifically defined for internal legal-team notification"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W6_TC1",
+    "title": "Denied Claim – Policy Lapsed, Coverage Not Confirmed",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The lapsed policy and unconfirmed coverage meet the W6 selection condition, and the denied status, property classification, and denial notification align across the input, milestones, and expected outcome.",
+        "evidence": [
+          "task.input_conditions",
+          "policy.action_plan.workflow_selection: W6",
+          "task.milestones",
+          "task.expected_success_outcome"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.0,
+        "explanation": "The expected result and milestones cover claim creation and customer denial notification, but omit required routing and regulatory documentation, so they do not satisfy the stated workflow objective.",
+        "evidence": [
+          "task.rationale: triggers denial letter and regulatory documentation",
+          "policy.action_plan.workflow_selection: W6 logic includes regulatory notification",
+          "policy.action_plan.success_criteria: claim routed to an adjuster and all regulatory notifications and documentation completed",
+          "python_reference.reference_tool_calls: no route_to_adjuster call or regulatory documentation step"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference workflow validates coverage before creating the claim, but it omits the policy-required adjuster routing and regulatory notification/documentation for a completed claim.",
+        "evidence": [
+          "policy.action_plan.guidelines: validate coverage before claim creation",
+          "policy.action_plan.success_criteria: routing within SLA and all regulatory notifications and documentation completed",
+          "policy.action_plan.workflow_selection: W6 logic specifies regulatory notification",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools support a plausible path to the listed expected outputs: extract and classify the loss, validate coverage, assess severity, create the denied claim, and send a denial notification. The reference calls describe that path, though they do not demonstrate actual tool results.",
+        "evidence": [
+          "available_tool_definitions: extract_loss_details, classify_claim_type, validate_policy_coverage, assess_claim_severity, create_claim_record, send_claim_acknowledgment",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W7_TC1",
+    "title": "Duplicate Claim – FNOL Already Reported, Link and Notify",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The duplicate-claim condition selects W7, and its stated linking and notification milestones align with the expected duplicate status and sent notification.",
+        "evidence": [
+          "policy.action_plan.workflow_selection: duplicate_claim_found == true selects W7 for linking and acknowledgment",
+          "task.milestones.steps 3–4 and task.expected_success_outcome.key_outputs"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The reference calls include a duplicate notification and a success result, but do not demonstrate that the communication was linked to the existing claim; the create call supplies no existing claim identifier, and no tool result showing linked_claims is provided.",
+        "evidence": [
+          "python_reference.reference_tool_calls: create_claim_record inputs omit an existing claim identifier",
+          "tools.domain_tools.create_claim_record: linked_claims is an optional return field",
+          "task.milestones.step 3: expects linked_claims to contain 2026-445521"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference workflow creates a claim without first calling the required coverage-validation tool, and it does not route the claim to an adjuster despite the policy success criterion requiring routing. Supplying coverage data directly in the create call does not demonstrate validation.",
+        "evidence": [
+          "policy.action_plan.guidelines: always validate policy coverage before claim creation",
+          "python_reference.reference_tool_calls: create_claim_record is called without a preceding validate_policy_coverage call",
+          "policy.action_plan.success_criteria: claim routed to an appropriate team/adjuster within SLA",
+          "python_reference.reference_tool_calls: no route_to_adjuster call"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The tools support extraction, coverage validation, assessment, claim creation, routing, and notification, but the definitions do not establish how to identify or explicitly link the existing claim; the reference calls do not show that linkage occurring.",
+        "evidence": [
+          "tools.domain_tools.create_claim_record: accepts loss, type, coverage, and severity data and may return linked_claims",
+          "tools.domain_tools: no dedicated duplicate-search or claim-linking tool is defined",
+          "python_reference.reference_tool_calls: no existing claim identifier is supplied to create_claim_record"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "insurance_claims_intake",
+    "task_id": "ClaimsAgent_W8_TC1",
+    "title": "Complex Commercial Property Claim – Business Interruption, Large Loss",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The W8 selection condition agrees with the inputs, and the milestones align with a commercial property/BI claim. However, the expected claim numbers (2026-CP-7788 and 2026-BI-7788) do not match the documented YYYY-XXXXXX format, leaving the expected identifiers inconsistent with the tool contract.",
+        "evidence": [
+          "Policy workflow_selection: W8 applies when claim_type is commercial_property and business_interruption is true.",
+          "create_claim_record and route_to_adjuster definitions specify claim-number format YYYY-XXXXXX.",
+          "expected_success_outcome and milestone 5 specify 2026-CP-7788 and 2026-BI-7788."
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected claim number conflicts with the documented format. Also, the expected specialist dispatch is not substantiated by the reference calls: the only dispatch tool handles emergency vendors, and the calls show no dispatch result.",
+        "evidence": [
+          "expected_success_outcome.key_outputs.claim_number: 2026-CP-7788",
+          "Tool definitions for create_claim_record and route_to_adjuster: claim number format YYYY-XXXXXX.",
+          "success_path_differences and milestone 7 require forensic accountant and engineer dispatch.",
+          "trigger_emergency_services dispatches emergency vendors; reference_tool_calls show no returned dispatch confirmation or specialist-dispatch capability."
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The workflow validates coverage before creation and routes the large-loss claim, but the policy also requires human review for high-severity or complex cases. The reference path instead ends in SUCCESS without showing escalation; it is unclear whether an escalation could occur outside the listed path.",
+        "evidence": [
+          "Policy guidelines: escalate to human review for ambiguous, high-severity, or complex cases.",
+          "Task title and milestones identify a large-loss, complex commercial claim.",
+          "python_reference.reference_tool_calls ends with SUCCESS and contains no HUMAN_IN_THE_LOOP call."
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The listed tools plausibly support extraction, classification, coverage validation, claim creation, routing, vendor dispatch, and acknowledgment. They do not document a way to dispatch a forensic accountant or engineer, so the full intended result is not shown to be reachable with the supplied tools.",
+        "evidence": [
+          "available_tool_names includes trigger_emergency_services but no specialist-dispatch tool.",
+          "trigger_emergency_services is documented for emergency vendor dispatch.",
+          "success_path_differences and milestone 7 require forensic accountant and engineer dispatch."
+        ]
+      }
+    }
+  }
+]
