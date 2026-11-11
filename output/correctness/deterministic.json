@@ -1,0 +1,288 @@
+{
+  "dataset": "banking_accounts_deposits",
+  "mode": "deterministic",
+  "task_count": 8,
+  "score": 0.71875,
+  "check_failures": {
+    "schema": 0,
+    "signatures": 1,
+    "references": 8,
+    "output_consistency": 0
+  },
+  "check_applicable_tasks": {
+    "schema": 8,
+    "signatures": 8,
+    "references": 8,
+    "output_consistency": 8
+  },
+  "sources": {
+    "test_cases.json": {
+      "path": "/Users/andersonchan/Documents/Code Projects/BTT/Automation-Anywhere-2B-evaluation-framework-for-synthetic-agent-benchmark-datasets/data/banking_accounts_deposits/test_cases.json",
+      "sha256": "fcd7228764e32c35df5eefa15b6395a2bd7abd5017711f702552ee7b6fc67403"
+    },
+    "test_cases.py": {
+      "path": "/Users/andersonchan/Documents/Code Projects/BTT/Automation-Anywhere-2B-evaluation-framework-for-synthetic-agent-benchmark-datasets/data/banking_accounts_deposits/test_cases.py",
+      "sha256": "0262923d8bfc190a2395a129f053fb83c046e6339740a1eb92b789153df70628"
+    },
+    "agent_definition.yaml": {
+      "path": "/Users/andersonchan/Documents/Code Projects/BTT/Automation-Anywhere-2B-evaluation-framework-for-synthetic-agent-benchmark-datasets/data/banking_accounts_deposits/agent_definition.yaml",
+      "sha256": "b91ed50d09e0c3fc39b68c5482aef90643bd11e4fdf6a639cee3f8a695182323"
+    }
+  },
+  "unmatched_python_classes": [],
+  "results": {
+    "DigitalAccountOpening_W1_TC1": {
+      "checks": {
+        "schema": 1,
+        "signatures": 1,
+        "references": 0,
+        "output_consistency": 1
+      },
+      "score": 0.75,
+      "evidence": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          {
+            "path": "python_fixture.attributes.test_case_id",
+            "message": "Python value disagrees with JSON"
+          }
+        ],
+        "output_consistency": []
+      },
+      "coverage_limits": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          "No initial entity database or returned-entity provenance: existence of other IDs is unverified"
+        ],
+        "output_consistency": [
+          "Cross-file expectations only; real tool execution and final-state outcome assertions are not available"
+        ]
+      },
+      "passed": false
+    },
+    "DigitalAccountOpening_W1_TC2": {
+      "checks": {
+        "schema": 1,
+        "signatures": 1,
+        "references": 0,
+        "output_consistency": 1
+      },
+      "score": 0.75,
+      "evidence": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          {
+            "path": "python_fixture.attributes.test_case_id",
+            "message": "Python value disagrees with JSON"
+          }
+        ],
+        "output_consistency": []
+      },
+      "coverage_limits": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          "No initial entity database or returned-entity provenance: existence of other IDs is unverified"
+        ],
+        "output_consistency": [
+          "Cross-file expectations only; real tool execution and final-state outcome assertions are not available"
+        ]
+      },
+      "passed": false
+    },
+    "DigitalAccountOpening_W2_TC1": {
+      "checks": {
+        "schema": 1,
+        "signatures": 1,
+        "references": 0,
+        "output_consistency": 1
+      },
+      "score": 0.75,
+      "evidence": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          {
+            "path": "python_fixture.attributes.test_case_id",
+            "message": "Python value disagrees with JSON"
+          }
+        ],
+        "output_consistency": []
+      },
+      "coverage_limits": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          "No initial entity database or returned-entity provenance: existence of other IDs is unverified"
+        ],
+        "output_consistency": [
+          "Cross-file expectations only; real tool execution and final-state outcome assertions are not available"
+        ]
+      },
+      "passed": false
+    },
+    "DigitalAccountOpening_W2_TC2": {
+      "checks": {
+        "schema": 1,
+        "signatures": 1,
+        "references": 0,
+        "output_consistency": 1
+      },
+      "score": 0.75,
+      "evidence": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          {
+            "path": "python_fixture.attributes.test_case_id",
+            "message": "Python value disagrees with JSON"
+          }
+        ],
+        "output_consistency": []
+      },
+      "coverage_limits": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          "No initial entity database or returned-entity provenance: existence of other IDs is unverified"
+        ],
+        "output_consistency": [
+          "Cross-file expectations only; real tool execution and final-state outcome assertions are not available"
+        ]
+      },
+      "passed": false
+    },
+    "DigitalAccountOpening_W3_TC1": {
+      "checks": {
+        "schema": 1,
+        "signatures": 1,
+        "references": 0,
+        "output_consistency": 1
+      },
+      "score": 0.75,
+      "evidence": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          {
+            "path": "python_fixture.attributes.test_case_id",
+            "message": "Python value disagrees with JSON"
+          }
+        ],
+        "output_consistency": []
+      },
+      "coverage_limits": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          "No initial entity database or returned-entity provenance: existence of other IDs is unverified"
+        ],
+        "output_consistency": [
+          "Cross-file expectations only; real tool execution and final-state outcome assertions are not available"
+        ]
+      },
+      "passed": false
+    },
+    "DigitalAccountOpening_W6_TC1": {
+      "checks": {
+        "schema": 1,
+        "signatures": 1,
+        "references": 0,
+        "output_consistency": 1
+      },
+      "score": 0.75,
+      "evidence": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          {
+            "path": "python_fixture.attributes.test_case_id",
+            "message": "Python value disagrees with JSON"
+          }
+        ],
+        "output_consistency": []
+      },
+      "coverage_limits": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          "No initial entity database or returned-entity provenance: existence of other IDs is unverified"
+        ],
+        "output_consistency": [
+          "Cross-file expectations only; real tool execution and final-state outcome assertions are not available"
+        ]
+      },
+      "passed": false
+    },
+    "DigitalAccountOpening_W7_TC1": {
+      "checks": {
+        "schema": 1,
+        "signatures": 0,
+        "references": 0,
+        "output_consistency": 1
+      },
+      "score": 0.5,
+      "evidence": {
+        "schema": [],
+        "signatures": [
+          {
+            "path": "python_fixture.attributes.expected_tool_calls.2",
+            "message": "customer_profile disagrees with Python type CustomerProfile"
+          }
+        ],
+        "references": [
+          {
+            "path": "python_fixture.attributes.test_case_id",
+            "message": "Python value disagrees with JSON"
+          }
+        ],
+        "output_consistency": []
+      },
+      "coverage_limits": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          "No initial entity database or returned-entity provenance: existence of other IDs is unverified"
+        ],
+        "output_consistency": [
+          "Cross-file expectations only; real tool execution and final-state outcome assertions are not available"
+        ]
+      },
+      "passed": false
+    },
+    "DigitalAccountOpening_W8_TC1": {
+      "checks": {
+        "schema": 1,
+        "signatures": 1,
+        "references": 0,
+        "output_consistency": 1
+      },
+      "score": 0.75,
+      "evidence": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          {
+            "path": "python_fixture.attributes.test_case_id",
+            "message": "Python value disagrees with JSON"
+          }
+        ],
+        "output_consistency": []
+      },
+      "coverage_limits": {
+        "schema": [],
+        "signatures": [],
+        "references": [
+          "No initial entity database or returned-entity provenance: existence of other IDs is unverified"
+        ],
+        "output_consistency": [
+          "Cross-file expectations only; real tool execution and final-state outcome assertions are not available"
+        ]
+      },
+      "passed": false
+    }
+  }
+}

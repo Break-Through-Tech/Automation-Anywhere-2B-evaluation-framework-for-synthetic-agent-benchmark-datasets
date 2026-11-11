@@ -2,10 +2,21 @@
 .env
 .vscode/settings.json
 /venv
-.venv
+.venv/
 *.pyc
 handoff
 .pytest_cache
 /correctness_op/__pycache__
 
-/data/__pycache__
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+/build/
+/dist/
+/htmlcov/
+.coverage
+.coverage.*
+
+# Generated evaluation outputs and reports.
+/output/

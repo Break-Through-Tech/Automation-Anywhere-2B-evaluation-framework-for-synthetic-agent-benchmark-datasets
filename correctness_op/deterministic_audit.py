@@ -273,8 +273,13 @@ def eval_expr(node, env):
         if type(op) in ops:
             return ops[type(op)]()
     if isinstance(node, ast.BoolOp):
-        values = [bool(eval_expr(x, env)) for x in node.values]
-        return all(values) if isinstance(node.op, ast.And) else any(values)
+        value = eval_expr(node.values[0], env)
+        for operand in node.values[1:]:
+            if (isinstance(node.op, ast.And) and not value
+                    or isinstance(node.op, ast.Or) and value):
+                return value
+            value = eval_expr(operand, env)
+        return value
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
         return not eval_expr(node.operand, env)
     if isinstance(node, ast.BinOp):
@@ -622,6 +627,7 @@ def audit_domain(domain, seen_ids, base_config):
         data = json.loads((domain / 'test_cases.json').read_text(encoding='utf-8'))
     except (OSError, json.JSONDecodeError) as exc:
         report['warnings'].append(f'test_cases.json unreadable: {exc}')
+        report.update(summarize([]))
         return report
     candidates, warnings = discover_tasks(data)
     report['warnings'] += warnings
