@@ -20,3 +20,6 @@ __pycache__/
 
 # Generated evaluation outputs and reports.
 /output/
+
+#README made on overview of tau bench functionality
+correctness_op/README_tau_llm_judge.md
