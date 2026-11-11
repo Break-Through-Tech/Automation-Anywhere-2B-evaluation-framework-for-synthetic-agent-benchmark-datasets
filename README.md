@@ -1,5 +1,36 @@
 # AI Studio Challenge Project Title
 
+## Correctness evaluation
+
+Offline τ²-bench task evaluation, controlled corruption validation, readable
+Markdown reports, and terminal summaries are available. See the
+[correctness evaluation guide](validation/README.md) for installation and usage.
+
+```bash
+.venv/bin/python -m validation.correctness_checker --demo --output output/demo-validation
+```
+
+The command writes `report.md`, detailed JSON, a CSV summary, and its input manifest.
+
+## Clean before a release
+
+Run from the repository root:
+
+```bash
+make -n clean  # Preview cleanup commands
+make clean     # Delete generated outputs, Python caches, and build artifacts
+```
+
+Cleanup removes all of `output/`, `__pycache__/` directories, `build/`, `dist/`,
+test/lint/type-check caches, and coverage artifacts. It preserves source code,
+datasets, `.env`, and virtual environments (`.venv/` and `venv/`). Use
+`make clean-output` to remove only outputs, or `make clean-cache` to keep reports.
+Copy any reports you want to retain outside `output/` before cleaning.
+
+Generated outputs are ignored by Git. Reports already tracked in Git remain
+tracked until removed; cleaning them will appear as deletions in `git status`.
+Review those changes before committing a release.
+
 > 💡 **Note for the team:** This is just a template. Update the above title with your AI Studio Challenge Project name. Remove all guidance notes and example text in this template and populate this README with your own content. You can work on this README throughout AI Studio, and get feedback from your AI Studio Coach and Challenge Advisor before finalizing it.  
 
 ---

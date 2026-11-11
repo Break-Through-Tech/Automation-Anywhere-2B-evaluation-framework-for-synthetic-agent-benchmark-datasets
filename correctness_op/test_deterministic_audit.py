@@ -149,6 +149,26 @@ class StaticReaderTest(unittest.TestCase):
         m = self.method('def f(x):\n    import os\n    return os.getcwd()\n')
         self.assertIs(da.static_response(m, {'x': 1}), da.UNKNOWN)
 
+    def test_boolean_operators_return_operand_values(self):
+        for expression, value, expected in (
+                ('x or "fallback"', 'C1', 'C1'),
+                ('x or "fallback"', '', 'fallback'),
+                ('x and "ready"', 'C1', 'ready'),
+                ('x and "ready"', 0, 0),
+                ('x and "ready"', [], []),
+                ('x or [] or {"id": "C1"}', None, {'id': 'C1'})):
+            with self.subTest(expression=expression, value=value):
+                method = self.method(f'def f(x):\n    return {{"value": {expression}}}\n')
+                actual = da.static_response(method, {'x': value})
+                self.assertEqual(actual, {'value': expected})
+                self.assertIs(type(actual['value']), type(expected))
+
+    def test_boolean_operators_skip_unreachable_expressions(self):
+        for expression, value in (('x or missing()', 'C1'), ('x and missing()', 0)):
+            with self.subTest(expression=expression):
+                method = self.method(f'def f(x):\n    return {expression}\n')
+                self.assertEqual(da.static_response(method, {'x': value}), value)
+
     def test_huge_multiplication_is_refused(self):
         m = self.method('def f():\n    return "a" * 10**9\n')
         self.assertIs(da.static_response(m, {}), da.UNKNOWN)
@@ -167,6 +187,30 @@ class AuditDomainTest(unittest.TestCase):
         self.assertEqual(task['D_i'], 1.0)
         if da.yaml is not None:
             self.assertEqual(report['warnings'], [])
+
+    def test_unreadable_json_has_complete_empty_summary(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            report = da.audit_domain(Path(tmp), {}, da.DEFAULT_CONFIG)
+        self.assertTrue(report['warnings'])
+        self.assertEqual(report['tasks'], [])
+        for key, value in da.summarize([]).items():
+            self.assertEqual(report[key], value)
+
+    def test_cli_reports_malformed_json_and_continues_other_domains(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            bad = root / 'bad'
+            bad.mkdir()
+            (bad / 'test_cases.json').write_text('{bad json')
+            write_domain(root / 'good')
+            proc = subprocess.run([sys.executable, str(SCRIPT), '--data-dir', str(root)],
+                                  capture_output=True, text=True, timeout=30)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn('WARNING: test_cases.json unreadable:', proc.stdout)
+        self.assertIn('=== good ===', proc.stdout)
+        self.assertIn('=== ALL ===', proc.stdout)
+        self.assertIn('Discovered: 1 | Audited: 1', proc.stdout)
+        self.assertNotIn('Traceback', proc.stderr)
 
     def test_wrong_expected_output_fails(self):
         task = self.audit(expected_success_outcome={'final_status': 'SUCCESS',

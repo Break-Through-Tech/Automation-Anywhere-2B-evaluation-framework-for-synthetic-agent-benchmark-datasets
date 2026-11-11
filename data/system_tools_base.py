@@ -23,7 +23,8 @@ html_llm = ChatOpenAI(
     model=model_name,
     openai_api_key=openai_api_key,
     openai_api_base=base_url,
-    temperature=0
+    temperature=1,
+    reasoning_effort="none"
 )
 
 print(f"✓ Initialized OpenAI model: {model_name}\n")
