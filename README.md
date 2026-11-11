@@ -12,6 +12,19 @@ Markdown reports, and terminal summaries are available. See the
 
 The command writes `report.md`, detailed JSON, a CSV summary, and its input manifest.
 
+Open [Correctness validation](notebooks/correctness_validation.ipynb) to rerun the
+demo, check that the reports match across runs, and plot observed versus expected
+scores. From the repository root, install the `notebook` extra and launch
+JupyterLab in the project environment.
+
+```bash
+uv sync --locked --extra notebook
+uv run --no-sync jupyter lab notebooks/correctness_validation.ipynb
+```
+
+Include `--extra tau2` on the sync command if you also use the benchmark integration.
+Restart any running notebook kernels after syncing the environment.
+
 ## Clean before a release
 
 Run from the repository root:
