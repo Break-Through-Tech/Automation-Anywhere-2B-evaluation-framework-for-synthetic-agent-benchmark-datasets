@@ -198,6 +198,13 @@ class PinnedDatasetTests(unittest.TestCase):
             self.assertTrue(all(r["benchmark_commit"] == BENCHMARK_COMMIT and r["task_score"] == 0.5 for r in records))
             self.assertEqual((Path(tmp) / "task_scores.csv").read_text().splitlines()[0], "domain,task_id,task_score," + ",".join(judge.DIMENSIONS) + ",uncertain_count")
             self.assertIn("OVERALL,3,0.5,12,0", (Path(tmp) / "domain_scores.csv").read_text())
+            for domain in ("airline", "retail", "telecom"):
+                folder = Path(tmp) / domain
+                domain_records = json.loads((folder / "judge_details.json").read_text())
+                self.assertEqual(len(domain_records), 1)
+                self.assertEqual(domain_records[0]["domain"], domain)
+                self.assertEqual(len((folder / "task_scores.csv").read_text().splitlines()), 2)
+                self.assertIn("OVERALL,1,0.5,4,0", (folder / "domain_scores.csv").read_text())
             for field, value in (("benchmark_commit", "wrong"), ("model", "other-model"), ("prompt_version", "wrong"), ("split", "test")):
                 changed = {**metadata, field: value}
                 (Path(tmp) / "run_metadata.json").write_text(json.dumps(changed))
@@ -226,10 +233,27 @@ class PinnedDatasetTests(unittest.TestCase):
                     self.cli(*args)
             saved = json.loads((Path(tmp) / "judge_details.json").read_text())
             self.assertEqual(len(saved), 1)
+            self.assertEqual(json.loads((Path(tmp) / "airline/judge_details.json").read_text()), saved)
             with patch.object(judge, "judge_task", return_value=self.judgment()) as mocked:
                 self.cli(*args)
                 self.assertEqual(mocked.call_count, 1)
             self.assertEqual(len(json.loads((Path(tmp) / "judge_details.json").read_text())), 2)
+            self.assertEqual(len(json.loads((Path(tmp) / "airline/judge_details.json").read_text())), 2)
+
+    def test_resuming_legacy_combined_results_creates_domain_reports_without_rejudging(self):
+        with tempfile.TemporaryDirectory() as tmp, patch.dict("os.environ", {"OPENAI_API_KEY": "offline-test-placeholder"}), patch("openai.OpenAI"):
+            args = ("--dataset", "tau2", "--domain", "airline", "--limit", "1", "--model", "gpt-6-luna", "--output-dir", tmp, "--resume")
+            with patch.object(judge, "judge_task", return_value=self.judgment()):
+                self.cli(*args)
+            # Remove only temporary fixture reports to recreate the original layout.
+            folder = Path(tmp) / "airline"
+            for path in folder.iterdir():
+                path.unlink()
+            folder.rmdir()
+            with patch.object(judge, "judge_task", side_effect=AssertionError("Must reuse saved judgment")):
+                self.cli(*args)
+            self.assertEqual(json.loads((folder / "judge_details.json").read_text()),
+                             json.loads((Path(tmp) / "judge_details.json").read_text()))
 
 
 if __name__ == "__main__":

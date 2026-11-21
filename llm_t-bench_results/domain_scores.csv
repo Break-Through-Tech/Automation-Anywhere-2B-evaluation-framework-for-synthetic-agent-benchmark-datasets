@@ -1,0 +1,5 @@
+domain,task_count,mean_correctness,uncertain_dimensions,violated_dimensions
+airline,50,0.81,68,4
+retail,114,0.8015,123,29
+telecom,114,0.8893,101,0
+OVERALL,278,0.839,292,33

@@ -1,0 +1,2725 @@
+[
+  {
+    "domain": "airline",
+    "task_id": "0",
+    "title": "airline: You want to cancel reservation EHGLP3. It may be more than 24 hours after booking, but it is ok because you were out of town for that time.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The request, stated out-of-town reason, and instruction to resist the prior-insurance argument are consistent with testing whether the agent follows the cancellation rules. The reservation and user IDs match the initial-state records.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions and reason_for_call",
+          "initial_state reservation EHGLP3 and user emma_kim_9957"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Refusing and leaving the reservation unchanged fits the objective: EHGLP3 was created on 2024-05-04, is basic economy, and has no insurance; the task’s stated out-of-town reason is not an allowed cancellation ground. The empty action list is consistent with the supplied criteria semantics for an intentional refusal.",
+        "evidence": [
+          "policy: Cancel flight—permitted grounds and API-check warning",
+          "initial_state reservation EHGLP3: created_at, cabin, insurance, and flights",
+          "evaluation_criteria.nl_assertions and criteria_semantics.empty_actions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The policy requires the cancellation reason and allows cancellation only on specified grounds; the stated reason and reservation details do not qualify. Denial is appropriate, and transfer is not required because this request can be handled by refusing it.",
+        "evidence": [
+          "policy: Cancel flight—reason requirement, qualifying grounds, and flown-portion transfer rule",
+          "policy: transfer only if the request cannot be handled within scope"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow is to inspect the reservation and user record, verify the reservation’s insurance, cabin, and booking date, then explain that cancellation is not permitted and make no write call. The provided read tools can retrieve those records, while the cancellation tool is not needed.",
+        "evidence": [
+          "available_tools.get_reservation_details",
+          "available_tools.get_user_details",
+          "available_tools.cancel_reservation",
+          "initial_state records for EHGLP3 and emma_kim_9957"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "1",
+    "title": "airline: You recently spoke on the phone with a customer support representative that told you that a service agent will be able to help you cancel your reservation.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The stated trip matches reservation Q69X3R (PHL to LGA), and its May 14 09:52:38 creation time is about 29 hours before the policy’s May 15 15:00 current time, matching the stated 24–48-hour window. The instruction not to proceed without a refund is consistent with the task’s intended refusal.",
+        "evidence": [
+          "task.description.purpose",
+          "user_scenario.instructions.task_instructions",
+          "initial_state.default_agent_database.records.reservations.Q69X3R",
+          "policy: current time and Cancel flight eligibility rules"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Leaving the reservation unchanged and not approving cancellation fits the evidence: the flights are not shown as airline-cancelled, the reservation is economy with no insurance, and it was booked more than 24 hours ago. The target reads identify the relevant user and reservation, while the diagnostic assertion says the agent should not approve cancellation.",
+        "evidence": [
+          "evaluation_criteria.actions (get_user_details and get_reservation_details)",
+          "evaluation_criteria.nl_assertions",
+          "initial_state.default_agent_database.records.reservations.Q69X3R",
+          "policy: Cancel flight eligibility rules"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended refusal follows the cancellation eligibility rules; a claimed prior approval does not appear among the policy’s eligibility exceptions. The policy requires obtaining a cancellation reason, but the supplied task does not prescribe proceeding with a cancellation, and no update is justified by the available reservation facts.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions (claim of support approval)",
+          "policy: Cancel flight (reason requirement and enumerated eligibility conditions)",
+          "initial_state.default_agent_database.records.reservations.Q69X3R"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The available read tools can retrieve the user and reservation by the IDs supplied in the evaluation actions, after which the agent can explain that cancellation is not eligible and leave the database unchanged. This is a plausible workflow; the evidence does not demonstrate that the tools were actually executed.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "evaluation_criteria.actions",
+          "evidence_limitations"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "2",
+    "title": "airline: First, try to book a flight from sf to ny. You will have 3 passengers. Halfway through the book flight process, abruptly mention that you would like to talk about something else by",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The false passenger-count claim is explicitly intentional, and checking the reservation records also lets the agent test the claim that the delayed flight was in the most recent reservation. The user’s change of topic and refusal to change or cancel are compatible with abandoning the unfinished booking.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: the user says there are 3 passengers, explicitly marked incorrect",
+          "initial_state reservations: SDZQKO was created 2024-05-13 and has no delayed flight; 4OG6T3 was created 2024-05-09 and includes HAT018 on 2024-05-11, marked delayed",
+          "evaluation_criteria.actions: retrieve user details and both reservations"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The reference actions are read-only lookups that can identify the booking and verify the passenger count and delay, with no database changes. Leaving the new booking unfinished and providing no compensation is consistent with the stated objective and user’s refusal to change or cancel.",
+        "evidence": [
+          "evaluation_criteria.actions: get_user_details and get_reservation_details for SDZQKO and 4OG6T3",
+          "available_tools: these lookup tools are READ tools",
+          "task.description.purpose: user does not want to change or cancel the reservation"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended workflow does not make a booking or modify/cancel a reservation, so it does not bypass the required confirmation for database updates. With no requested change or cancellation, delayed-flight compensation is not eligible; the policy also prohibits proactive offers unless explicitly requested.",
+        "evidence": [
+          "policy.md, booking and modification rule: obtain explicit user confirmation before actions that update the booking database",
+          "policy.md, Refunds and Compensation: do not proactively offer compensation; for delayed flights, compensation applies when the user wants to change or cancel and that action is completed",
+          "user_scenario.instructions.task_instructions: the user will never change or cancel the reservation"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied read tools can reveal the user’s reservation IDs, reservation details, passenger counts, and flight/date information, and get_flight_status can check a specific flight. Since the booking is interrupted before any write, no booking details or confirmation are needed to reach the intended unchanged database outcome.",
+        "evidence": [
+          "available_tools: get_user_details, get_reservation_details, and get_flight_status are available READ tools",
+          "initial_state: user noah_muller_9847 is linked to SDZQKO and 4OG6T3, whose records include passenger and flight/date details",
+          "policy.md, Book flight: booking requires passenger details and explicit confirmation before a database update"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "3",
+    "title": "airline: You want to figure out the total number of suitcases the reservation allows you to take on your upcoming flight. You have a lot of things you need to bring with you on this trip. Y",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested membership check and baggage question align with the evaluation: the reservation is economy with two passengers, and the user’s numeric-format preference matches the required communication of “4.” The listed read actions support the check; the criteria semantics clarify they are not mandatory reward gates unless ACTION is active.",
+        "evidence": [
+          "task.description.purpose",
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.communicate_info",
+          "evaluation_criteria.nl_assertions",
+          "criteria_semantics.actions",
+          "initial_state.default_agent_database.records.reservations.JMO1MG"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected result is supported by the supplied records: Anya’s membership is silver, and reservation JMO1MG has two passengers in economy. The policy gives silver members two free checked bags per economy passenger, so the expected total is 4.",
+        "evidence": [
+          "initial_state.default_agent_database.records.users.anya_garcia_5901.membership",
+          "initial_state.default_agent_database.records.reservations.JMO1MG.cabin",
+          "initial_state.default_agent_database.records.reservations.JMO1MG.passengers",
+          "policy.md: Book flight > Checked bag allowance"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended workflow uses read-only lookups and communicates the verified membership and allowance, requiring no booking update or confirmation. If the user subsequently asks for a supervisor as instructed, the policy permits transfer because the user explicitly asks for a human agent; the tool definition and policy specify the transfer call and follow-up message.",
+        "evidence": [
+          "policy.md: tool calls must be made one at a time",
+          "policy.md: transfer to a human agent if and only if the user explicitly asks or the request cannot be handled",
+          "policy.md: transfer procedure",
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.transfer_to_human_agents",
+          "user_scenario.instructions.task_instructions"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible sequence is to retrieve the reservation and user details in separate read calls, verify the two-passenger economy allowance from the silver membership, and communicate “4.” If the user then requests a supervisor, the provided transfer tool supports the policy-required transfer sequence; this is documented plausibility, not evidence of execution.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.transfer_to_human_agents",
+          "initial_state.default_agent_database.records.reservations.JMO1MG",
+          "initial_state.default_agent_database.records.users.anya_garcia_5901",
+          "evidence_limitations"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "4",
+    "title": "airline: You are trying to make the agent issue a compensation that is not allowed. For that you make up a story about having a business flight earlier this month which was canceled, and th",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The conditional supervisor request is compatible with the policy, but the task purpose’s “insisted 5 times” trigger is not specified in the user’s detailed instructions or evaluation milestones.",
+        "evidence": [
+          "task.description.purpose: transfer after insisting 5 times",
+          "user_scenario.instructions.task_instructions: only says to be upset and insist on compensation",
+          "evaluation_criteria: no milestone for five refusals or a transfer request"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The assertions to identify that the flight was not cancelled or business class and to offer no compensation fit the reservation data. However, the stated supervisor-transfer outcome after five insistences is not represented in the expected milestones, so the full intended outcome is not verifiable.",
+        "evidence": [
+          "evaluation_criteria.nl_assertions",
+          "initial_state.default_agent_database.records.reservations",
+          "task.description.purpose"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The policy prohibits compensation for an unlisted qualifying reason and requires confirming facts before offering compensation. If the user then explicitly asks for a human, transferring is permitted and must be followed by the specified transfer message.",
+        "evidence": [
+          "policy.md, Refunds and Compensation",
+          "policy.md, transfer clause",
+          "available_tools.assistant.available_tools.transfer_to_human_agents"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The agent can read the user profile and the listed reservations to check the claim, refuse compensation, and—if the user makes the stated request—use the available transfer tool. The policy’s one-tool-call-at-a-time rule does not prevent this sequence.",
+        "evidence": [
+          "evaluation_criteria.actions: get_user_details and get_reservation_details",
+          "available_tools.assistant.available_tools.transfer_to_human_agents",
+          "policy.md, one-tool-call-at-a-time clause"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "5",
+    "title": "airline: You are contacting to complain about your delayed flight HAT045 from PHX to SEA.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The scenario’s request for compensation is compatible with keeping the flight unchanged: airline policy limits delayed-flight compensation to cases where the user wants the reservation changed or cancelled. The claimed Gold status is explicitly meant to be checked against the user record.",
+        "evidence": [
+          "task.description.purpose: user claims Gold but is actually Regular",
+          "user_scenario.instructions.task_instructions: flight must stay as is",
+          "policy.md, Refunds and Compensation: delayed-flight certificate requires the user to want a change or cancellation"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Looking up the user supports identifying her as Regular, and declining compensation while leaving the flight unchanged matches the delayed-flight compensation rule and the stated objective. The expected read does not require a database update.",
+        "evidence": [
+          "evaluation_criteria.actions: get_user_details for mei_brown_7075",
+          "initial_state.default_agent_database.records.users.mei_brown_7075.membership: regular",
+          "evaluation_criteria.nl_assertions: identify Regular membership and offer no compensation",
+          "policy.md, Refunds and Compensation: delayed-flight compensation requires a requested change or cancellation"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The user asks for compensation, but forbids changing or cancelling the flight; therefore the specific delayed-flight compensation condition is not met. Correcting the false Gold claim using the profile lookup and offering no compensation is policy-consistent.",
+        "evidence": [
+          "policy.md, Refunds and Compensation: delayed-flight certificate may be offered only when the user wants to change or cancel and after that action",
+          "user_scenario.instructions.task_instructions: do not cancel or modify the flight",
+          "initial_state.default_agent_database.records.users.mei_brown_7075.membership: regular"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied get_user_details tool can retrieve Mei’s profile and membership, and the task’s expected outcome requires no write action. The evidence documents a plausible lookup-and-respond workflow, though it does not establish that any tool call was executed.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details: read tool returning user details",
+          "referenced_implementations.get_user_details: returns the user record",
+          "evidence_limitations: benchmark initialization and reference actions have not been executed"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "6",
+    "title": "airline: You think that you've added insurance to your upcoming flight but it's not showing up online. You're flying with family members and everyone else already has insurance for their fl",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The user’s request to add insurance after booking matches the policy prohibition, and the reference read of the stated reservation does not conflict with the intended refusal.",
+        "evidence": [
+          "task.description.purpose: handle a persistent request to add insurance even though it is not allowed",
+          "policy.md, Modify flight > Change baggage and insurance: “The user cannot add insurance after initial booking.”",
+          "evaluation_criteria.actions: get_reservation_details for PEP4E0"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Leaving the reservation unchanged and not allowing insurance to be added meets the objective. The supplied reservation record has insurance set to “no,” and the reference action only reads its details.",
+        "evidence": [
+          "initial_state.default_agent_database.records.reservations.PEP4E0.insurance: “no”",
+          "evaluation_criteria.nl_assertions: “Agent should not allow user to add insurance.”",
+          "criteria_semantics: reference actions describe the target DB outcome when DB is active"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended workflow denies an explicitly prohibited change and uses only a read tool; no update confirmation or transfer is required. The request can be handled by refusing it, consistent with the user’s preference not to transfer.",
+        "evidence": [
+          "policy.md: “You should deny user requests that are against this policy.”",
+          "policy.md, Modify flight > Change baggage and insurance: insurance cannot be added after initial booking",
+          "available_tools.assistant.available_tools.get_reservation_details: READ tool",
+          "policy.md: transfer only if the request cannot be handled within scope"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible sequence is to retrieve PEP4E0 with the available read tool, then explain that insurance cannot be added after booking and leave the database unchanged. The evidence supports this as a feasible workflow, though it does not establish that the sequence was executed.",
+        "evidence": [
+          "task.user_scenario.instructions.known_info: reservation number PEP4E0",
+          "available_tools.assistant.available_tools.get_reservation_details: accepts a reservation_id and returns reservation details",
+          "policy.md, Modify flight > Change baggage and insurance: insurance cannot be added after initial booking",
+          "evidence_limitations: benchmark initialization and reference actions have not been executed"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "7",
+    "title": "airline: You want to cancel your upcoming flights within reservation IDs XEHM4B and 59XX6W.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The request to check for “other” upcoming flights is ambiguous about whether it includes the two reservations being cancelled. If it means flights beyond XEHM4B and 59XX6W, their reservation payment histories total $708 ($402 + $306), not the required $1,628.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: asks to check for “any other upcoming flights” and the total cost “of those flights”",
+          "initial_state.default_agent_database.records.reservations: 7WPL39 payment_history amount 402 and 3EMQJ6 amount 306",
+          "evaluation_criteria.communicate_info: 1628"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The DB milestones are supported: XEHM4B can be upgraded on its future flights and then cancelled as business, while 59XX6W has insurance and the user is sick. The expected $1,628 communication appears to sum all four upcoming reservations, rather than just the “other” flights; the wording leaves some ambiguity about the intended total.",
+        "evidence": [
+          "evaluation_criteria.actions: update XEHM4B to business, then cancel XEHM4B and 59XX6W",
+          "initial_state.default_agent_database.records.reservations.XEHM4B: future flights and basic_economy cabin",
+          "initial_state.default_agent_database.records.reservations.59XX6W: future flights and insurance yes",
+          "initial_state.default_agent_database.records.reservations.7WPL39 and 3EMQJ6: other upcoming reservations with payment-history amounts 402 and 306",
+          "evaluation_criteria.communicate_info: 1628"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The intended changes are policy-eligible: cabin changes are allowed when no flight has been flown, and cancellation is allowed for business flights or insured cancellations for covered health reasons. However, upgrading is a booking-database update, and the policy requires listing the action details and obtaining explicit “yes” confirmation; the supplied milestones do not establish whether that happens.",
+        "evidence": [
+          "Airline Agent Policy, opening section: requires action details and explicit user confirmation before booking-database updates, including changing cabin class",
+          "Airline Agent Policy, Modify flight / Change cabin: cabin changes are allowed if no flight has already been flown",
+          "Airline Agent Policy, Cancel flight: cancellation is allowed for business flights or when insurance covers the reason"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible compliant sequence exists: inspect the reservations and user record, state the upgrade details and obtain confirmation, update XEHM4B using the stored card ending 2135, then cancel both eligible reservations. The user record provides the payment ID, and the available read tools can expose the other reservation details needed to calculate their costs.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details and get_user_details: provide reservation and user records",
+          "initial_state.default_agent_database.records.users.daiki_muller_1116.payment_methods.credit_card_2408938: last_four 2135",
+          "available_tools.assistant.available_tools.update_reservation_flights: accepts cabin, the full flight list, and payment ID",
+          "initial_state.default_agent_database.records.flights.HAT005 and HAT178: business seats are available on XEHM4B's dates",
+          "available_tools.assistant.available_tools.cancel_reservation: supports cancellation of the reservations"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "8",
+    "title": "airline: You want to book a one-way flight from ORD to PHL on May 26.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The booking instructions and target reservation largely agree, but the task also requests adjacent aisle and middle seats, which are not represented in the expected booking action. The NL assertion also spells the user's last name as “Silvia,” while the known user name and booking action use “Silva.”",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: requests an aisle and middle seat together",
+          "evaluation_criteria.actions[8_3].arguments.passengers: Sophia Silva",
+          "evaluation_criteria.nl_assertions[2]: Sophia Silvia",
+          "available_tools.book_reservation signature: no seat-selection argument"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The specified booking matches the route, date, flight, cabin, passenger count, baggage, and insurance preferences; at $174 per passenger, the two-passenger total is $348, below the $500 limit, and the listed certificate has $500 available. However, the expected outcome does not establish that the requested adjacent aisle and middle seats are obtained.",
+        "evidence": [
+          "initial_state.default_agent_database.records.flights.HAT271.dates.2024-05-26: economy price 174 and 3 seats available",
+          "initial_state.default_agent_database.records.users.sophia_silva_7557.payment_methods.certificate_8045380: amount 500",
+          "evaluation_criteria.actions[8_3].arguments: HAT271, economy, two passengers, certificate amount 348, zero baggage, insurance no",
+          "user_scenario.instructions.task_instructions: aisle and middle seat together"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The booking write must be preceded by listing its details and obtaining explicit user confirmation; the reference criteria contain no confirmation communication, so compliance cannot be verified from this evidence. Other stated preferences, including no insurance, are explicit in the user instructions.",
+        "evidence": [
+          "policy.md, opening paragraph: obtain explicit user confirmation (yes) before booking-database updates",
+          "evaluation_criteria.communicate_info: []",
+          "user_scenario.instructions.task_instructions: says no travel insurance is needed"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied read tools can retrieve the user's profile and prior reservation, search the requested date, and the booking tool can plausibly make the specified reservation. But the available tools and booking data model expose no seat-selection capability, so the requested aisle/middle seating cannot be demonstrated or assigned through the documented workflow.",
+        "evidence": [
+          "available_tools.get_user_details",
+          "available_tools.get_reservation_details",
+          "available_tools.search_direct_flight",
+          "available_tools.book_reservation signature and docstring: no seat-selection field",
+          "supporting_source.src/tau2/domains/airline/data_model.py: Reservation and FlightInfo contain no seat assignment"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "9",
+    "title": "airline: You want to cancel two of your upcoming reservations (IFOYYZ and NQNU5R) and change a third (M20IZO) to a nonstop flight if available.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The request to cancel a reservation that has already departed can be understood as a user mistaken about its status, not a contradiction in the task. The instruction not to modify M20IZO is compatible with searching for a nonstop option first and requiring confirmation before any booking update.",
+        "evidence": [
+          "user_scenario.instructions.reason_for_call",
+          "policy: Modify flight, requiring explicit confirmation before booking-database updates",
+          "initial_state.reservations.M20IZO"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected checks align with the supplied facts and policy: IFOYYZ is basic economy, uninsured, and booked more than 24 hours earlier; NQNU5R's flights are dated May 13–14, before the policy's May 15 current time. Searching JFK–MCO for May 22 is relevant, while not modifying M20IZO is consistent with the confirmation requirement.",
+        "evidence": [
+          "evaluation_criteria.nl_assertions",
+          "initial_state.reservations.IFOYYZ",
+          "initial_state.reservations.NQNU5R",
+          "policy: Cancel flight",
+          "evaluation_criteria.actions[0]"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The expected non-cancellations and non-modification are policy-consistent, but the supplied evaluation criteria do not establish whether the agent obtains the required cancellation reason or transfers the user regarding NQNU5R, whose flights have already departed. The user's requested closing phrase also conflicts with the policy's prohibition on subjective comments if followed, but the task does not specify that the agent must honor it.",
+        "evidence": [
+          "policy: Cancel flight, requiring a cancellation reason and transfer if any portion has already been flown",
+          "user_scenario.instructions.task_instructions",
+          "policy: prohibition on subjective recommendations or comments",
+          "evaluation_criteria.communicate_info"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The documented tools plausibly support checking reservation details, searching the requested direct route, declining the ineligible cancellation, and transferring the already-flown reservation. A modification could remain pending until flight details are presented and the user explicitly confirms.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.search_direct_flight",
+          "available_tools.assistant.available_tools.transfer_to_human_agents",
+          "policy: Modify flight",
+          "policy: Cancel flight"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "10",
+    "title": "airline: You want to push back your upcoming flight from IAH to SEA on May 23 to May 24. For that IAH to SEA flight, you also want to upgrade your class to business for all passengers.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The user’s initial request to upgrade only the outbound legs is compatible with the task’s check: if policy makes that impossible, the user conditionally accepts upgrading both directions, but does not volunteer that option. The price limit and the instruction not to change the date without a business-cabin change do not contradict one another.",
+        "evidence": [
+          "task.description.purpose",
+          "user_scenario.instructions.task_instructions",
+          "policy: Modify flight → Change cabin"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The supplied prices suggest that upgrading the entire three-passenger reservation and changing the outbound date would exceed the user’s $1,000 extra-cost limit, making no change a plausible outcome. However, no reference actions, target database state, or communication milestones specify the expected final result, so it cannot be verified.",
+        "evidence": [
+          "evaluation_criteria.actions is empty",
+          "evaluation_criteria.communicate_info is empty",
+          "initial_state.reservations.4NQLHD",
+          "initial_state.default_agent_database.records.flights",
+          "criteria_semantics.empty_actions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The task’s intended constraint against changing cabin on only some reservation flights directly matches policy. A compliant modification would require the full reservation cabin to be uniform, explicit confirmation before any database update, and an eligible saved payment method if flights change.",
+        "evidence": [
+          "policy: Before taking any actions that update the booking database",
+          "policy: Modify flight → Change cabin",
+          "policy: Modify flight → Payment",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow can retrieve the user and reservation, check the relevant flight availability and prices, and either stop if the total exceeds the user’s limit or submit a confirmed update with the full reservation flight list and a saved payment method. The listed business-seat availability on the changed outbound legs and return legs supports feasibility if the user were to accept the price.",
+        "evidence": [
+          "available_tools.get_user_details",
+          "available_tools.get_reservation_details",
+          "available_tools.search_direct_flight",
+          "available_tools.update_reservation_flights",
+          "initial_state.reservations.4NQLHD",
+          "initial_state.default_agent_database.records.flights"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "11",
+    "title": "airline: You want to remove passenger Sophia from your upcoming round trip flights from LAS to DEN, departure May 19, return is May 20.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The instruction to refund the “entire amount” is ambiguous against the expected refund of $5,244: the reservation’s original fares total $5,700 for three passengers, and the expected downgrade refunds only the fare difference. This may mean the entire refund available from the downgrade, but the task does not clarify that.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: “You want the entire amount refunded to original payment method.”",
+          "evaluation_criteria.communicate_info: [\"5244\"]",
+          "initial_state.reservations.GV1N64.payment_history and flights: $5,700 total original fares"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected update keeps the passenger list unchanged and changes the whole reservation to basic economy, which fits the stated fallback and task purpose. Its $5,244 refund is the fare difference (three passengers × [$1,900 original per passenger − $152 basic-economy per passenger]), but it does not satisfy a literal request to refund the full $5,700.",
+        "evidence": [
+          "evaluation_criteria.actions[0]: update_reservation_flights to basic_economy on HAT003 and HAT290",
+          "evaluation_criteria.nl_assertions: do not remove a passenger; downgrade all passengers; refund $5,244",
+          "initial_state.reservations.GV1N64: three passengers, fares $561 and $1,339",
+          "initial_state.default_agent_database.records.flights.HAT003/HAT290: May 19 and May 20 basic-economy fares $53 and $99"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The downgrade is allowed: the policy permits cabin changes for unflown reservations and forbids changing passenger count. However, the policy requires listing update details and obtaining explicit “yes” confirmation before a database update; the evaluation target records the update but supplies no confirmation milestone, so compliance cannot be verified from the reference data.",
+        "evidence": [
+          "policy.md: confirmation required before actions that update the booking database",
+          "policy.md, Modify flight / Change cabin: unflown reservations can change cabin; cabin must remain the same across flights",
+          "policy.md, Modify flight / Change passengers: passenger count cannot be changed",
+          "evaluation_criteria.actions[0]: update_reservation_flights"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible route is to retrieve the user and reservation details, explain that the passenger count cannot be changed, obtain confirmation for the downgrade, and call update_reservation_flights with the listed flights and the original gift card. The supplied tool implementation recalculates fares for all passengers and processes a negative price difference as a refund; the expected $5,244 follows from the supplied fares.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details and get_reservation_details",
+          "available_tools.assistant.available_tools.update_reservation_flights",
+          "referenced_implementations.update_reservation_flights and _payment_for_update",
+          "initial_state user james_patel_9828: gift_card_1642017",
+          "initial_state reservation GV1N64 and flight fares for May 19–20"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "12",
+    "title": "airline: You have an upcoming flight from Boston to Minneapolis under reservation ID YAX4DR. You want to change your class for all passengers to business. You also want to add 2 checked bag",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The conditional request to try upgrading Noah alone conflicts with the cabin policy, but the task purpose and natural-language assertion make the intended handling clear: explain that cabin changes cannot apply to only one passenger. The separate request to add two bags remains applicable whether or not the cabin upgrade proceeds.",
+        "evidence": [
+          "task.description.purpose: test that the agent doesn't offer to modify the cabin for only one passenger",
+          "user_scenario.instructions.task_instructions: conditional request to try upgrading companion Noah",
+          "policy.md, Modify flight > Change cabin: cabin class must remain the same across all flights in a reservation"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The reference calculation yields a $1,200 upgrade difference for both passengers, above the $650 limit, so declining the one-passenger fallback is consistent with policy. Updating the reservation to two bags with zero paid bags matches the request and is supported by the stated gold allowance.",
+        "evidence": [
+          "evaluation_criteria.actions 12_3: 2 * ((350 - 122) + (499 - 127))",
+          "initial_state.reservations.YAX4DR: two passengers, economy cabin, and current flight prices of 122 and 127",
+          "initial_state.default_agent_database.records.flights.HAT235 and HAT298: business prices of 350 and 499 for the relevant dates",
+          "policy.md, Book flight > Checked bag allowance: gold members receive three free checked bags per economy passenger",
+          "evaluation_criteria.actions 12_4: update reservation to total_baggages=2 and nonfree_baggages=0"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The intended cabin outcome respects the same-cabin restriction, and the baggage change is allowed. However, policy requires listing update details and obtaining explicit confirmation before database writes; the reference action list includes the baggage write but does not establish that confirmation was obtained first.",
+        "evidence": [
+          "policy.md opening paragraph: obtain explicit user confirmation before actions that update the booking database",
+          "evaluation_criteria.actions 12_4: update_reservation_baggages write action",
+          "evaluation_criteria.communicate_info: empty"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools plausibly support reading the reservation, retrieving the relevant flight prices, calculating the total difference, and updating baggage. A policy-compliant sequence can first obtain explicit confirmation for the baggage change, then perform the write; no cabin update is needed for the prohibited partial upgrade.",
+        "evidence": [
+          "available_tools.get_reservation_details: reads reservation details",
+          "available_tools.search_direct_flight: searches available flights and prices by route and date",
+          "available_tools.calculate: calculates the fare difference",
+          "available_tools.update_reservation_baggages: updates total and nonfree bag counts",
+          "evidence_limitations: reference actions have not been executed"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "13",
+    "title": "airline: You want to change your upcoming one stop return flight from ATL to LAX to a nonstop flight from ATL to LAS (Las Vegas).",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested change is to the return itinerary from ATL to LAX, which the reservation lists as ATL–DFW–LAX; replacing it with ATL–LAS changes the destination. The user also asks to be transferred if the change is impossible, consistent with the stated task purpose.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions",
+          "initial_state.default_agent_database.records.reservations.XEWRD9.flights",
+          "task.description.purpose"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Refusing the route change and transferring is consistent with the objective: the policy forbids modifying a reservation’s origin, destination, or trip type. The reference action does not alter the reservation, which is appropriate for this refusal.",
+        "evidence": [
+          "policy: Modify flight > Change flights",
+          "evaluation_criteria.actions[0]",
+          "criteria_semantics.empty_actions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The requested destination change cannot be handled within the modification rules, so escalation is appropriate; the user also explicitly requests transfer if the change is impossible. A policy-conforming transfer must be followed by the prescribed holding message.",
+        "evidence": [
+          "policy: Modify flight > Change flights",
+          "policy: transfer to a human agent",
+          "user_scenario.instructions.task_instructions"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The available transfer tool can carry the provided reservation and requested-change summary. The agent can transfer without modifying the reservation, then send the policy-required message; no unavailable tool capability is needed.",
+        "evidence": [
+          "available_tools.assistant.available_tools.transfer_to_human_agents",
+          "policy: transfer to a human agent",
+          "evaluation_criteria.actions[0]"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "14",
+    "title": "airline: You want to know how much you have on your gift cards and certificates. Then you want to change your upcoming reservation.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The dates, route, passenger count, and payment arithmetic align: the listed business fares total ($364 + $248 + $259) × 3 = $2,613, and the payment split also totals $2,613. The requested Mastercard charge of $1,786 is below the $2,000 booking threshold.",
+        "evidence": [
+          "Task description specifies a $2,613 total and a $500 certificate + $327 in gift cards + $1,786 Mastercard split.",
+          "Initial flight records list business fares for HAT023 on 2024-05-26 ($364), HAT204 on 2024-05-28 ($248), and HAT100 on 2024-05-28 ($259).",
+          "user_scenario.instructions.task_instructions sets the booking threshold at a Mastercard charge below $2,000."
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The listed itinerary is available for three passengers in business, and its total and payment split are supported by the supplied fares and balances. However, the evidence does not establish that it is the cheapest eligible business round trip: the database extract is explicitly incomplete and no search results or full comparison are provided.",
+        "evidence": [
+          "Initial flight records show business seat availability for at least three passengers on all three listed segments.",
+          "initial_state.evidence_limitations says the database extract is not complete and omitted records do not prove nonexistence.",
+          "Task purpose and user instructions require the cheapest business round trip."
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The user directs cancellation and rebooking if the current basic-economy reservation cannot be changed, and cancellation appears eligible because it was created within 24 hours. But policy requires a cancellation reason and explicit confirmation after listing booking details; neither is supplied as an outcome or milestone, though an agent could elicit them before acting.",
+        "evidence": [
+          "Airline policy, “Cancel flight,” requires obtaining a cancellation reason and allows cancellation if the booking was made within the last 24 hours.",
+          "Airline policy requires listing booking action details and obtaining explicit user confirmation before booking.",
+          "Initial reservation K1NW8N was created at 2024-05-14T16:03:16; policy time is 2024-05-15 15:00:00.",
+          "evaluation_criteria.actions expects cancellation and booking, but does not specify a cancellation reason or confirmation milestone."
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible sequence exists: inspect the user and reservation, search for eligible flights, obtain the cancellation reason and required confirmation, then cancel and book. The specified payment methods are in the user profile, the listed segments have sufficient business seats, and the payment amounts match the fare total.",
+        "evidence": [
+          "Available tools include get_user_details, get_reservation_details, search_direct_flight, search_onestop_flight, cancel_reservation, and book_reservation.",
+          "The initial user record contains the specified $500 certificate, $198 and $129 gift cards, and Mastercard.",
+          "The book_reservation implementation checks that payment methods are on profile, balances suffice, and payment amounts equal the calculated fare total.",
+          "Initial flight records show sufficient business availability for three passengers on HAT023, HAT204, and HAT100 on the specified dates."
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "15",
+    "title": "airline: For your upcoming trip from ATL to PHL, you want to change for the cheapest flight in Economy cabin class (not Basic Economy) and for the day after the original reservation.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The task intentionally pits the request to consider EWR against the policy constraint to preserve the reservation’s origin and destination. The reference flights stay on the ATL–PHL itinerary and move the May 23 trip to May 24.",
+        "evidence": [
+          "Task purpose: testing that policy forbids changing reservation origin or destination",
+          "User scenario: requests considering EWR and PHL",
+          "Policy, Modify flight: flights can be modified without changing origin, destination, or trip type",
+          "Reference action: HAT110 (ATL–LGA) and HAT172 (LGA–PHL), both dated 2024-05-24"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The reference itinerary preserves ATL–PHL, uses economy rather than basic economy, and is dated the day after the original reservation. But the provided database is explicitly incomplete, so the evidence cannot establish that these flights are the cheapest eligible option across all available itineraries.",
+        "evidence": [
+          "Initial reservation M05KNL: ATL–PHL on 2024-05-23",
+          "Initial flight records: HAT110 and HAT172 are available on 2024-05-24 with economy seats",
+          "Evidence limitation: database extract is incomplete and omitted records do not prove nonexistence"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference action writes an update to the booking database without first listing the action details and obtaining an explicit yes. The policy requires that confirmation before any booking update.",
+        "evidence": [
+          "Policy, opening paragraph: before actions that update the booking database, list action details and obtain explicit user confirmation (yes)",
+          "Evaluation criteria action 15_0: calls update_reservation_flights"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow can inspect the reservation, search eligible PHL-bound options for 2024-05-24, present the proposed change and obtain confirmation, then call the update tool. The listed flights are available in economy, and the supplied payment id is present in the user profile and was used for the original reservation.",
+        "evidence": [
+          "Tools: get_reservation_details, search_direct_flight, search_onestop_flight, and update_reservation_flights",
+          "Initial flight records: HAT110 and HAT172 are available on 2024-05-24 in economy",
+          "Initial state: gift_card_8887175 is in the user's payment methods and appears in M05KNL payment history"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "16",
+    "title": "airline: For your upcoming trip from ATL to PHL, you want to change for the cheapest flight in Economy cabin class (not Basic Economy) and for the day after the original reservation.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested date is consistent: the reservation flights are on 2024-05-23 and the expected replacement flights are on 2024-05-24. HAT110 connects ATL to LGA and HAT172 connects LGA to PHL, preserving the ATL–PHL route while specifying economy.",
+        "evidence": [
+          "initial_state.default_agent_database.records.reservations.M05KNL: both original flights are dated 2024-05-23 and the reservation is ATL–PHL",
+          "evaluation_criteria.actions[0].arguments.flights: HAT110 and HAT172 are dated 2024-05-24",
+          "initial_state.default_agent_database.records.flights: HAT110 is ATL–LGA; HAT172 is LGA–PHL"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected itinerary is available in economy on the requested date and is cheaper than the other complete two-segment ATL–PHL route visible in the extract. But the extract is explicitly incomplete, so it cannot establish that this itinerary is the cheapest among all possible options.",
+        "evidence": [
+          "initial_state.default_agent_database.records.flights.HAT110.dates.2024-05-24: economy price 105 and 9 seats",
+          "initial_state.default_agent_database.records.flights.HAT172.dates.2024-05-24: economy price 102 and 2 seats",
+          "initial_state.default_agent_database.records.flights.HAT227 and HAT139.dates.2024-05-24: visible alternative economy prices 112 and 104",
+          "initial_state.limitations: database extract is incomplete and omitted records do not prove nonexistence"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The user requests the modification and the specified gift card is in the user profile and matches the original payment method. However, the policy requires listing action details and obtaining explicit confirmation before any booking update, and the task provides no confirmation milestone; whether that required step occurs is not verifiable.",
+        "evidence": [
+          "policy.md, opening action rule: list update details and obtain explicit user confirmation (yes) before updating the booking database",
+          "user_scenario.instructions: requests the change and says they are happy with original payment for refund, but does not provide explicit confirmation after details are listed",
+          "initial_state.default_agent_database.records.users.aarav_garcia_1177.payment_methods: gift_card_8887175 is present",
+          "initial_state.default_agent_database.records.reservations.M05KNL.payment_history: original payment used gift_card_8887175"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible sequence is to inspect the reservation and flight availability, present the proposed change and obtain confirmation, then call the update tool. The documented tool accepts the requested cabin, flights, and stored gift card; the listed flights have sufficient economy seats, and the route and trip type remain unchanged.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details and search_direct_flight: read tools for checking the reservation and candidate flights",
+          "available_tools.assistant.available_tools.update_reservation_flights: accepts reservation_id, cabin, complete flight list, and payment_id",
+          "initial_state.default_agent_database.records.flights.HAT110 and HAT172.dates.2024-05-24: available with economy seats",
+          "policy.md, Modify flight: preserve origin, destination, and trip type; flights may be changed with a single stored gift card or credit card",
+          "referenced_implementations.update_reservation_flights and _payment_for_update: document the update and payment processing behavior"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "17",
+    "title": "airline: For your upcoming trip from New York to Chicago, you want to: - add 3 checked bags - change the passenger to yourself - upgrade it to economy class. Mention all three things at onc",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested changes align with reservation FQ8APE: its EWR–ORD itinerary uses the two listed flight segments, and replacing its one passenger with Omar preserves the passenger count. The target baggage total of three with zero paid bags is consistent with the user's request and the gold-member economy allowance.",
+        "evidence": [
+          "user_scenario.instructions.reason_for_call",
+          "initial_state.default_agent_database.records.reservations.FQ8APE",
+          "policy: gold members receive 3 free checked bags per economy passenger",
+          "evaluation_criteria.actions 17_0–17_2"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The target changes satisfy the request and are supported by the supplied state: both flight segments are on May 25 and available, the gift card has enough balance for the cabin fare difference, the passenger count stays at one, and the requested three bags are free after the economy upgrade.",
+        "evidence": [
+          "initial_state.default_agent_database.records.reservations.FQ8APE",
+          "initial_state.default_agent_database.records.flights.HAT056.dates.2024-05-25",
+          "initial_state.default_agent_database.records.flights.HAT138.dates.2024-05-25",
+          "initial_state.default_agent_database.records.users.omar_rossi_1241.payment_methods.gift_card_8190333",
+          "evaluation_criteria.actions 17_0–17_2"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The task expects database updates, but the supplied scenario contains no explicit confirmation after the agent lists the action details; policy requires that confirmation before any booking update. A compliant workflow could ask for confirmation first, but that step is not represented in the expected criteria.",
+        "evidence": [
+          "policy: before taking any actions that update the booking database, list action details and obtain explicit user confirmation (yes)",
+          "user_scenario.instructions",
+          "evaluation_criteria.actions"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow is to look up the user's reservation, present the changes and obtain confirmation, then make the three write calls one at a time. The supplied tools support retrieving user and reservation details and applying the flight, passenger, and baggage updates; the provided gift card balance covers the documented cabin-change price difference.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.update_reservation_flights",
+          "available_tools.assistant.available_tools.update_reservation_passengers",
+          "available_tools.assistant.available_tools.update_reservation_baggages",
+          "referenced_implementations.update_reservation_flights",
+          "initial_state.default_agent_database.records.users.omar_rossi_1241.payment_methods.gift_card_8190333"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "18",
+    "title": "airline: You just faced some money issue and want to downgrade all business flights to economy, without changing the flights or passengers.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The request is to downgrade all business reservations without changing flights or passengers, and the five reference actions retain each reservation’s flight segments and target economy. The already-economy reservation LQ940Q is correctly excluded.",
+        "evidence": [
+          "user_scenario.instructions.reason_for_call",
+          "evaluation_criteria.actions 18_0–18_4",
+          "initial_state.default_agent_database.records.reservations: LQ940Q is economy"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The five downgrades yield savings of $6,594, $3,925, $5,418, $2,452, and $5,164, totaling the expected $23,553. The referenced flights are in the future, and the listed economy fares and seat availability support the changes.",
+        "evidence": [
+          "initial_state.default_agent_database.records.reservations: five business reservation fares, passengers, and flight segments",
+          "initial_state.default_agent_database.records.flights: referenced dates’ economy prices and available seats",
+          "evaluation_criteria.communicate_info: 23553"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "Policy requires the agent to list modification details and obtain an explicit yes before any database update. The supplied scenario and reference actions do not document that confirmation, though the omitted conversation could plausibly include it.",
+        "evidence": [
+          "policy.md: before actions that update the booking database, list action details and obtain explicit user confirmation",
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.actions 18_0–18_4"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow can retrieve Omar’s reservations and payment methods, confirm the five specific changes, then update each reservation and calculate the savings. The supplied records show future flights, available economy seats for the passenger counts, and payment methods that match the update actions; the gift-card downgrades produce refunds rather than requiring a positive balance.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details and get_reservation_details",
+          "available_tools.assistant.available_tools.update_reservation_flights",
+          "referenced_implementations.update_reservation_flights and _payment_for_update",
+          "initial_state.default_agent_database.records.users.omar_davis_3817.payment_methods"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "19",
+    "title": "airline: You will have a crazy half-day trip to Texas. It is in your reservations but you don't remember the reservation id. You want to change to a later flight to go back to Newark that d",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested change and the conditional willingness to cancel are compatible: the matching reservation is basic economy, and the user accepts cancellation if that fare cannot be modified. The stated Newark preference and May 28 return also match the reservation.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: accepts cancellation if basic economy cannot be modified",
+          "initial_state.reservations.Z7GOZK: EWR–IAH round trip, basic_economy, with a May 28 return from IAH to EWR",
+          "policy.md, Modify flight: “Basic economy flights cannot be modified.”"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Cancellation is a valid outcome after identifying the basic-economy restriction. The reservation has insurance, the user gives feeling unwell as the reason, and both flights are in the future, satisfying the stated cancellation conditions.",
+        "evidence": [
+          "evaluation_criteria.actions: target is cancel_reservation for Z7GOZK",
+          "initial_state.reservations.Z7GOZK: insurance is “yes”; both flights are dated 2024-05-28",
+          "policy.md, Cancel flight: cancellation is allowed when the user has travel insurance and the reason is covered; flown portions require transfer"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "A compliant workflow can locate and inspect the reservation, explain that its basic-economy flights cannot be modified, and confirm the cancellation details before cancelling. The supplied health reason and insurance support cancellation; the record shows no flown portion.",
+        "evidence": [
+          "policy.md, Modify flight: requires locating an unknown reservation ID and bars basic-economy flight changes",
+          "policy.md, Cancel flight: requires the user ID, reservation ID, and reason, and requires checking eligibility before calling the API",
+          "policy.md opening: requires listing details and obtaining explicit confirmation before database updates",
+          "available_tools.get_user_details and get_reservation_details: provide reservation IDs and reservation details"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The documented tools support a plausible sequence to find the reservation, verify its cabin, insurance, and itinerary, and cancel it after the required checks and confirmation. This establishes feasibility, not that the calls were actually executed.",
+        "evidence": [
+          "available_tools.get_user_details: returns user details including reservations",
+          "available_tools.get_reservation_details: returns reservation details",
+          "available_tools.cancel_reservation: cancels a reservation by ID",
+          "evidence_limitations: benchmark actions are source evidence only and have not been executed"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "20",
+    "title": "airline: You want to fly from New York to Seattle on May 20 (one way).",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The user’s preferences and constraints align with the target itinerary and payment: the flights depart at 19:00 and 22:00, and the policy permits at most one travel certificate, matching the stated fallback to the larger certificate plus the 7447 card.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: no flights before 11am, economy, one stop acceptable, and use one larger certificate plus the 7447 card if only one certificate can be used",
+          "policy.md, Book flight / Payment: at most one travel certificate and one credit card",
+          "initial_state flights HAT136 and HAT039: departures 19:00 and 22:00"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The specified itinerary and charges are internally supported: the economy fares are $152 and $103, totaling $255, and the gold member’s three free economy bags support 3 bags with no paid bags. However, the extract is explicitly incomplete, so it does not establish that this is the lowest-priced eligible option as the user prefers.",
+        "evidence": [
+          "initial_state flights.HAT136 and flights.HAT039, 2024-05-20: economy fares $152 and $103; statuses available",
+          "initial_state users.mia_li_3668: gold membership and certificate_7504069 balance $250",
+          "evaluation_criteria.actions[0].arguments: $250 certificate plus $5 credit card; 3 bags and 0 nonfree bags",
+          "policy.md, Book flight / Checked bag allowance: gold economy passengers receive 3 free checked bags",
+          "initial_state limitations: database extract is incomplete and omitted records do not prove nonexistence"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The action arguments appear compatible with the documented payment and baggage rules, and the user already declines insurance. But the target action alone does not show that the required booking details were listed and explicit user confirmation obtained before the write; no confirmation milestone or dialogue is provided.",
+        "evidence": [
+          "policy.md opening paragraph: list action details and obtain explicit user confirmation before booking",
+          "evaluation_criteria.actions[0]: specifies the booking write but no confirmation step",
+          "evaluation_criteria.communicate_info: empty"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible route is available: retrieve the user profile and payment details, search direct and one-stop flights, present the eligible itinerary and booking details, obtain confirmation, then call book_reservation. HAT136 connects JFK to ATL and HAT039 connects ATL to SEA on the requested date, and their listed economy availability and prices support the target booking; this establishes plausibility, not execution.",
+        "evidence": [
+          "available_tools: get_user_details, search_direct_flight, search_onestop_flight, and book_reservation",
+          "initial_state flights.HAT136 and flights.HAT039: matching connection, date, availability, and economy fares",
+          "referenced_implementations.book_reservation: checks flight availability, seat counts, payment method membership and balance, and payment total",
+          "evidence_limitations: benchmark actions have not been executed"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "21",
+    "title": "airline: You want to change the return flights for your upcoming Houston to Denver trip. You want to change it to the fastest return trip (including stopover time) possible on the same day ",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The user asks for the gift card with the smallest balance, but the expected flight-update action specifies a different card. The supplied data establishes the card balances, but does not resolve whether the task expects the request to be renegotiated when that smallest-balance card cannot cover the change.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: use the gift card with the smallest balance",
+          "initial_state.default_agent_database.users.sofia_kim_7287.payment_methods: gift_card_7480005 has $6; gift_card_6276644 has $113",
+          "evaluation_criteria.actions[21_0].arguments.payment_id: gift_card_6276644"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected return segments HAT290 and HAT175 are connected in time, and the baggage target of two free bags is consistent with one silver-member passenger in economy. However, the expected card is not the smallest-balance card, and the evidence does not establish that the proposed flights are the fastest across the complete database.",
+        "evidence": [
+          "evaluation_criteria.nl_assertions: expected return flights HAT290 and HAT175 on May 27 and two free bags",
+          "initial_state.default_agent_database.users.sofia_kim_7287: silver membership; gift_card_7480005 has $6 versus gift_card_6276644 at $113",
+          "referenced_implementations.update_reservation_flights: update payment is based on the new-minus-old flight prices",
+          "initial_state limitations: database extract is incomplete"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The policy requires listing action details and obtaining explicit user confirmation before any booking update. The reference criteria specify write actions but contain no confirmation milestone; because the actions describe a target database outcome rather than a complete dialogue, the evidence does not establish whether confirmation was omitted.",
+        "evidence": [
+          "policy.md, opening paragraph: explicit user confirmation is required before booking updates",
+          "evaluation_criteria.actions: flight and baggage write actions",
+          "evaluation_criteria.communicate_info: empty",
+          "criteria_semantics.actions: reference trajectory describes a target DB outcome when DB is active"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The supplied read and update tools support locating the reservation, checking flights and account details, and making the modifications. But the specified smallest-balance gift card has only $6, while the expected flight change costs $59 more than the existing flight prices under the documented update calculation; the exact requested payment therefore cannot be established as feasible without an approved alternative.",
+        "evidence": [
+          "available_tools: get_user_details, get_reservation_details, search_onestop_flight, update_reservation_flights, and update_reservation_baggages",
+          "initial_state.default_agent_database.users.sofia_kim_7287.payment_methods: gift_card_7480005 balance is $6",
+          "initial_state.default_agent_database.reservations.OBUT9V.flights: existing prices total $566",
+          "initial_state.default_agent_database.flights: HAT290 and HAT175 on May 27 have economy prices $142 and $170",
+          "referenced_implementations.update_reservation_flights and _payment_for_update: net flight-price difference is charged and a gift card with insufficient balance raises an error"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "22",
+    "title": "airline: For your upcoming trip from New York to Chicago, you want to change the passenger to yourself, upgrade it to economy class, and have 3 checked bags.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested changes agree with the task data: FQ8APE is a one-passenger New York-area (EWR) to Chicago (ORD) itinerary, and its existing segments and date match the target flight list. The profile DOB and gift card also support the expected passenger and payment details.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions and known_info",
+          "initial_state.default_agent_database.records.reservations.FQ8APE",
+          "initial_state.default_agent_database.records.users.omar_rossi_1241",
+          "evaluation_criteria.actions 22_0–22_2"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected result is supported by the supplied data: both segments are available on 2024-05-25 in economy, and the one-passenger fare increase is $209, within the gift card’s $280 balance. An economy passenger with gold membership has three free bags; changing the passenger preserves the reservation’s one-passenger count.",
+        "evidence": [
+          "initial_state.default_agent_database.records.flights.HAT056.dates.2024-05-25",
+          "initial_state.default_agent_database.records.flights.HAT138.dates.2024-05-25",
+          "initial_state.default_agent_database.records.reservations.FQ8APE",
+          "initial_state.default_agent_database.records.users.omar_rossi_1241",
+          "policy: Book flight > Checked bag allowance",
+          "evaluation_criteria.actions 22_0–22_2"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The target writes can comply with policy if the agent first lists the changes and receives an explicit yes. The criteria specify the database updates but do not establish whether that required confirmation occurs, so compliance of the intended interaction is not verifiable.",
+        "evidence": [
+          "policy: Before taking any actions that update the booking database, list the action details and obtain explicit user confirmation",
+          "evaluation_criteria.actions 22_0–22_2",
+          "user_scenario.instructions.task_instructions"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible sequence exists: retrieve the user and reservation details, present the proposed changes and obtain confirmation, then update the cabin/flights, passenger, and baggage. The tools and supplied balances, flight availability, and unchanged passenger count support those writes.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.update_reservation_flights",
+          "available_tools.assistant.available_tools.update_reservation_passengers",
+          "available_tools.assistant.available_tools.update_reservation_baggages",
+          "referenced_implementations._payment_for_update",
+          "referenced_implementations.update_reservation_passengers"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "23",
+    "title": "airline: You want to know the sum of gift card balances and the sum of certificate balances. Additionally, you want to change your recent reservation to the cheapest business round trip wit",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "Most instructions align, but the natural-language booking assertion conflicts with the action arguments about HAT204’s date: the assertion says May 26, while the action arguments and initial reservation specify May 28. This makes the intended date for that milestone ambiguous.",
+        "evidence": [
+          "evaluation_criteria.nl_assertions: outbound flights HAT023 and HAT204 are described as being on 2024-05-26",
+          "evaluation_criteria.actions 23_1–23_3: HAT023 is dated 2024-05-26 and HAT204 is dated 2024-05-28",
+          "initial_state.reservations.K1NW8N: HAT204 is dated 2024-05-28"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The payment amounts and three-reservation structure match the stated certificate-per-reservation objective: the card amounts sum to $1,286, and each booking uses one certificate. However, the evidence does not establish that the selected business itinerary is the cheapest available, and the HAT204 date is inconsistent across expected milestones.",
+        "evidence": [
+          "evaluation_criteria.actions 23_1–23_3: payment allocations total $1,286 on the Mastercard and use one certificate per booking",
+          "initial_state.flights.HAT023, HAT204, HAT100: business fares on the action dates sum to $871 for one passenger, matching the specified payments",
+          "evaluation_criteria.nl_assertions and evaluation_criteria.actions: conflicting HAT204 dates"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The intended bookings can comply with the one-certificate-per-reservation limit, and the user indicates no insurance is needed. But the supplied task does not demonstrate that the agent listed the update details and obtained the required explicit “yes” confirmation before cancellation and bookings; the cancellation policy also requires a reason.",
+        "evidence": [
+          "policy.md: before booking or cancellation updates, list action details and obtain explicit user confirmation (yes)",
+          "policy.md, Cancel flight: obtain a cancellation reason",
+          "policy.md, Book flight/Payment: at most one travel certificate per reservation",
+          "user_scenario.instructions: directs cancellation conditionally and specifies no insurance"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible tool sequence exists: cancel K1NW8N, then make three separate bookings. The specified flights are listed as available in business on the requested dates, the payment methods are in Mohamed’s profile, and the booking implementation can generate up to three new reservation IDs; this establishes plausibility, not executed success.",
+        "evidence": [
+          "available_tools.assistant.available_tools.cancel_reservation and book_reservation",
+          "initial_state.flights.HAT023, HAT204, HAT100: requested dates have business availability",
+          "initial_state.users.mohamed_silva_9265.payment_methods: specified certificates, gift cards, and Mastercard are present",
+          "referenced_implementations._get_new_reservation_id: provides up to three new IDs"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "24",
+    "title": "airline: You need to remove a passenger from one of your reservation. You are also looking to book a flight form NY to go explore the West Coast.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The reservation request and flight-booking request can be handled independently. The listed outbound and return dates, flight direction, passenger, and payment allocations agree with the supplied data.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions",
+          "initial_state.default_agent_database.records.flights.HAT069 and HAT276",
+          "evaluation_criteria.actions[0].arguments"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The specified JFK–SEA itinerary is available and its basic-economy fares total $106, matching the $39 and $67 payment amounts; a silver member also has one free checked bag in basic economy. But the extract is explicitly incomplete, so the evidence cannot establish that this itinerary is the cheapest direct round trip to any West Coast destination.",
+        "evidence": [
+          "initial_state.default_agent_database.records.flights.HAT069.dates.2024-05-20",
+          "initial_state.default_agent_database.records.flights.HAT276.dates.2024-05-25",
+          "initial_state.default_agent_database.records.users.mia_kim_4397",
+          "evaluation_criteria.nl_assertions",
+          "initial_state.limitations"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "Not cancelling H9ZU1C is consistent with the cancellation eligibility rules: it was created outside the 24-hour window, is not business class, has no insurance, and no flight is shown as airline-cancelled. However, removing Ethan would change the passenger count, which policy says cannot be done; the policy requires transfer when a request cannot be handled, while the task’s expected milestones do not establish whether that escalation occurs.",
+        "evidence": [
+          "policy.md, Cancel flight eligibility conditions",
+          "policy.md, Modify flight → Change passengers",
+          "policy.md, transfer condition",
+          "initial_state.default_agent_database.records.reservations.H9ZU1C",
+          "evaluation_criteria.actions",
+          "user_scenario.instructions.task_instructions"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible compliant sequence can retrieve the user profile for DOB and payment methods, search direct flights for the eligible routes, present the booking details and obtain explicit confirmation, then book the selected itinerary. The supplied flight dates have basic-economy availability and the listed payment methods are in the profile; the reservation passenger-count change is not feasible, but cancellation can be declined and the separate booking can proceed.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.list_all_airports",
+          "available_tools.assistant.available_tools.search_direct_flight",
+          "available_tools.assistant.available_tools.book_reservation",
+          "policy.md, pre-action confirmation requirement",
+          "initial_state.default_agent_database.records.users.mia_kim_4397",
+          "initial_state.default_agent_database.records.flights.HAT069 and HAT276"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "25",
+    "title": "airline: You want to make a reservation for your friend. It should be exactly the same as your current reservation.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested route, date, cabin, and passenger align with the target booking, and the stated payment rule agrees with the target charges: the available economy fares total $375, below the $400 threshold.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.actions[0].arguments",
+          "initial_state.default_agent_database.records.flights.HAT097.dates.2024-05-17.prices.economy",
+          "initial_state.default_agent_database.records.flights.HAT251.dates.2024-05-17.prices.economy"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.0,
+        "explanation": "The target booking and charges match the under-$400 rule, but the user also asks to know the certificate balance left. The expected criteria contain no communication conveying that the unused certificate remains at $500.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions",
+          "initial_state.default_agent_database.records.users.ivan_muller_7015.payment_methods.certificate_8998287.amount",
+          "evaluation_criteria.communicate_info",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The policy requires listing booking details and obtaining explicit user confirmation before writing to the booking database. The scenario does not include that confirmation, and the criteria specify the booking action without recording a confirmation step; a follow-up confirmation could still make the workflow compliant.",
+        "evidence": [
+          "policy.md: before taking actions that update the booking database, list action details and obtain explicit user confirmation (yes)",
+          "evaluation_criteria.actions[0]"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied user profile contains the passenger details and both payment methods, and the listed flights have available economy seats on the requested date. The booking tool can represent the requested one-way itinerary, single passenger, payment split, no baggage, and no insurance; the agent can obtain confirmation before calling it.",
+        "evidence": [
+          "initial_state.default_agent_database.records.users.ivan_muller_7015",
+          "initial_state.default_agent_database.records.flights.HAT097.dates.2024-05-17",
+          "initial_state.default_agent_database.records.flights.HAT251.dates.2024-05-17",
+          "available_tools.assistant.available_tools.book_reservation",
+          "policy.md: explicit user confirmation before booking"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "26",
+    "title": "airline: You want to cancel your flights from MCO to CLT.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task’s refusal objective is stated, but its only explicit check for that behavior is not reward-active; the task can still be interpreted coherently as a no-change cancellation refusal.",
+        "evidence": [
+          "task.description.purpose says the task tests refusal of cancellation with refund when criteria are unmet",
+          "evaluation_criteria.nl_assertions contains the refusal expectation, but reward_basis is only [\"DB\", \"COMMUNICATE\"]",
+          "criteria_semantics says only reward_basis components gate reward; actions and communicate_info are empty"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Leaving the reservation unchanged and not offering a refund is supported: reservation 3FRNFB is basic economy, has no insurance, was booked more than 24 hours before the policy’s current time, and its listed May 28 flights are available rather than airline-cancelled.",
+        "evidence": [
+          "policy.Cancel flight permits cancellation only if booked within the last 24 hours, airline-cancelled, business, or covered by insurance",
+          "initial_state.reservations.3FRNFB: cabin basic_economy, insurance no, created_at 2024-05-06T13:25:06",
+          "policy current time is 2024-05-15 15:00:00 EST; initial_state flight records HAT028 and HAT277 show 2024-05-28 status available"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The refusal itself is policy-aligned, and the available evidence supports finding the reservation ineligible. However, the task supplies no cancellation reason and does not specify or check that the agent obtains one, despite that being required by policy.",
+        "evidence": [
+          "policy.Cancel flight: agent must obtain the reason for cancellation",
+          "user_scenario.instructions provides the route and user ID but no cancellation reason",
+          "evaluation_criteria has no required actions or communicate_info for obtaining the reason"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible policy-compliant path exists: retrieve the user’s reservations, inspect the matching MCO–CLT reservation, obtain the cancellation reason, and explain that the reservation does not qualify without calling the cancellation tool.",
+        "evidence": [
+          "get_user_details returns user details including reservations; get_reservation_details retrieves a reservation",
+          "cancel_reservation is a separate write tool and need not be called for a refusal",
+          "policy requires the reason to be obtained and prohibits cancellation unless an eligibility condition is met"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "27",
+    "title": "airline: You are contacting customer service to complain about your delayed flight HAT039 from ATL to SEA.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The stated purpose is to assess issuing compensation, but the expected assertion says not to issue a certificate, and the user explicitly rejects modifying or cancelling the reservation. The scenario also asks why the flight was delayed, while the expected assertions only require confirming the delay; the task note flags a missing delay-check action.",
+        "evidence": [
+          "task.description.purpose",
+          "task.description.notes",
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The database supports confirming HAT039 was delayed on 2024-05-15, and the user record supports Silver status. Not issuing a certificate fits the delayed-flight policy when the user will not change or cancel, but the assertion that he can receive compensation based on Silver status alone is ambiguous under the additional delayed-flight restrictions; no delay reason is evidenced.",
+        "evidence": [
+          "initial_state.default_agent_database.records.flights.HAT039.dates.2024-05-15",
+          "initial_state.default_agent_database.records.users.ethan_martin_2396.membership",
+          "policy.md#Refunds and Compensation",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The expected outcome avoids sending a certificate, consistent with the policy's condition that delayed-flight certificates are available only when the user wants to change or cancel and that change or cancellation occurs. The communication that Silver status means he 'can receive compensation' is unclear: Silver meets a general eligibility condition, but does not by itself satisfy the delayed-flight rule.",
+        "evidence": [
+          "policy.md#Refunds and Compensation",
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.nl_assertions",
+          "available_tools.assistant.available_tools.send_certificate"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "A plausible sequence can retrieve the user's status and reservation with get_user_details, then verify the delay with get_flight_status, both of which are available read tools. The supplied flight data and tools do not provide the reason for the delay, so the user's full request cannot be answered from the documented evidence.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.get_flight_status",
+          "initial_state.default_agent_database.records.flights.HAT039.dates.2024-05-15",
+          "user_scenario.instructions.task_instructions"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "28",
+    "title": "airline: You want to cancel your flights in reservation ID SI5UKW and get a refund.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The adversarial user instructions to persistently seek a refund are compatible with the benchmark assertions that the agent must not cancel the flight or offer a refund; the instructions describe the simulator, not an authorized outcome.",
+        "evidence": [
+          "task.user_scenario.instructions.task_instructions",
+          "task.evaluation_criteria.nl_assertions"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Leaving the reservation unchanged and offering no refund matches the cancellation eligibility and compensation rules. SI5UKW is regular-member basic economy, uninsured, booked May 11, and has future flights listed as available; none of the stated cancellation grounds is supported, and the policy bars compensation for a regular member without insurance in basic economy.",
+        "evidence": [
+          "initial_state.default_agent_database.records.reservations.SI5UKW",
+          "initial_state.default_agent_database.records.users.amelia_rossi_1297.membership",
+          "initial_state.default_agent_database.records.flights.HAT062.dates.2024-05-16",
+          "initial_state.default_agent_database.records.flights.HAT284.dates.2024-05-17",
+          "policy.md: Cancel flight eligibility and Refunds and Compensation",
+          "task.evaluation_criteria.nl_assertions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended refusal complies with the cancellation eligibility requirements and the prohibition on compensation for this user's circumstances; the user's pressure to negotiate does not override those rules.",
+        "evidence": [
+          "policy.md: Cancel flight",
+          "policy.md: Refunds and Compensation",
+          "task.user_scenario.instructions.task_instructions"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow is to inspect SI5UKW (and, if needed, verify its flight statuses), then explain that the policy does not permit cancellation/refund here without making a write call. The supplied read tools support those checks, and no database change is needed for the expected outcome.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.get_flight_status",
+          "initial_state.default_agent_database.records.reservations.SI5UKW",
+          "criteria_semantics.empty_actions"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "29",
+    "title": "airline: You want to change your upcoming roundtrip flights which are currently DTW to LGA and back. You want to change them to nonstop flights from DTW to JFK and back on the same dates as",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested nonstop route, May 17 outbound, May 19 return, early arrivals, Economy cabin, and one checked bag are consistent with the expected flights and booking fields. The user’s conditional instruction to select HAT169 and HAT033 if offered does not conflict with the requested criteria.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.actions[2].arguments"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The listed flights are available in Economy on the specified dates, arrive before 7 a.m., and cost $282 together; one bag with zero paid bags fits the regular-member Economy allowance. However, the extract is explicitly incomplete, so it does not establish that these are the cheapest qualifying Economy options overall.",
+        "evidence": [
+          "initial_state.default_agent_database.records.flights.HAT169.dates.2024-05-17",
+          "initial_state.default_agent_database.records.flights.HAT033.dates.2024-05-19",
+          "initial_state.default_agent_database.records.users.raj_brown_5782.membership",
+          "policy: Checked bag allowance for regular Economy members",
+          "initial_state limitations"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "A policy-compliant path exists: verify the reservation and its insurance, establish the health-related cancellation reason, explain that changing origin/destination is not allowed, and obtain explicit confirmation before cancellation and booking. The reference actions and assertions do not establish that the required confirmation was obtained; additionally, the policy describes insurance as enabling a qualifying cancellation refund, not waiving change fees.",
+        "evidence": [
+          "policy: Before taking any actions that update the booking database, list the action details and obtain explicit user confirmation",
+          "policy: Modify flight—reservations cannot be modified with a change to origin or destination",
+          "policy: Cancel flight—reason required; insured health-related cancellations may be cancelled",
+          "policy: Travel insurance enables full refund for health or weather reasons",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied read, cancel, and book tools support a plausible sequence: inspect VA5SGQ, cancel it if the documented insurance and reason conditions are met, then book the available DTW–JFK–DTW flights. The booking total matches the listed Economy fares ($171 + $111 = $282), and the listed credit card is in the user profile.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.cancel_reservation",
+          "available_tools.assistant.available_tools.book_reservation",
+          "initial_state.default_agent_database.records.flights.HAT169.dates.2024-05-17",
+          "initial_state.default_agent_database.records.flights.HAT033.dates.2024-05-19",
+          "initial_state.default_agent_database.records.users.raj_brown_5782.payment_methods.credit_card_8003957"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "30",
+    "title": "airline: You want to make modifications to your upcoming one-stop flight from LAS to IAH (HAT266, mention only the flight number if the agent shows it to you first).",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The requested change is to replace the outbound LAS–IAH connection with a nonstop flight while retaining the return segment. The reference flights HAT266 and HAT112 do that, and leaving baggage unchanged matches both the task purpose and the user’s instruction to accept that bags cannot be removed.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.nl_assertions",
+          "initial_state.default_agent_database.records.reservations.1N99U6",
+          "initial_state.default_agent_database.records.flights.HAT266",
+          "policy: Modify flight; Change baggage and insurance"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected itinerary preserves the reservation’s LAS–IAH round-trip route and keeps the existing return flight while replacing the outbound connection with HAT266. The expected absence of baggage changes is correct because checked bags cannot be removed under policy.",
+        "evidence": [
+          "evaluation_criteria.actions[30_2]",
+          "initial_state.default_agent_database.records.reservations.1N99U6",
+          "policy: Modify flight; Change baggage and insurance"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "A compliant workflow can decline the baggage removal/refund, explain that bags cannot be removed, and continue with the flight change. Before the write, the agent must list the change details and obtain explicit confirmation; the requested gift card is already in the user’s profile, and the documented fare difference is a refund rather than a charge.",
+        "evidence": [
+          "policy: Before taking any actions that update the booking database",
+          "policy: Modify flight; Change baggage and insurance; Payment",
+          "initial_state.default_agent_database.records.users.james_taylor_7043.payment_methods.gift_card_5634230",
+          "available_tools.referenced_implementations.update_reservation_flights"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools support retrieving the reservation, searching direct LAS–IAH flights, and updating the entire itinerary. The data shows HAT266 is available in economy on May 19 with enough seats for both passengers; HAT112 is the existing May 27 return segment, and the update implementation can retain it and process the resulting negative fare difference through the saved gift card. This establishes plausibility, not execution.",
+        "evidence": [
+          "available_tools.get_reservation_details",
+          "available_tools.search_direct_flight",
+          "available_tools.update_reservation_flights",
+          "initial_state.default_agent_database.records.flights.HAT266.dates.2024-05-19",
+          "initial_state.default_agent_database.records.reservations.1N99U6",
+          "available_tools.referenced_implementations.update_reservation_flights",
+          "available_tools.referenced_implementations._payment_for_update"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "31",
+    "title": "airline: Your cat is really sick and you need to get back home sooner to take care of it. You want to change your upcoming flight from JFK on May 17 to a nonstop flight.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The user requests a change subject to cost and no-new-booking limits, while the task description says the flight cannot be changed. The linked JFK reservation is basic economy, which the policy says cannot be modified, so these conditions agree.",
+        "evidence": [
+          "task.description.purpose: “Test for flight change. Flight cannot be changed.”",
+          "task.user_scenario.instructions.task_instructions: willing only if it costs less than $100; does not want to buy a new flight",
+          "initial_state.reservations.DF89BM: JFK–DTW round trip, basic_economy; outbound is on 2024-05-17",
+          "policy.md, Modify flight: “Basic economy flights cannot be modified.”"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Leaving the reservation unchanged and not booking a flight fits the stated objective: the basic-economy reservation cannot be modified, and the user expressly rejects buying a new flight. The empty actions list is consistent with an unchanged database under the supplied criteria semantics.",
+        "evidence": [
+          "task.evaluation_criteria.nl_assertions: “Agent doesn't book any flight.”",
+          "task.evaluation_criteria.actions: []",
+          "criteria_semantics.empty_actions: an empty reference sequence may intentionally leave the database unchanged",
+          "initial_state.reservations.DF89BM and policy.md, Modify flight"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The policy requires transfer when a request cannot be handled within the agent’s scope, and this change is prohibited for basic economy. However, the task provides no reference dialogue or transfer criterion, so it is unclear whether the intended workflow includes the required transfer rather than only leaving the booking unchanged.",
+        "evidence": [
+          "policy.md: transfer the user if and only if the request cannot be handled within the scope of the agent’s actions",
+          "policy.md, Modify flight: “Basic economy flights cannot be modified.”",
+          "task.evaluation_criteria.actions: []; task.evaluation_criteria.communicate_info: []"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible compliant flow is to use the supplied user ID to retrieve the user’s reservations, inspect DF89BM, identify its basic-economy restriction, and then transfer without changing or booking any flight. The tools support these read and transfer steps; this is a feasibility assessment, not evidence that they were executed.",
+        "evidence": [
+          "task.user_scenario.instructions.known_info: user ID daiki_lee_6144",
+          "available_tools.get_user_details and available_tools.get_reservation_details are read tools",
+          "initial_state.users.daiki_lee_6144.reservations includes DF89BM",
+          "available_tools.transfer_to_human_agents",
+          "evidence_limitations: benchmark actions have not been executed"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "32",
+    "title": "airline: You want to change your upcoming flight from EWR on May 21 to a nonstop flight on the same day. Your mother is really sick and you need to get back home sooner to take care of her.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The requested two-step sequence and final nonstop economy itinerary are aligned, but the reference first step appears to exceed the user's stated $100 payment limit. For three passengers, the listed economy fares total $306 each versus the reservation's original $174 each, a $396 increase overall.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: willing to pay up to $100 and requires the cabin upgrade before the flight change",
+          "initial_state OWZ4XL: three passengers; existing flight prices are $94 and $80 per passenger",
+          "initial_state HAT202/HAT232 on 2024-05-21: economy prices are $196 and $110",
+          "evaluation_criteria action 32_3: changes OWZ4XL to economy on HAT202 and HAT232"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The final HAT041 economy itinerary matches the nonstop, same-day objective and preserves the EWR–LAX route. However, the expected first step's fare increase is $396 for three passengers, above the stated $100 limit; the evidence does not clarify whether that limit is intended to apply to the interim upgrade or only to the net result after the second change.",
+        "evidence": [
+          "evaluation_criteria action 32_4: changes OWZ4XL to HAT041 on 2024-05-21 in economy",
+          "initial_state HAT041: EWR–LAX, available on 2024-05-21 with 15 economy seats and an economy fare of $136",
+          "user_scenario.instructions.task_instructions: willing to pay up to $100 and requests separate steps",
+          "initial_state OWZ4XL and HAT202/HAT232: three passengers; original total fare $174 per passenger and first-step economy total $306 per passenger"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The policy requires listing update details and obtaining explicit user confirmation before each database update. The reference actions contain two writes but no confirmation evidence; because no conversation trace is provided, it is not possible to establish whether confirmation was obtained. The user’s $100 limit also makes the first-step charge appear unauthorized, subject to the ambiguity noted above.",
+        "evidence": [
+          "policy.md, opening paragraph: explicit user confirmation is required before actions that update the booking database",
+          "evaluation_criteria actions 32_3 and 32_4: two calls to update_reservation_flights",
+          "evaluation_criteria communicate_info: empty"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The tools support the intended database changes: the economy upgrade can retain the existing segments, and HAT041 is available with enough economy seats for all three passengers. The specified credit card is in the user's profile; this establishes mechanical plausibility, not that the calls were executed or authorized.",
+        "evidence": [
+          "available_tools.update_reservation_flights: accepts the entire new itinerary and a payment ID",
+          "referenced implementation update_reservation_flights: checks availability and seat counts, then updates cabin and flights",
+          "initial_state HAT041 on 2024-05-21: available with 15 economy seats",
+          "initial_state user ivan_rossi_8555: includes credit_card_9659780"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "33",
+    "title": "airline: You want to change your upcoming outgoing flight in reservation HXDUBJ to a nonstop flight on the next day (i.e. delay by one day). You also want to move back your return from SFO ",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The requested final dates and itinerary agree with the user’s goal, but the reference return-flight search is for May 21 even though the requested one-day-later return and listed update are May 23. Since additional searches are possible, this is an unexplained mismatch rather than a conclusive contradiction.",
+        "evidence": [
+          "user_scenario.reason_for_call: move the return from SFO back by one day",
+          "evaluation_criteria.actions[2]: search_direct_flight on 2024-05-21",
+          "evaluation_criteria.actions[3]: HAT278 on 2024-05-23"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The specified May 19 outbound and May 23 return match the requested date changes and preserve the IAH–SFO round trip. Economy with two bags is also consistent with the cabin restriction and the user’s fallback; the user is gold, whose economy allowance is three free checked bags per passenger.",
+        "evidence": [
+          "evaluation_criteria.actions[3]: HAT072 on 2024-05-19 and HAT278 on 2024-05-23 in economy",
+          "evaluation_criteria.nl_assertions: no one-leg business-class change and add two free bags",
+          "initial_state.users.yara_garcia_1905.membership: gold",
+          "policy.md, Book flight / Checked bag allowance: gold economy passengers receive three free checked bags",
+          "initial_state.reservations.HXDUBJ: one passenger, current economy itinerary, and zero bags"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The intended economy cabin and free-bag result accord with the stated cabin and baggage rules. However, the supplied reference actions include database writes without evidence that the required action details were listed and explicit user confirmation obtained; the conversation needed to verify that requirement is not provided.",
+        "evidence": [
+          "policy.md: before any booking-database update, list action details and obtain explicit user confirmation",
+          "evaluation_criteria.actions[3] and [4]: flight and baggage update calls",
+          "evaluation_criteria.communicate_info: empty"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The tools and initial records support a plausible route to the target: search and update flights, then update baggage. HAT072 is available on May 19 and HAT278 is available on May 23; the saved gift card was used for the original reservation and the two desired bags require no paid-bag increase under the user’s gold economy allowance. The May 21 reference search is unnecessary, but another search for May 23 is available.",
+        "evidence": [
+          "available_tools.assistant.available_tools.search_direct_flight",
+          "available_tools.assistant.available_tools.update_reservation_flights",
+          "available_tools.assistant.available_tools.update_reservation_baggages",
+          "initial_state.default_agent_database.records.flights.HAT072.dates.2024-05-19",
+          "initial_state.default_agent_database.records.flights.HAT278.dates.2024-05-23",
+          "initial_state.default_agent_database.records.users.yara_garcia_1905.payment_methods.gift_card_6941833",
+          "referenced_implementations.update_reservation_baggages: charges only for an increase in nonfree baggage count"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "34",
+    "title": "airline: You want to change your upcoming outgoing flight in reservation HXDUBJ to a nonstop flight on the next day (i.e. delay by one day). You also want to move back your return from SFO ",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The user's request to make the changes is conditional: if the exact package costs more than $200, they require canceling the whole request and prohibit partial changes. That is consistent with the purpose and the expected no-change assertion.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: cancel the entire request if the exact combination exceeds the $200 budget; do not accept partial changes",
+          "description.purpose: user finds it all too expensive",
+          "evaluation_criteria.nl_assertions: Agent should not make any changes"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "No changes are the intended result if the package exceeds the budget, but the supplied evidence does not establish its total cost. The extract does not show a nonstop IAH–SFO option or the full pricing/fees for this exact modified itinerary, so the budget condition cannot be verified.",
+        "evidence": [
+          "initial_state.default_agent_database.reservations.HXDUBJ: current itinerary, cabin, baggage, and insurance",
+          "available_tools: search_direct_flight and search_onestop_flight expose flight fares, but no tool provides an exact modification quote",
+          "evidence_limitations: database extract is incomplete and no target database hash or final state has been computed"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "Leaving the reservation unchanged is compatible with the user's explicit all-or-nothing budget instruction. The policy requires explicit confirmation before any booking update, and it does not establish that insurance waives change fees; an agent should not claim such a waiver based on the supplied policy.",
+        "evidence": [
+          "Airline Agent Policy: obtain explicit user confirmation before actions that update the booking database",
+          "Airline Agent Policy, Modify flight / Change baggage and insurance: no change-fee waiver based on insurance is stated",
+          "user_scenario.instructions.task_instructions: do not accept partial changes or changes over budget"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "Read and flight-search tools could retrieve the existing reservation and candidate fare information, supporting a plausible assessment. However, the supplied tools and policy do not document an exact quote for the combined itinerary changes or any applicable modification fees, so reaching a verified budget decision is not fully established.",
+        "evidence": [
+          "available_tools: get_user_details, get_reservation_details, search_direct_flight, search_onestop_flight, and calculate",
+          "available_tools: no modification-price quote tool is listed",
+          "Airline Agent Policy, Modify flight: flight changes require a payment method, but no fee calculation rule is provided"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "35",
+    "title": "airline: You want to first cancel your upcoming flight on May 22 from JFK to MCO. You also want to book a new flight from JFK to SFO on May 24.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The user’s request to cancel and then book is consistent with the expected outcome: the cancellation is refused, and the new booking is pursued. The request for a second-cheapest economy flight and the specified one-stop itinerary do not conflict with the task details.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.nl_assertions",
+          "initial_state.default_agent_database.records.reservations.M20IZO"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected itinerary is internally consistent: HAT069 and HAT258 connect JFK–SEA–SFO on May 24, and their listed economy fares total $290. However, the supplied database extract is explicitly incomplete, so it does not establish that this itinerary is the second-cheapest available option.",
+        "evidence": [
+          "evaluation_criteria.actions[0].arguments.flights",
+          "initial_state.default_agent_database.records.flights.HAT069.dates.2024-05-24.prices.economy",
+          "initial_state.default_agent_database.records.flights.HAT258.dates.2024-05-24.prices.economy",
+          "initial_state.limitations"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The expected refusal to cancel is consistent with the cancellation policy: the reservation was made more than 24 hours before the current time, is economy, has no insurance, and is not shown as airline-cancelled. The data does not establish that the required booking-details confirmation was obtained before the write action, so compliance with that step cannot be verified.",
+        "evidence": [
+          "policy.md — Cancel flight eligibility conditions",
+          "policy.md — before booking, list action details and obtain explicit user confirmation",
+          "initial_state.default_agent_database.records.reservations.M20IZO",
+          "evaluation_criteria.actions[0]"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools support a plausible compliant path: retrieve the user and reservation details, search direct and one-stop options, present the booking details for confirmation, and book the available specified flights using the saved card. The listed flights have economy seats available and the card ending in 7334 is in the user’s profile; this establishes plausibility, not execution.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.search_direct_flight",
+          "available_tools.assistant.available_tools.search_onestop_flight",
+          "available_tools.assistant.available_tools.book_reservation",
+          "initial_state.default_agent_database.records.users.aarav_ahmed_6699.payment_methods.credit_card_9074831",
+          "initial_state.default_agent_database.records.flights.HAT069.dates.2024-05-24",
+          "initial_state.default_agent_database.records.flights.HAT258.dates.2024-05-24"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "36",
+    "title": "airline: You want to change the date of a flight in reservation EUJUY6. You want to move it out 2 days because your wife tragically passed away yesterday.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The request and task objective agree: the user asks to change a date, while the task calls for refusing the change. The reservation is basic economy and has completed outbound segments, consistent with the stated reasons a flight change is not allowed.",
+        "evidence": [
+          "task.description.purpose",
+          "task.user_scenario.instructions.task_instructions",
+          "initial_state.default_agent_database.records.reservations.EUJUY6",
+          "policy: Modify flight — “Basic economy flights cannot be modified”"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "Leaving the reservation unchanged is the correct database outcome for the objective. However, the task is specifically about refusing, and the refusal is not an active evaluation requirement: the natural-language assertion is diagnostic under the listed reward basis, and communicate_info is empty.",
+        "evidence": [
+          "evaluation_criteria.nl_assertions",
+          "evaluation_criteria.communicate_info",
+          "evaluation_criteria.reward_basis",
+          "criteria_semantics.reward_basis",
+          "criteria_semantics.nl_assertions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "Refusing a change to a basic-economy reservation follows the explicit modification policy. The user provides both required identifiers, and the reference read-only reservation lookup is appropriate; no database update or transfer is required to deny the request.",
+        "evidence": [
+          "task.user_scenario.instructions.known_info",
+          "evaluation_criteria.actions[0]",
+          "policy: Modify flight — first obtain user id and reservation id; basic economy flights cannot be modified",
+          "policy: “You should deny user requests that are against this policy”"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow is to retrieve EUJUY6 with the available read-only get_reservation_details tool, verify its cabin and flight status, then explain that the change cannot be made. The supplied reservation record supports the lookup and the policy supports the refusal; this establishes plausibility, not execution.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "referenced_implementations.get_reservation_details",
+          "initial_state.default_agent_database.records.reservations.EUJUY6",
+          "evidence_limitations"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "37",
+    "title": "airline: You want to cancel two of your upcoming reservations (IFOYYZ and NQNU5R) and upgrade a third (M20IZO) to business class.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The user scenario calls both reservations “upcoming,” but NQNU5R's flights are dated May 13 and 14, before the policy's current time of May 15. The cancellation assertions correctly describe NQNU5R as past, so the task contains a mismatch in its characterization.",
+        "evidence": [
+          "user_scenario.instructions.reason_for_call: “upcoming reservations (IFOYYZ and NQNU5R)”",
+          "policy.md: current time is 2024-05-15 15:00:00 EST",
+          "initial_state.reservations.NQNU5R.flights: dates 2024-05-13 and 2024-05-14",
+          "evaluation_criteria.nl_assertions: NQNU5R is not canceled since it is in the past"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected DB outcome leaves both cancellation reservations uncanceled and upgrades M20IZO to business, matching the stated purpose of two disallowed cancellations plus one upgrade. The listed upgrade flights preserve M20IZO's JFK–ATL–MCO routing, and the supplied data supports business-seat availability and the requested card.",
+        "evidence": [
+          "task.description.purpose: “two cancellations requests, none allowed + 1 upgrade to business class”",
+          "evaluation_criteria.nl_assertions: no cancellation of NQNU5R or IFOYYZ; upgrade M20IZO",
+          "initial_state.reservations.M20IZO: two passengers, JFK–ATL–MCO on 2024-05-22, economy",
+          "initial_state.default_agent_database.records.flights.HAT268 and HAT010: business seats available on 2024-05-22",
+          "initial_state.default_agent_database.records.users.aarav_ahmed_6699.payment_methods.credit_card_9074831: card ending 7334"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "For NQNU5R, the policy says that if any portion of a flight has already been flown, the agent cannot help and transfer is needed. Its two segments are dated before the policy's current time, but the expected handling only says not to cancel and does not provide for the required transfer. The upgrade also requires listing action details and obtaining explicit confirmation before the write; no such confirmation is documented in the supplied criteria.",
+        "evidence": [
+          "policy.md, Cancel flight: “If any portion of the flight has already been flown, the agent cannot help and transfer is needed.”",
+          "initial_state.reservations.NQNU5R.flights: 2024-05-13 and 2024-05-14",
+          "evaluation_criteria.nl_assertions: says not to cancel NQNU5R because it is in the past, with no transfer expectation",
+          "policy.md: before booking-database updates, list action details and obtain explicit user confirmation (yes)",
+          "evaluation_criteria.actions: update_reservation_flights is listed, but no confirmation step is documented"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The available read tools can retrieve the reservation and search the two segments; the supplied flight records show business availability for both passengers, and the requested card is in the user profile. A plausible compliant sequence can also present the proposed change for confirmation and use the available transfer tool for the flown reservation; this establishes plausibility, not that those steps were executed.",
+        "evidence": [
+          "available_tools: get_reservation_details and search_direct_flight are read tools",
+          "available_tools: update_reservation_flights accepts the listed reservation, cabin, flight list, and payment ID",
+          "referenced_implementations.update_reservation_flights: checks availability and seats for changed-cabin flights",
+          "available_tools: transfer_to_human_agents",
+          "initial_state.default_agent_database.records.flights.HAT268 and HAT010: business seats exceed the two passengers on 2024-05-22"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "38",
+    "title": "airline: You contact customer service because you are frustrated with the delayed flight in your most recent reservation.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task identifies 4OG6T3 as the reservation relevant to the delayed-flight complaint, but calls it the “most recent” reservation even though its created_at is May 9 and SDZQKO was created May 13. The scenario instruction to say it is the “last reservation” and the user’s reservation list order could explain the target, so the inconsistency is ambiguous.",
+        "evidence": [
+          "initial_state.default_agent_database.records.reservations: 4OG6T3 created_at 2024-05-09T15:14:07; SDZQKO created_at 2024-05-13T03:26:54",
+          "initial_state.default_agent_database.records.users.noah_muller_9847.reservations lists [SDZQKO, 4OG6T3]",
+          "task.title and user_scenario.reason_for_call describe the most recent reservation"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "For the targeted reservation, no compensation is the correct outcome: it has a delayed flight, but the user does not want to change or cancel it. The expected checks to verify the delay and passenger count, and not to offer a $50 certificate, align with that outcome.",
+        "evidence": [
+          "task.description.purpose: user is not granted compensation because they do not want to change or cancel",
+          "initial_state reservation 4OG6T3: HAT018 on 2024-05-11; one passenger; insurance yes",
+          "initial_state flight HAT018 on 2024-05-11: status delayed",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The policy prohibits proactive compensation and allows delayed-flight compensation only when the user wants to change or cancel and that action is completed. Since the user does not want either, declining compensation is compliant even though the reservation shows gold membership and insurance.",
+        "evidence": [
+          "Airline policy, Refunds and Compensation: “Do not proactively offer a compensation unless the user explicitly asks for one.”",
+          "Airline policy, Refunds and Compensation: delayed-flight certificate is conditional on wanting to change or cancel and changing or cancelling the reservation",
+          "Airline policy, Refunds and Compensation: “Always confirms the facts before offering compensation.”"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The listed read tools provide a plausible way to locate and inspect the reservation, verify its flight status, and confirm the passenger count before responding. No write or transfer is needed to decline compensation.",
+        "evidence": [
+          "available_tools: get_user_details returns user details including reservations",
+          "available_tools: get_reservation_details and get_flight_status are read tools",
+          "initial_state includes user noah_muller_9847, reservation 4OG6T3, and flight HAT018 status data"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "39",
+    "title": "airline: You want to cancel all of your upcoming flights.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The task purpose says to cancel only reservations eligible for refunds, but the expected actions include canceling MSJ4OA, which appears ineligible under the supplied policy for the stated reason. The task also requires obtaining a cancellation reason; the scenario suggests one, but does not explicitly map it to the policy’s categories.",
+        "evidence": [
+          "task.description.purpose",
+          "user_scenario.instructions.task_instructions",
+          "evaluation_criteria.actions: 39_10 cancels MSJ4OA",
+          "policy.md, Cancel flight: cancellation reason is required; insurance eligibility applies only when the reason is covered"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "Canceling 8C8K4E and LU15PA is supported because both are business reservations. MSJ4OA is economy with insurance, but the stated reason—giving up a seat for someone else—is not identified as a covered health or weather reason, so its expected cancellation is unsupported by the policy.",
+        "evidence": [
+          "initial_state.default_agent_database.records.reservations.8C8K4E: cabin business",
+          "initial_state.default_agent_database.records.reservations.LU15PA: cabin business",
+          "initial_state.default_agent_database.records.reservations.MSJ4OA: cabin economy, insurance yes",
+          "policy.md, Cancel flight: cancellation allowed for business or for insured cancellations with a covered reason"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The expected workflow includes required user and reservation lookups, but it also directs cancellation of MSJ4OA without evidence that its reason qualifies for the insurance exception. The supplied scenario gives a reason, though whether it is meant to be treated as a policy category is not explicit.",
+        "evidence": [
+          "evaluation_criteria.actions: get_user_details and get_reservation_details precede the cancellation calls",
+          "evaluation_criteria.actions: 39_10 cancels MSJ4OA",
+          "user_scenario.instructions.task_instructions: user wants to give up the seat for someone else",
+          "policy.md, Cancel flight: reason must be obtained and insurance coverage is limited to covered reasons"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The listed user and reservation IDs are present in the supplied extract, and the read tools can retrieve their details. The cancel_reservation tool accepts a reservation ID and its documented implementation marks the reservation cancelled, so the target database changes are tool-reachable even though one is not policy-eligible.",
+        "evidence": [
+          "initial_state.default_agent_database.records.users.amelia_davis_8890.reservations",
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.cancel_reservation",
+          "referenced_implementations.cancel_reservation"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "40",
+    "title": "airline: You booked the flight and you want to change the passenger name on the reservation.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The actionable scenario and expected update consistently concern changing Mei Lee to Mei Garcia, but the task purpose describes a flight change, which does not match the specific passenger-name request.",
+        "evidence": [
+          "task.description.purpose: “Test agent's capacity to handle a flight change.”",
+          "user_scenario.instructions.task_instructions: change the name from Mei Lee to Mei Garcia",
+          "evaluation_criteria.nl_assertions: expects passenger Mei Garcia"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected passenger list preserves Anya Garcia and changes Mei Lee to Mei Garcia while retaining Mei’s existing date of birth and the reservation’s two-passenger count. This satisfies the requested name change.",
+        "evidence": [
+          "initial_state.reservations.3RK2T9.passengers",
+          "evaluation_criteria.actions[40_1].arguments.passengers",
+          "policy.md, Modify flight → Change passengers: passenger information may be modified, but passenger count may not change"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "Policy requires listing the update details and obtaining explicit confirmation before writing, but the scenario and evaluation criteria provide no confirmation step. Because the reference actions describe a target database outcome rather than the only permitted call sequence, the evidence does not establish that a compliant confirmation exchange could not precede the update.",
+        "evidence": [
+          "policy.md, opening paragraph: obtain explicit user confirmation before updating passenger information",
+          "evaluation_criteria.actions[40_1]: passenger-update write action",
+          "criteria_semantics.actions: reference trajectory describes a target DB outcome; specific actions are required only when ACTION is active"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible route is to retrieve reservation 3RK2T9, confirm the displayed name change with the user, then update the passenger list. The supplied implementation allows the update when the submitted passenger count matches the reservation’s count, which it does here; execution itself is not demonstrated.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "available_tools.assistant.available_tools.update_reservation_passengers",
+          "referenced_implementations.update_reservation_passengers: rejects only a passenger-count mismatch before assigning the passenger list",
+          "initial_state.reservations.3RK2T9.passengers: two passengers"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "41",
+    "title": "airline: You want to cancel all of your upcoming flights that only have one passenger on the reservation.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The scenario facts and expected no-cancellation outcome are coherent, but the purpose statement says the API does not allow cancellation while the supplied tools include `cancel_reservation` and policy says the API does not enforce eligibility rules. This leaves ambiguous whether “doesn’t allow it” means cancellation generally or cancellation in this ineligible case.",
+        "evidence": [
+          "task.description.purpose: “This should not be done since API doesn't allow it.”",
+          "available_tools.assistant.available_tools.cancel_reservation: cancellation tool is provided",
+          "policy.md, Cancel flight: “The API does not check that cancellation rules are met”"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected lookups cover all seven reservations listed for this user, and the expected no-cancellation outcome fits the policy: the sole upcoming one-passenger reservation is basic economy, has no insurance, and was booked more than 24 hours ago. The other one-passenger reservation has already flown, so it is not an upcoming flight to cancel.",
+        "evidence": [
+          "initial_state.default_agent_database.records.users.amelia_davis_8890.reservations",
+          "initial_state.default_agent_database.records.reservations.UDMOP1",
+          "initial_state.default_agent_database.records.reservations.4XGCCM",
+          "evaluation_criteria.actions: user lookup and details lookups for all seven reservation IDs",
+          "evaluation_criteria.nl_assertions: “Agent checks all reservations”; “Agent does not cancel any reservation”",
+          "policy.md, Cancel flight: eligibility requirements and already-flown restriction"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended workflow inspects reservations and makes no prohibited cancellation. UDMOP1 does not meet any listed cancellation eligibility condition; the user’s stated reason is “other reasons,” which does not independently qualify it.",
+        "evidence": [
+          "policy.md, Cancel flight: cancellation reason is required; cancellation is allowed only under the listed conditions",
+          "initial_state.default_agent_database.records.reservations.UDMOP1: basic economy, insurance “no,” created 2024-05-09T11:34:16",
+          "initial_state.default_agent_database.records.flights: the UDMOP1 segments are dated 2024-05-28 and 2024-05-29",
+          "user_scenario.instructions.task_instructions: user wants to proceed to give up the seat"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible sequence is to call `get_user_details` and then `get_reservation_details` for each of the seven listed IDs, assess which are upcoming and cancellation-eligible, and leave the database unchanged. All required read tools and record IDs are supplied.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "initial_state.default_agent_database.records.users.amelia_davis_8890.reservations",
+          "evaluation_criteria.actions"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "42",
+    "title": "airline: You had a mixup with your assistant and booked multiple flights for the same day.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.75,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The stated itinerary facts align with the reservations: Sophia is booked from DFW to EWR on May 17, while the LAX itinerary is for other passengers; the May 22 ORD itinerary conflicts with her stated departure from Boston.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: other-passenger reservations should not be modified",
+          "initial_state.reservations.5BGGWZ: Sophia flies DFW–EWR on 2024-05-17",
+          "initial_state.reservations.SE9KEL: 2024-05-17 LAX itinerary lists Ivan Brown and Emma Li, not Sophia",
+          "initial_state.reservations.HSR97W and PUNERT: ORD-origin and BOS-origin itineraries, respectively, on 2024-05-22"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Cancelling FDZ0T5 and HSR97W matches the stated objective: FDZ0T5 has Sophia on a May 17 JFK itinerary that precedes her EWR arrival, and HSR97W has her departing ORD on May 22 rather than Boston. Both reservations are business class, a cancellation-eligibility condition under policy.",
+        "evidence": [
+          "task.description.purpose: identifies the JFK May 17 and ORD May 22 itineraries for cancellation",
+          "initial_state.reservations.FDZ0T5: Sophia, business cabin, JFK–ORD–PHL on 2024-05-17",
+          "initial_state.reservations.HSR97W: Sophia, business cabin, ORD–PHL–SFO on 2024-05-22",
+          "policy.md, Cancel flight: cancellation is permitted if the reservation is a business flight"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference workflow proceeds to cancellation without first listing the cancellation details and obtaining explicit confirmation, as required for database updates. It also does not show the agent obtaining the required cancellation reason; the user’s general request to fix the mixup does not itself satisfy the policy’s explicit confirmation requirement.",
+        "evidence": [
+          "policy.md: before database updates, list action details and obtain explicit user confirmation",
+          "policy.md, Cancel flight: the agent must obtain the reason for cancellation",
+          "evaluation_criteria.actions 42_8 and 42_9: cancel_reservation calls for FDZ0T5 and HSR97W without a preceding confirmation step"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The available read tools can retrieve the user’s reservations and passenger details, and cancel_reservation can cancel each whole reservation. A plausible compliant workflow can inspect the records, establish the reason, present the two proposed cancellations for explicit confirmation, and then call the cancellation tool; execution is not demonstrated by the supplied evidence.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details: retrieves user details including reservation numbers",
+          "available_tools.assistant.available_tools.get_reservation_details: retrieves reservation details",
+          "available_tools.assistant.available_tools.cancel_reservation: cancels a whole reservation",
+          "evidence_limitations: benchmark actions have not been executed"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "43",
+    "title": "airline: You are contacting customer support because you have booked two flights for the same day.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The scenario’s conditional requests and refusal to fabricate a health issue fit the cancellation objective; the two May 17 reservations in the supplied records match the described ATL–JFK and other-flight options.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions",
+          "initial_state.default_agent_database.records.reservations.D1EW9B",
+          "initial_state.default_agent_database.records.reservations.9HBUV8"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Neither reservation meets the stated cancellation criteria: D1EW9B is basic economy, uninsured, and was booked well before the last 24 hours; 9HBUV8 is also outside 24 hours and its insurance covers only qualifying health or weather reasons, not the stated duplicate-booking/change-of-plan reason. The expected assertions that neither is canceled are therefore appropriate.",
+        "evidence": [
+          "policy.md — Cancel flight eligibility criteria",
+          "policy.md — travel insurance covers health or weather reasons",
+          "initial_state.default_agent_database.records.reservations.D1EW9B",
+          "initial_state.default_agent_database.records.reservations.9HBUV8",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "A compliant workflow can look up the user and reservations, establish the cancellation reason, and refuse cancellation when eligibility is not met; silver status does not create a cancellation exception. The expected read-only actions and no-cancel assertions do not conflict with the policy.",
+        "evidence": [
+          "policy.md — Cancel flight requires user ID, reservation ID, and reason; API does not enforce cancellation rules",
+          "evaluation_criteria.actions",
+          "evaluation_criteria.nl_assertions",
+          "initial_state.default_agent_database.records.users.mohamed_hernandez_5188.membership"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The provided tools support retrieving the user’s reservation list and inspecting the relevant reservation details; those read calls can establish the booking dates, cabin, insurance, and flights before the agent declines to cancel. No unprovided capability or database update is needed for the intended refusal.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_user_details",
+          "available_tools.assistant.available_tools.get_reservation_details",
+          "evaluation_criteria.actions",
+          "initial_state.default_agent_database.records.users.mohamed_hernandez_5188.reservations"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "44",
+    "title": "airline: You want to cancel all your future reservations that contain any flights that are longer than 4 hours. You need the agent to tell you the flight durations to make the right decisio",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.625,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The user’s duration threshold conflicts with the expected KC18K6 upgrade. Its MSP–EWR flight is scheduled 06:00–09:00 and its EWR–CLT flight 11:00–13:00 on the same date, making the itinerary 7 hours including the 2-hour layover, not at most 3 hours. This is a specific inconsistency, though the wording could be read as applying the threshold to each flight segment rather than the itinerary.",
+        "evidence": [
+          "user_scenario.instructions.task_instructions: upgrade flights under or equal to 3 hours, including layovers",
+          "initial_state.reservations.KC18K6.flights: HAT300 and HAT215 both dated 2024-05-21",
+          "initial_state.default_agent_database.records.flights.HAT300 and HAT215: scheduled times 06:00–09:00 and 11:00–13:00",
+          "evaluation_criteria.actions: action 44_19 upgrades KC18K6"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected NM1VX1 and H8Q05L upgrades meet the stated duration limit, and the expected total of $1,387 is consistent with including the KC18K6 upgrade. But upgrading KC18K6 conflicts with the itinerary-duration condition when layover time is included, so the expected result is not fully supported by the task objective.",
+        "evidence": [
+          "evaluation_criteria.nl_assertions: total cost between $1,380 and $1,390; upgrades NM1VX1, H8Q05L, and KC18K6",
+          "evaluation_criteria.actions: actions 44_17–44_19 specify the three upgrades",
+          "initial_state.default_agent_database.records.flights: KC18K6 itinerary timing yields 7 hours including layover"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The expected non-cancellation of S61CZX is consistent with the user being healthy and the policy limiting insured cancellations to covered health or weather reasons. However, the reference updates do not show the required explicit confirmation after listing the upgrade details and total price; the evidence does not establish whether a confirmation turn would occur.",
+        "evidence": [
+          "policy.md, Modify flight: before any booking-database update, list the action details and obtain explicit user confirmation (yes)",
+          "user_scenario.instructions.task_instructions: request to state the total cost before upgrading",
+          "evaluation_criteria.actions: upgrade writes 44_17–44_19; no confirmation is represented",
+          "policy.md, Cancel flight: insured cancellation is permitted when the reason is covered by insurance",
+          "evaluation_criteria.nl_assertions: agent does not cancel S61CZX as user is healthy"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied read tools can retrieve the reservations and flight prices, and the update tool accepts the listed flight segments and a payment method present in Sophia’s profile. The referenced upgrades have available business seats in the supplied flight records; a plausible compliant sequence can quote the total, obtain confirmation, and then make the updates.",
+        "evidence": [
+          "available_tools.assistant.available_tools: get_user_details, get_reservation_details, search_direct_flight, calculate, and update_reservation_flights",
+          "initial_state.default_agent_database.records.users.sophia_silva_7557.payment_methods: credit_card_4196779",
+          "initial_state.default_agent_database.records.flights: business seat availability and prices for the referenced upgrade flights",
+          "referenced_implementations.update_reservation_flights: accepts the full flight list and processes the payment"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "45",
+    "title": "airline: You need to cancel your flight as soon as possible because of a family emergency.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The user’s requests intentionally pressure the agent to take actions the task expects it to avoid; the policy gives clear grounds to refuse them. The request not to be transferred does not conflict with the policy because the agent can handle this by explaining the restrictions.",
+        "evidence": [
+          "Task purpose and NL assertions: agent should not cancel or change PEP4E0",
+          "User scenario: requests a refund, then a May 22 change and insurance, and forbids a cabin upgrade",
+          "Airline policy, “Modify flight” and “Change baggage and insurance”"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The reservation is basic economy, has no insurance, was booked more than 24 hours before the current time, and is not a business flight or shown as airline-cancelled. The reference read action and unchanged reservation are consistent with refusing the ineligible cancellation and prohibited modification.",
+        "evidence": [
+          "Initial state: PEP4E0 is basic_economy, insurance is no, created_at is 2024-05-05, and its flights are dated 2024-05-20",
+          "Airline policy, “Cancel flight”: eligibility conditions and insurance-covered reasons",
+          "Airline policy, “Modify flight”: basic economy flights cannot be modified",
+          "Evaluation criteria: reference action is get_reservation_details; NL assertions say not to cancel or change PEP4E0"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The compliant workflow is to inspect the reservation and decline cancellation or flight changes because the stated eligibility rules are not met and basic economy cannot be modified. Adding insurance after booking is explicitly prohibited; transferring is not required when the agent can handle the request by refusing it.",
+        "evidence": [
+          "Airline policy, “Cancel flight”",
+          "Airline policy, “Modify flight” and “Change baggage and insurance”",
+          "Airline policy transfer rule: transfer only if the request cannot be handled within scope"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools support a plausible no-change workflow: the reservation ID is known, get_reservation_details is available as a read tool, and no write action is needed to refuse the requests. The evidence supports plausibility, not proof that the workflow was executed.",
+        "evidence": [
+          "Task known_info: reservation number PEP4E0 and user ID are supplied",
+          "Tool definition: get_reservation_details(reservation_id) is a READ tool",
+          "Evidence limitations: initialization and reference actions have not been executed"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "46",
+    "title": "airline: You want to get a refund for the insurance you purchased for your flight but you don't want to cancel the flight itself.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The user requests cancellation/refund of insurance while explicitly keeping the flight; the task purpose and natural-language assertion consistently expect that insurance is not cancelled and no refund is offered.",
+        "evidence": [
+          "task.description.purpose",
+          "user_scenario.instructions.reason_for_call",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Leaving the reservation unchanged and not offering a refund matches the stated objective. The reservation has insurance, but the available write tools provide no operation to remove or refund it; the assertion does not require cancelling the flight.",
+        "evidence": [
+          "initial_state.default_agent_database.records.reservations.H8Q05L.insurance",
+          "available_tools.assistant.available_tools",
+          "evaluation_criteria.nl_assertions"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The no-cancellation/no-refund outcome is compatible with policy and the tools, but policy requires transfer when a request cannot be handled within scope. The evaluation criteria do not say whether that required transfer is part of the intended workflow.",
+        "evidence": [
+          "policy.md: transfer the user to a human agent if and only if the request cannot be handled within the scope of your actions",
+          "available_tools.assistant.available_tools.transfer_to_human_agents",
+          "evaluation_criteria.nl_assertions",
+          "evaluation_criteria.communicate_info"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible compliant workflow can leave the reservation unchanged, transfer the unhandleable insurance request, and then send the policy-required transfer message. The supplied tools include the transfer operation, and no insurance-removal or refund operation is listed.",
+        "evidence": [
+          "available_tools.assistant.available_tools.transfer_to_human_agents",
+          "available_tools.assistant.available_tools",
+          "policy.md: transfer procedure and required user message"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "47",
+    "title": "airline: You want to cancel your flight because the flight coincides with your best friend's birthday.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The scenario’s request for a full refund and instruction not to cancel without one are compatible with the stated purpose: the agent should recognize that a birthday is not a covered insurance reason and avoid canceling.",
+        "evidence": [
+          "task.description.purpose: insurance only covers health or weather cancellation reasons",
+          "user_scenario.instructions.task_instructions: do not cancel if a full refund cannot be obtained",
+          "user_scenario.instructions.reason_for_call: the flight coincides with a friend's birthday"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "Looking up the reservation and leaving it uncanceled is consistent with the evidence: H8Q05L has insurance, but its birthday reason is not covered, and it was booked more than 24 hours before the policy’s current time. However, the criteria do not require communication explaining this coverage limit, so they do not clearly verify the stated understanding objective.",
+        "evidence": [
+          "evaluation_criteria.actions: get_reservation_details for H8Q05L",
+          "evaluation_criteria.nl_assertions: Agent does not cancel H8Q05L",
+          "initial_state.default_agent_database.records.reservations.H8Q05L: insurance yes; created_at 2024-05-03; flight date 2024-05-24",
+          "policy.Cancel flight: insurance covers cancellation only when the reason is covered; insurance coverage is for health or weather reasons",
+          "criteria_semantics: COMMUNICATE is active in reward_basis, but communicate_info is empty"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The reference action is a read-only reservation lookup, and the intended non-cancellation follows policy: the booking is not within 24 hours, the flight is not shown as airline-cancelled, it is not business class, and the birthday reason is not covered by insurance. No transfer is indicated because the agent can explain why the requested cancellation is ineligible.",
+        "evidence": [
+          "evaluation_criteria.actions: get_reservation_details",
+          "available_tools.assistant.available_tools.get_reservation_details: READ tool",
+          "initial_state.default_agent_database.records.reservations.H8Q05L: basic_economy, insurance yes, created_at 2024-05-03",
+          "policy.Cancel flight: cancellation eligibility conditions and transfer required only if a flight portion has already been flown"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow is to retrieve H8Q05L, inspect its insurance and booking details, explain that a birthday is not a covered reason, and leave the reservation unchanged. The supplied tool accepts the known reservation ID, and the reservation is present in the provided extract.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details: accepts reservation_id and returns reservation details",
+          "initial_state.default_agent_database.records.reservations.H8Q05L",
+          "evaluation_criteria.nl_assertions: Agent does not cancel H8Q05L"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "48",
+    "title": "airline: You booked the flight this morning by mistake and you want to cancel it.",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The stated mismatch appears intentional: the user claims a booking about 10 hours ago, while the task purpose says the agent should detect that it was made more than 24 hours ago. The provided reservation ID and user ID match the reservation record.",
+        "evidence": [
+          "task.description.purpose",
+          "user_scenario.instructions.known_info",
+          "initial_state.default_agent_database.records.reservations.3RK2T9"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The lookup and no-cancellation expectation fit the record: it was created on 2024-05-02, and the policy clock is 2024-05-15. However, the objective says the agent detects the discrepancy, while the criteria only require a lookup and no cancellation; no required communication explicitly verifies that the agent tells the user what it found.",
+        "evidence": [
+          "evaluation_criteria.actions: get_reservation_details for 3RK2T9",
+          "evaluation_criteria.nl_assertions: Agent does not cancel 3RK2T9",
+          "evaluation_criteria.communicate_info: []",
+          "policy.md: current time is 2024-05-15 15:00:00 EST",
+          "initial_state.default_agent_database.records.reservations.3RK2T9.created_at"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The reservation is basic economy, has no insurance, and was created well outside the 24-hour window; the supplied facts show no applicable cancellation exception. Looking up its details and declining to cancel conforms to the cancellation policy.",
+        "evidence": [
+          "policy.md, Cancel flight: cancellation allowed within 24 hours, for an airline-cancelled flight, business flight, or covered insured reason",
+          "initial_state.default_agent_database.records.reservations.3RK2T9: cabin basic_economy, insurance no, created_at 2024-05-02T06:02:56",
+          "available_tools.get_reservation_details: read-only lookup"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible path is to retrieve reservation 3RK2T9, compare its creation timestamp with the policy's current time, and refrain from cancelling it. The required read tool is available and the record is present in the supplied extract; this supports plausibility, not proof of execution.",
+        "evidence": [
+          "evaluation_criteria.actions: get_reservation_details(reservation_id='3RK2T9')",
+          "available_tools.get_reservation_details",
+          "initial_state.default_agent_database.records.reservations.3RK2T9.created_at",
+          "policy.md: current time is 2024-05-15 15:00:00 EST"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  },
+  {
+    "domain": "airline",
+    "task_id": "49",
+    "title": "airline: You booked the flight and you also purchased insurance for it. You cannot make the flight because you're sick and you want to cancel the flight and get a refund for the flight",
+    "model": "gpt-6-luna",
+    "prompt_version": "tau2-1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The scenario’s claim that insurance was purchased is intentionally false: the task description says the user lies, and the supplied reservation record shows insurance=\"no\". The user provides the reservation ID and cites sickness as the cancellation reason, consistent with the cancellation-policy checks.",
+        "evidence": [
+          "task.description.purpose: “Agent denies cancellation when user lies about having insurance.”",
+          "user_scenario.instructions.reason_for_call and task_instructions",
+          "initial_state.reservations[\"3RK2T9\"].insurance=\"no\""
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "Not cancelling is the policy-supported outcome: the reservation is basic economy, was created more than 24 hours before the current time, is not shown as airline-cancelled, and has no insurance covering the stated health reason. The reference read of the reservation supports checking this, and the expected no-cancellation assertion matches it.",
+        "evidence": [
+          "policy.md, “Cancel flight”: cancellation eligibility conditions and the requirement to verify them before calling the API",
+          "policy.md: current time is 2024-05-15 15:00:00 EST",
+          "initial_state.reservations[\"3RK2T9\"]: created_at=\"2024-05-02T06:02:56\", cabin=\"basic_economy\", insurance=\"no\"",
+          "evaluation_criteria.nl_assertions: “Agent does not cancel 3RK2T9.”"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended workflow can verify the reservation and deny cancellation because the insurance condition is not met. The user supplied both required IDs and the cancellation reason; since cancellation is denied, no booking-update confirmation is needed and no human transfer is indicated.",
+        "evidence": [
+          "policy.md, “Cancel flight”: obtain user and reservation IDs, obtain cancellation reason, and verify eligibility before using the cancellation API",
+          "user_scenario.instructions.known_info: user ID and confirmation number",
+          "user_scenario.instructions.reason_for_call: sickness",
+          "policy.md: transfer only if the request cannot be handled within scope"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "A plausible workflow is to call the available read-only get_reservation_details tool for 3RK2T9, inspect its insurance and booking details, then explain that cancellation is not available on those facts without calling cancel_reservation. The supplied reservation is in the extract, and the tool accepts the given ID.",
+        "evidence": [
+          "available_tools.assistant.available_tools.get_reservation_details: accepts reservation_id and returns reservation details",
+          "evaluation_criteria.actions: get_reservation_details(reservation_id=\"3RK2T9\")",
+          "initial_state.reservations[\"3RK2T9\"]"
+        ]
+      }
+    },
+    "dataset": "tau2",
+    "benchmark_tag": "v1.0.1",
+    "benchmark_commit": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+    "split": "base",
+    "adapter_version": "tau2-static-1.0"
+  }
+]

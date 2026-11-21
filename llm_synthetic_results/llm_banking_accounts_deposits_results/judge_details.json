@@ -1,0 +1,385 @@
+[
+  {
+    "domain": "banking_accounts_deposits",
+    "task_id": "DigitalAccountOpening_W1_TC1",
+    "title": "Premium Savings Account - Individual, Large Deposit, Instant Funding",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The individual applicant and $10,000 deposit meet the W1 premium-path condition; the account type, milestones, and expected outputs align with the documented tools and workflow.",
+        "evidence": [
+          "task.input_conditions",
+          "task.representative_input",
+          "policy.action_plan.workflow_selection: deposit amount >= 5000 and applicant is individual → W1",
+          "task.milestones",
+          "tools.domain_tools"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected progression covers identity and AML checks, premium configuration, delivered disclosures, verified funding, and account opening. The reference result fields match the stated expected account, limits, fees, disclosures, and funding status.",
+        "evidence": [
+          "task.milestones",
+          "task.expected_success_outcome",
+          "python_reference.reference_tool_calls: configure_account_limits through open_account and SUCCESS",
+          "policy.action_plan.success_criteria"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The reference sequence performs identity validation and AML screening before configuration, and opens the account only after disclosures are delivered and funding is verified. The expected clear AML result and verified funding do not trigger the policy's escalation or restricted-mode branches.",
+        "evidence": [
+          "policy.action_plan.guidelines",
+          "policy.action_plan.workflow_selection: AML and funding failure branches",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The documented tools support the reference sequence and required inputs, including deriving age 44 from the provided birth date for the 2024 scenario. The documented call sequence is a plausible route to the intended result; the data does not establish that the calls were actually executed.",
+        "evidence": [
+          "tools.domain_tools",
+          "python_reference.available_tool_definitions",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_accounts_deposits",
+    "task_id": "DigitalAccountOpening_W1_TC2",
+    "title": "Standard Checking Account - Individual, Small Deposit, Micro-Deposit Funding",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The stated inputs and expected milestones agree: an individual checking applicant depositing $1,500 follows the default W1 standard-account path, with external-bank funding verified by micro-deposit.",
+        "evidence": [
+          "task.input_conditions",
+          "task.representative_input",
+          "policy.action_plan.workflow_selection: default to W1 when none of the listed conditions apply",
+          "task.milestones"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected opening is consistent with the asserted verified identity, clear AML result, delivered disclosures, and verified funding. However, the reference contains tool calls but no returned results demonstrating those states or the specified account-opening output.",
+        "evidence": [
+          "task.milestones",
+          "task.expected_success_outcome",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended sequence performs identity validation and AML screening before configuration or opening, and the expected clear/verified outcomes do not trigger the stated escalation or alternate-workflow conditions.",
+        "evidence": [
+          "policy.action_plan.guidelines",
+          "policy.action_plan.workflow_selection",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools cover each required step, and the reference calls use inputs compatible with their documented signatures and enumerated values. This establishes a plausible route to the intended result, but does not demonstrate that the tools returned the expected outputs.",
+        "evidence": [
+          "tools.domain_tools",
+          "python_reference.available_tool_definitions",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_accounts_deposits",
+    "task_id": "DigitalAccountOpening_W2_TC1",
+    "title": "Student Checking - Verified Student, Parent Account Funding",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.875,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The applicant meets the under-25 condition, and the reference age of 20 is consistent with the DOB and the 2024 confirmation timestamp. The student-checking account type, parent-account funding, milestones, and expected final configuration do not conflict.",
+        "evidence": [
+          "task.input_conditions",
+          "task.representative_input.customer_data.dob",
+          "task.representative_input.account_type",
+          "task.milestones",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected final status, account ID format, disclosures, fees, limits, and funding status align with the stated milestones. However, the reference provides no tool-returned results to substantiate the expected states, and no application-submission time is given to verify the 15-minute confirmation criterion.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "task.milestones",
+          "policy.success_criteria",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended happy path performs identity validation and AML screening before account configuration or opening, as required. The expected milestones specify verified identity and clear AML results, so the high-risk escalation condition is not triggered in the stated scenario.",
+        "evidence": [
+          "policy.guidelines",
+          "task.milestones[0]",
+          "task.milestones[1]",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The supplied tools support a plausible sequence for all milestones: validate and screen, determine the student tier, configure limits and fees, generate disclosures, verify funding, and open the account. The reference calls use inputs compatible with the documented tool signatures; this establishes plausibility, not that the calls actually succeeded.",
+        "evidence": [
+          "policy.action_plan.tools_and_resources",
+          "tools.domain_tools",
+          "python_reference.available_tool_definitions",
+          "python_reference.reference_tool_calls"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_accounts_deposits",
+    "task_id": "DigitalAccountOpening_W2_TC2",
+    "title": "Student Checking - Verified Student, External Bank Funding",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 1.0,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The applicant is under 25 (age 22 in the reference profile), has student status, and requests student checking with external-bank funding, matching the W2 selection condition. The milestones and expected confirmation consistently specify student limits, waived fees, delivered disclosures, verified funding, and an opened account.",
+        "evidence": [
+          "task.representative_input.customer_data.dob and task.input_conditions",
+          "policy.action_plan.workflow_selection: student checking and applicant age < 25 selects W2",
+          "task.milestones and task.expected_success_outcome"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "The expected final status and confirmation align with the milestone progression and the stated student-account objective. The reference result data uses the same limits, fee schedule, disclosures, funding status, and account ID as the expected outcome.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "task.milestones",
+          "python_reference.reference_tool_calls: SUCCESS result_data"
+        ]
+      },
+      "policy_compliance": {
+        "score": 1.0,
+        "explanation": "The intended sequence performs identity validation and AML screening before account configuration, and opens only after disclosures are delivered and funding is verified. The expected clear/verified states do not trigger the stated escalation or restricted-account conditions.",
+        "evidence": [
+          "policy.action_plan.guidelines",
+          "policy.action_plan.failure_points",
+          "task.milestones steps 1–8",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 1.0,
+        "explanation": "The documented tools support a plausible sequence from identity and AML checks through tiering, configuration, disclosures, funding verification, and opening. The reference calls use compatible application, account, tier, and funding values, and the final account ID matches the documented format.",
+        "evidence": [
+          "tools.domain_tools",
+          "python_reference.reference_tool_calls",
+          "tools.domain_tools.open_account return description"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_accounts_deposits",
+    "task_id": "DigitalAccountOpening_W3_TC1",
+    "title": "Business Checking - Multi-Owner, Wire Funding",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The business/multi-owner/wire conditions align with W3, but the supplied identity data conflicts with the identity tool’s documented input schema.",
+        "evidence": [
+          "policy.workflow_selection: business application with multiple owners selects W3",
+          "representative_input.customer_data.id_type is business_license; validate_customer_identity documents id_type as driver's_license, passport, or state_id"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected opened account and configuration fit the stated business-account objective, but the reference calls provide no tool return values demonstrating that the identity, AML, funding, or other milestone conditions were actually met.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "task.milestones",
+          "python_reference.reference_tool_calls: inputs are shown, but tool outputs are not"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference sequence places identity and AML checks before configuration and opening, consistent with the required order. However, there is no evidence of their results or of required escalation handling, so compliance of the intended completion cannot be confirmed.",
+        "evidence": [
+          "policy.guidelines: identity and AML screening must precede configuration or opening; high-risk or ambiguous cases must be escalated",
+          "python_reference.reference_tool_calls: identity and AML calls precede configuration, but their outputs are absent"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The tools cover the listed workflow stages and accept the business tier, multiple owner IDs, and wire funding. Feasibility is uncertain because the provided identity input uses an id_type outside the validator’s documented enum, and no tool outputs establish whether the remaining steps can complete.",
+        "evidence": [
+          "tools.domain_tools.validate_customer_identity: id_type enum excludes business_license",
+          "tools.domain_tools: tier, limits, fee, disclosures, funding, and account-opening tools are defined",
+          "python_reference.reference_tool_calls: no return values are provided"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_accounts_deposits",
+    "task_id": "DigitalAccountOpening_W6_TC1",
+    "title": "Joint Savings Account - Two Owners, Transfer Funding",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The representative customer_data gives the primary record id_type \"joint\", but the identity tool only permits driver's_license, passport, or state_id. The task also requires validating all owners, while the reference calls identity validation once with the combined record; whether that call can validate each owner is not specified.",
+        "evidence": [
+          "task.representative_input.customer_data.id_type",
+          "tools.domain_tools.validate_customer_identity customer_data description",
+          "task.milestones[0]",
+          "python_reference.reference_tool_calls[0]"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected success assumes verified identities, clear AML, and verified funding, but the reference provides no returned results for those checks. The malformed primary id_type further leaves the expected identity milestone unsupported; the supplied evidence does not establish the actual check outcomes.",
+        "evidence": [
+          "task.expected_success_outcome",
+          "task.milestones[1]",
+          "python_reference.reference_tool_calls",
+          "tools.domain_tools.validate_customer_identity"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "The reference orders identity and AML checks before configuration, as required, but gives no screening results or conditional handling. It is therefore not possible to verify whether high-risk, failed, or ambiguous cases would be escalated before opening.",
+        "evidence": [
+          "policy.guidelines",
+          "policy.action_plan.workflow_selection",
+          "python_reference.reference_tool_calls"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The listed tools plausibly support checking, configuring, disclosing, funding, and opening the account, but the evidence does not establish successful check results or show how the joint record's invalid identity type is resolved. Also, no tool explicitly accepts a survivorship-rights setting, so that expected feature is not demonstrably configurable.",
+        "evidence": [
+          "tools.domain_tools",
+          "task.milestones[7]",
+          "task.success_path_differences"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_accounts_deposits",
+    "task_id": "DigitalAccountOpening_W7_TC1",
+    "title": "Restricted Account - Pending Micro-Deposit Funding Verification",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 0.5,
+        "explanation": "The stated milestones put account opening at step 6 and disclosure delivery at step 7, but the open_account tool requires a disclosure package. This conflicts with the listed progression, although disclosures could plausibly be generated before opening and delivered at a different point.",
+        "evidence": [
+          "task.milestones steps 6–7",
+          "tools.domain_tools.open_account requires disclosures",
+          "tools.domain_tools.generate_account_disclosures returns a package with delivery_status"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 1.0,
+        "explanation": "A restricted account with pending funding and zero limits matches the task objective and the policy instruction to hold accounts in restricted mode while funding verification is pending. The expected confirmation also includes delivered disclosures and the specified fee schedule.",
+        "evidence": [
+          "task.success_path_differences",
+          "task.expected_success_outcome",
+          "policy.action_plan.workflow_selection: pending funding routes to W7 and restricted mode"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.0,
+        "explanation": "The reference progression opens the account before generating disclosures, even though open_account requires a disclosure package and the policy action plan calls for generating and delivering disclosures. The reference also supplies a fee schedule to open_account without calling the listed configure_fee_schedule tool.",
+        "evidence": [
+          "python_reference.reference_tool_calls: open_account precedes generate_account_disclosures",
+          "tools.domain_tools.open_account requires disclosures",
+          "policy.action_plan.tools_and_resources: generate_account_disclosures and configure_fee_schedule"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.5,
+        "explanation": "The available tools permit a plausible corrected sequence: complete identity and AML checks, determine tier, link funding, configure limits and fees, generate disclosures, then open the account. However, the tool definitions do not establish that the limits tool can produce zero limits for pending funding, so the specified configuration is not verifiable from the supplied evidence.",
+        "evidence": [
+          "tools.domain_tools.configure_account_limits accepts tier and risk_level but no funding status or explicit limit values",
+          "tools.domain_tools.link_funding_source supports pending status",
+          "tools.domain_tools.open_account accepts pending funding_status"
+        ]
+      }
+    }
+  },
+  {
+    "domain": "banking_accounts_deposits",
+    "task_id": "DigitalAccountOpening_W8_TC1",
+    "title": "Same-Day Account Opening - Cash Deposit >= $10,000",
+    "model": "gpt-6-luna",
+    "prompt_version": "1.0",
+    "task_score": 0.5,
+    "dimensions": {
+      "task_consistency": {
+        "score": 1.0,
+        "explanation": "The input conditions, W8 selection rule, and expected milestones are internally aligned: the $15,000 cash deposit meets the stated threshold, and the account is checking. No contradiction among the task fields is established.",
+        "evidence": [
+          "task.input_conditions",
+          "task.representative_input.deposit_amount",
+          "policy.action_plan.workflow_selection: cash deposit >= 10000 selects W8",
+          "task.milestones"
+        ]
+      },
+      "expected_outcome_validity": {
+        "score": 0.5,
+        "explanation": "The expected account configuration and final status are consistent with the stated objective, but the reference calls do not establish that the CTR was filed or that funding was verified. The expected milestone progression therefore cannot be verified from the supplied evidence.",
+        "evidence": [
+          "task.milestones[3].expected_state.ctr_status",
+          "task.milestones[8].expected_state",
+          "python_reference.reference_tool_calls: HUMAN_IN_THE_LOOP requests CTR filing",
+          "python_reference.reference_tool_calls: open_account supplies funding_status=verified"
+        ]
+      },
+      "policy_compliance": {
+        "score": 0.5,
+        "explanation": "Identity and AML checks are called before account configuration, in the prescribed order, but their results are not provided, so it cannot be confirmed that proceeding was appropriate. The reference also passes verified funding to account opening without showing a funding verification result.",
+        "evidence": [
+          "policy.action_plan.guidelines: identity and AML screening before configuration or opening",
+          "python_reference.reference_tool_calls: validate_customer_identity and perform_aml_screening precede configuration",
+          "python_reference.reference_tool_calls: no link_funding_source call; open_account receives funding_status=verified",
+          "policy.action_plan.failure_points: funding that cannot be verified must be held in restricted mode"
+        ]
+      },
+      "workflow_feasibility": {
+        "score": 0.0,
+        "explanation": "The documented domain tools provide no CTR filing operation or cash-deposit processing operation. The reference only asks a human to file the CTR and calls open_account, whose documented purpose is account creation; the supplied tool definitions do not establish a sequence that completes both required actions.",
+        "evidence": [
+          "tools.domain_tools: no CTR filing or cash-deposit processing tool is defined",
+          "python_reference.reference_tool_calls: HUMAN_IN_THE_LOOP message requests CTR filing",
+          "tools.domain_tools.open_account.purpose",
+          "task.milestones[3].expected_state.ctr_status",
+          "task.milestones[8].description"
+        ]
+      }
+    }
+  }
+]

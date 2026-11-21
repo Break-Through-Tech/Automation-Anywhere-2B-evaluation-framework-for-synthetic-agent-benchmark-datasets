@@ -256,9 +256,9 @@ def summary_row(name: str, tasks: list[dict]) -> dict:
 def run_tau2(args, parser):
     """Route static τ-bench payloads through the existing judge and report writers."""
     if __package__:
-        from .tau_adapter import DEFAULT_OUTPUT_DIR, TauBenchAdapter
+        from .tau_adapter import DEFAULT_OUTPUT_DIR, TauBenchAdapter, write_domain_reports
     else:
-        from tau_adapter import DEFAULT_OUTPUT_DIR, TauBenchAdapter
+        from tau_adapter import DEFAULT_OUTPUT_DIR, TauBenchAdapter, write_domain_reports
 
     output = (args.output_dir or DEFAULT_OUTPUT_DIR).resolve()
     protected = Path(__file__).resolve().parents[1] / "llm_synthetic_results"
@@ -350,16 +350,16 @@ def run_tau2(args, parser):
         try:
             judgment = judge_task(client, args.model, payload, system_prompt=TAU_SYSTEM_PROMPT)
         except Exception as exc:
-            write_reports(records, output)
+            write_domain_reports(records, output, write_reports)
             raise RuntimeError(f"Failed evaluating τ-bench {key}: {exc}") from exc
         record = make_record(payload, judgment, args.model)
         record.update(dataset="tau2", prompt_version=TAU_PROMPT_VERSION,
                       benchmark_tag=manifest["benchmark_tag"], benchmark_commit=adapter.commit,
                       split=adapter.split, adapter_version=manifest["adapter_version"])
         records.append(record)
-        write_reports(records, output)
+        write_domain_reports(records, output, write_reports)
         print(f"{key[0]}/{key[1]}: {record['task_score']:.2f}")
-    for row in write_reports(records, output):
+    for row in write_domain_reports(records, output, write_reports):
         print(f"{row['domain']}: {row['mean_correctness']:.3f} ({row['task_count']} tasks)")
 
 
@@ -367,8 +367,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dataset", choices=("synthetic", "tau2"), default="synthetic")
     parser.add_argument("--data-dir", type=Path, default=Path("data"))
-    parser.add_argument("--output-dir", type=Path, help="Default: llm_audit_results (synthetic), workspace/llm_t-bench_results (tau2)")
-    parser.add_argument("--tau2-dir", type=Path, default=Path(__file__).resolve().parents[2] / "t-bench_data" / "tau2-bench")
+    parser.add_argument("--output-dir", type=Path, help="Default: llm_audit_results (synthetic), project/llm_t-bench_results (tau2); tau2 adds per-domain subfolders")
+    parser.add_argument("--tau2-dir", type=Path, default=Path(__file__).resolve().parents[1] / "t-bench_data" / "tau2-bench")
     parser.add_argument("--tau2-split", default="base", help="Official τ-bench split (default: base)")
     parser.add_argument("--model", default=os.getenv("MODEL_NAME"))
     parser.add_argument("--domain", help="Evaluate one domain, otherwise all seven")
@@ -384,7 +384,7 @@ def main():
         args.output_dir = Path("llm_audit_results")
     # Never let the synthetic path overwrite the separate τ-bench reports.
     tau_metadata = args.output_dir / "run_metadata.json"
-    tau_output = Path(__file__).resolve().parents[2] / "llm_t-bench_results"
+    tau_output = Path(__file__).resolve().parents[1] / "llm_t-bench_results"
     if (args.output_dir.resolve() == tau_output or tau_output in args.output_dir.resolve().parents
             or (tau_metadata.exists() and json.loads(tau_metadata.read_text()).get("dataset") == "tau2")):
         parser.error("Synthetic output cannot use a τ-bench result directory")

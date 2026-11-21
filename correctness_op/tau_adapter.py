@@ -18,10 +18,28 @@ BENCHMARK_TAG = "v1.0.1"
 BENCHMARK_COMMIT = "fc0055dc4e0a316c3f83133267fbd6faaa770992"
 DOMAINS = ("airline", "retail", "telecom")
 BASE_COUNTS = {"airline": 50, "retail": 114, "telecom": 114}
-WORKSPACE = Path(__file__).resolve().parents[2]
-DEFAULT_TAU2_DIR = WORKSPACE / "t-bench_data" / "tau2-bench"
-DEFAULT_OUTPUT_DIR = WORKSPACE / "llm_t-bench_results"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_TAU2_DIR = PROJECT_ROOT / "t-bench_data" / "tau2-bench"
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "llm_t-bench_results"
 ADAPTER_VERSION = "tau2-static-1.0"
+
+
+def write_domain_reports(records: list[dict], output: Path, report_writer):
+    """Save combined reports for resume and separate reports for each domain.
+
+    Reuse the judge's existing writer so all scores and CSV schemas stay the same.
+    ``output`` is the parent result folder, not an individual domain folder.
+    """
+    grouped = {}
+    for record in records:
+        domain = record["domain"]
+        if domain not in DOMAINS or record.get("dataset") != "tau2":
+            raise ValueError(f"Invalid τ-bench result domain/dataset: {domain}")
+        grouped.setdefault(domain, []).append(record)
+    rows = report_writer(records, output)
+    for domain, tasks in sorted(grouped.items()):
+        report_writer(tasks, output / domain)
+    return rows
 
 
 def _git(root: Path, *args: str) -> str:
