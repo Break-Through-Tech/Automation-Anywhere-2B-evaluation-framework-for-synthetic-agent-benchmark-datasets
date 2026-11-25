@@ -1,0 +1,249 @@
+{
+  "configuration": {
+    "dataset": "insurance_claims_intake",
+    "reference_tools": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "assess_claim_severity",
+      "classify_claim_type",
+      "create_claim_record",
+      "extract_loss_details",
+      "route_to_adjuster",
+      "send_claim_acknowledgment",
+      "trigger_emergency_services",
+      "validate_policy_coverage"
+    ],
+    "source": "expected",
+    "unknown_tool_policy": "reported and excluded from score",
+    "unmatched_tasks": []
+  },
+  "distinct_tools_used": 9,
+  "never_called_tools": [
+    "CANCELLED",
+    "FAILED",
+    "HUMAN_IN_THE_LOOP"
+  ],
+  "normalized_tool_usage_diversity": 0.877006245574,
+  "raw_shannon_entropy": 2.1792786515324405,
+  "recognized_tool_calls": 97,
+  "reference_tool_count": 12,
+  "task_calls": [
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "create_claim_record",
+        "trigger_emergency_services",
+        "route_to_adjuster",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W1_TC1"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "create_claim_record",
+        "trigger_emergency_services",
+        "route_to_adjuster",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W1_TC2"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "create_claim_record",
+        "route_to_adjuster",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W2_TC1"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "create_claim_record",
+        "route_to_adjuster",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W2_TC2"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "extract_loss_details",
+        "extract_loss_details",
+        "classify_claim_type",
+        "classify_claim_type",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "validate_policy_coverage",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "assess_claim_severity",
+        "assess_claim_severity",
+        "create_claim_record",
+        "create_claim_record",
+        "create_claim_record",
+        "route_to_adjuster",
+        "route_to_adjuster",
+        "route_to_adjuster",
+        "trigger_emergency_services",
+        "trigger_emergency_services",
+        "send_claim_acknowledgment",
+        "send_claim_acknowledgment",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W3_TC1"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "create_claim_record",
+        "route_to_adjuster",
+        "trigger_emergency_services",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W4_TC1"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "create_claim_record",
+        "route_to_adjuster",
+        "send_claim_acknowledgment",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W5_TC1"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "create_claim_record",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W6_TC1"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "create_claim_record",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W7_TC1"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "classify_claim_type",
+        "validate_policy_coverage",
+        "assess_claim_severity",
+        "create_claim_record",
+        "route_to_adjuster",
+        "trigger_emergency_services",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "task_id": "ClaimsAgent_W8_TC1"
+    }
+  ],
+  "tool_balance": 0.9918324571876328,
+  "tool_call_counts": {
+    "CANCELLED": 0,
+    "FAILED": 0,
+    "HUMAN_IN_THE_LOOP": 0,
+    "SUCCESS": 10,
+    "assess_claim_severity": 11,
+    "classify_claim_type": 12,
+    "create_claim_record": 12,
+    "extract_loss_details": 12,
+    "route_to_adjuster": 10,
+    "send_claim_acknowledgment": 13,
+    "trigger_emergency_services": 6,
+    "validate_policy_coverage": 11
+  },
+  "tool_call_proportions": {
+    "CANCELLED": 0.0,
+    "FAILED": 0.0,
+    "HUMAN_IN_THE_LOOP": 0.0,
+    "SUCCESS": 0.10309278350515463,
+    "assess_claim_severity": 0.1134020618556701,
+    "classify_claim_type": 0.12371134020618557,
+    "create_claim_record": 0.12371134020618557,
+    "extract_loss_details": 0.12371134020618557,
+    "route_to_adjuster": 0.10309278350515463,
+    "send_claim_acknowledgment": 0.13402061855670103,
+    "trigger_emergency_services": 0.061855670103092786,
+    "validate_policy_coverage": 0.1134020618556701
+  },
+  "total_tool_calls": 97,
+  "unknown_tool_call_counts": {},
+  "unknown_tool_calls": 0,
+  "validation": {
+    "baseline_diversity": 0.877006245574,
+    "baseline_tools_represented": [
+      "SUCCESS",
+      "assess_claim_severity",
+      "classify_claim_type",
+      "create_claim_record",
+      "extract_loss_details",
+      "route_to_adjuster",
+      "send_claim_acknowledgment",
+      "trigger_emergency_services",
+      "validate_policy_coverage"
+    ],
+    "strict_single_tool": {
+      "absolute_score_change": 0.877006245574,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "passed": true,
+      "relative_score_change": -1.0,
+      "selected_tool": "send_claim_acknowledgment",
+      "tool_call_count": 13,
+      "tools_represented": [
+        "send_claim_acknowledgment"
+      ]
+    },
+    "task_level_single_tool_subset": {
+      "absolute_score_change": null,
+      "expected_decrease": null,
+      "normalized_tool_usage_diversity": null,
+      "relative_score_change": null,
+      "supported": false,
+      "task_count": 0,
+      "tool_call_count": 0,
+      "tools_represented": []
+    }
+  }
+}

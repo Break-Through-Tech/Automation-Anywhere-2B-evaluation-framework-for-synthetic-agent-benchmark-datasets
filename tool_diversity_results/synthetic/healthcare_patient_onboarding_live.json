@@ -1,0 +1,250 @@
+{
+  "configuration": {
+    "dataset": "healthcare_patient_onboarding",
+    "model": "gpt-6-luna",
+    "reference_tools": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "check_provider_availability",
+      "create_ehr_patient_record",
+      "extract_insurance_info",
+      "extract_medical_history",
+      "extract_patient_demographics",
+      "schedule_appointment",
+      "send_patient_communication",
+      "verify_insurance_eligibility"
+    ],
+    "run_errors": [],
+    "source": "live",
+    "trace_file": "tool_diversity_results/synthetic/traces/healthcare_patient_onboarding.json",
+    "unknown_tool_policy": "reported and excluded from score"
+  },
+  "distinct_tools_used": 12,
+  "never_called_tools": [],
+  "normalized_tool_usage_diversity": 0.926737857825828,
+  "raw_shannon_entropy": 2.3028570655216862,
+  "recognized_tool_calls": 93,
+  "reference_tool_count": 12,
+  "task_calls": [
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "extract_medical_history",
+        "verify_insurance_eligibility",
+        "check_provider_availability",
+        "HUMAN_IN_THE_LOOP",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase1_HealthcarePatientOnboardingAgent_W1_Full_New_Patient_Onboarding_easy"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "extract_medical_history",
+        "verify_insurance_eligibility",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase2_HealthcarePatientOnboardingAgent_W1_Full_New_Patient_Onboarding_easy"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "extract_medical_history",
+        "verify_insurance_eligibility",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "CANCELLED"
+      ],
+      "completed": true,
+      "task_id": "TestCase3_HealthcarePatientOnboardingAgent_W2_PediatricPatientOnboarding_easy"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "extract_medical_history",
+        "verify_insurance_eligibility",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase4_HealthcarePatientOnboardingAgent_W3_Insurance_Eligibility_Failure_Request_Update_medium"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "extract_medical_history",
+        "verify_insurance_eligibility",
+        "HUMAN_IN_THE_LOOP",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase5_HealthcarePatientOnboardingAgent_W4_SpecialtyReferralwithPriorAuthorization_medium"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_medical_history",
+        "extract_insurance_info",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "FAILED"
+      ],
+      "completed": true,
+      "task_id": "TestCase6_HealthcarePatientOnboardingAgent_W5_SelfPayPatientOnboarding_easy"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "extract_medical_history",
+        "verify_insurance_eligibility",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "FAILED"
+      ],
+      "completed": true,
+      "task_id": "TestCase7_HealthcarePatientOnboardingAgent_W6_Duplicate_Patient_Detection_and_Merge_easy"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "extract_medical_history",
+        "verify_insurance_eligibility",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase8_HealthcarePatientOnboardingAgent_W7_HighRiskComplexMedicalHistoryOnboarding_easy"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "extract_medical_history",
+        "verify_insurance_eligibility",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "send_patient_communication",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "verify_insurance_eligibility",
+        "HUMAN_IN_THE_LOOP"
+      ],
+      "completed": false,
+      "task_id": "TestCase9_HealthcarePatientOnboardingAgent_W8_IncompleteIntakeFormRequestInformation_easy"
+    }
+  ],
+  "tool_balance": 0.926737857825828,
+  "tool_call_counts": {
+    "CANCELLED": 1,
+    "FAILED": 2,
+    "HUMAN_IN_THE_LOOP": 21,
+    "SUCCESS": 5,
+    "check_provider_availability": 7,
+    "create_ehr_patient_record": 6,
+    "extract_insurance_info": 9,
+    "extract_medical_history": 9,
+    "extract_patient_demographics": 9,
+    "schedule_appointment": 6,
+    "send_patient_communication": 9,
+    "verify_insurance_eligibility": 9
+  },
+  "tool_call_proportions": {
+    "CANCELLED": 0.010752688172043012,
+    "FAILED": 0.021505376344086023,
+    "HUMAN_IN_THE_LOOP": 0.22580645161290322,
+    "SUCCESS": 0.053763440860215055,
+    "check_provider_availability": 0.07526881720430108,
+    "create_ehr_patient_record": 0.06451612903225806,
+    "extract_insurance_info": 0.0967741935483871,
+    "extract_medical_history": 0.0967741935483871,
+    "extract_patient_demographics": 0.0967741935483871,
+    "schedule_appointment": 0.06451612903225806,
+    "send_patient_communication": 0.0967741935483871,
+    "verify_insurance_eligibility": 0.0967741935483871
+  },
+  "total_tool_calls": 93,
+  "unknown_tool_call_counts": {},
+  "unknown_tool_calls": 0,
+  "validation": {
+    "baseline_diversity": 0.926737857825828,
+    "baseline_tools_represented": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "check_provider_availability",
+      "create_ehr_patient_record",
+      "extract_insurance_info",
+      "extract_medical_history",
+      "extract_patient_demographics",
+      "schedule_appointment",
+      "send_patient_communication",
+      "verify_insurance_eligibility"
+    ],
+    "strict_single_tool": {
+      "absolute_score_change": 0.926737857825828,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "passed": true,
+      "relative_score_change": -1.0,
+      "selected_tool": "HUMAN_IN_THE_LOOP",
+      "tool_call_count": 21,
+      "tools_represented": [
+        "HUMAN_IN_THE_LOOP"
+      ]
+    },
+    "task_level_single_tool_subset": {
+      "absolute_score_change": null,
+      "expected_decrease": null,
+      "normalized_tool_usage_diversity": null,
+      "relative_score_change": null,
+      "supported": false,
+      "task_count": 0,
+      "tool_call_count": 0,
+      "tools_represented": []
+    }
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "configuration": {
+    "dataset": "manufacturing_purchase_to_pay",
+    "reference_tools": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "check_supplier_contracts",
+      "create_purchase_order",
+      "match_invoice_to_po",
+      "process_payment",
+      "read_purchase_requisition",
+      "route_payment_approval",
+      "send_po_to_supplier",
+      "validate_budget_availability"
+    ],
+    "source": "expected",
+    "unknown_tool_policy": "reported and excluded from score",
+    "unmatched_tasks": []
+  },
+  "distinct_tools_used": 10,
+  "never_called_tools": [
+    "CANCELLED",
+    "FAILED"
+  ],
+  "normalized_tool_usage_diversity": 0.8887459423456072,
+  "raw_shannon_entropy": 2.208450702106702,
+  "recognized_tool_calls": 58,
+  "reference_tool_count": 12,
+  "task_calls": [
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "create_purchase_order",
+        "send_po_to_supplier",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "process_payment",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W1_TC1"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "create_purchase_order",
+        "send_po_to_supplier",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "process_payment",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W1_TC2"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "HUMAN_IN_THE_LOOP",
+        "check_supplier_contracts",
+        "create_purchase_order",
+        "send_po_to_supplier",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W2_TC1"
+    },
+    {
+      "calls": [
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "process_payment",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W3_TC1"
+    },
+    {
+      "calls": [
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "process_payment",
+        "process_payment",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W4_TC1"
+    },
+    {
+      "calls": [
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W5_TC1"
+    },
+    {
+      "calls": [
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "process_payment",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W6_TC1"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "check_supplier_contracts",
+        "create_purchase_order",
+        "send_po_to_supplier",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "process_payment",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W7_TC1"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "create_purchase_order",
+        "send_po_to_supplier",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "process_payment",
+        "SUCCESS"
+      ],
+      "task_id": "P2P_W8_TC1"
+    }
+  ],
+  "tool_balance": 0.9591179534803028,
+  "tool_call_counts": {
+    "CANCELLED": 0,
+    "FAILED": 0,
+    "HUMAN_IN_THE_LOOP": 1,
+    "SUCCESS": 9,
+    "check_supplier_contracts": 5,
+    "create_purchase_order": 5,
+    "match_invoice_to_po": 8,
+    "process_payment": 8,
+    "read_purchase_requisition": 5,
+    "route_payment_approval": 8,
+    "send_po_to_supplier": 5,
+    "validate_budget_availability": 4
+  },
+  "tool_call_proportions": {
+    "CANCELLED": 0.0,
+    "FAILED": 0.0,
+    "HUMAN_IN_THE_LOOP": 0.017241379310344827,
+    "SUCCESS": 0.15517241379310345,
+    "check_supplier_contracts": 0.08620689655172414,
+    "create_purchase_order": 0.08620689655172414,
+    "match_invoice_to_po": 0.13793103448275862,
+    "process_payment": 0.13793103448275862,
+    "read_purchase_requisition": 0.08620689655172414,
+    "route_payment_approval": 0.13793103448275862,
+    "send_po_to_supplier": 0.08620689655172414,
+    "validate_budget_availability": 0.06896551724137931
+  },
+  "total_tool_calls": 58,
+  "unknown_tool_call_counts": {},
+  "unknown_tool_calls": 0,
+  "validation": {
+    "baseline_diversity": 0.8887459423456072,
+    "baseline_tools_represented": [
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "check_supplier_contracts",
+      "create_purchase_order",
+      "match_invoice_to_po",
+      "process_payment",
+      "read_purchase_requisition",
+      "route_payment_approval",
+      "send_po_to_supplier",
+      "validate_budget_availability"
+    ],
+    "strict_single_tool": {
+      "absolute_score_change": 0.8887459423456072,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "passed": true,
+      "relative_score_change": -1.0,
+      "selected_tool": "SUCCESS",
+      "tool_call_count": 9,
+      "tools_represented": [
+        "SUCCESS"
+      ]
+    },
+    "task_level_single_tool_subset": {
+      "absolute_score_change": null,
+      "expected_decrease": null,
+      "normalized_tool_usage_diversity": null,
+      "relative_score_change": null,
+      "supported": false,
+      "task_count": 0,
+      "tool_call_count": 0,
+      "tools_represented": []
+    }
+  }
+}

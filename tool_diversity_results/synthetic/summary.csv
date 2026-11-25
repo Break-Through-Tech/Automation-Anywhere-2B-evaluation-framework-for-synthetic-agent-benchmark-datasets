@@ -1,0 +1,9 @@
+dataset,source,tasks,tasks_with_calls,reference_tools,distinct_tools_used,recognized_calls,unknown_calls,raw_entropy,tool_balance,diversity,most_used_tool,single_tool_perturbation,single_tool_check_passed,never_called
+healthcare_patient_onboarding,expected,9,9,12,9,71,0,2.1411,0.9745,0.8617,send_patient_communication,0.0,True,CANCELLED;FAILED;HUMAN_IN_THE_LOOP
+healthcare_patient_onboarding,live,9,9,12,12,93,0,2.3029,0.9267,0.9267,HUMAN_IN_THE_LOOP,0.0,True,
+healthcare_prior_authorization,expected,9,9,12,10,63,0,2.1599,0.9381,0.8692,track_pa_status,0.0,True,CANCELLED;FAILED
+healthcare_prior_authorization,live,9,9,12,10,101,0,2.1534,0.9352,0.8666,HUMAN_IN_THE_LOOP,0.0,True,CANCELLED;FAILED
+insurance_claims_intake,expected,10,10,12,9,97,0,2.1793,0.9918,0.877,send_claim_acknowledgment,0.0,True,CANCELLED;FAILED;HUMAN_IN_THE_LOOP
+insurance_claims_intake,live,10,10,12,12,80,0,1.3312,0.5357,0.5357,HUMAN_IN_THE_LOOP,0.0,True,
+manufacturing_purchase_to_pay,expected,9,9,12,10,58,0,2.2085,0.9591,0.8887,SUCCESS,0.0,True,CANCELLED;FAILED
+manufacturing_purchase_to_pay,live,9,9,12,12,83,0,2.1496,0.8651,0.8651,HUMAN_IN_THE_LOOP,0.0,True,

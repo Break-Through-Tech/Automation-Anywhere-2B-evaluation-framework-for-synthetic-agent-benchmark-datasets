@@ -1,0 +1,210 @@
+{
+  "configuration": {
+    "dataset": "healthcare_prior_authorization",
+    "reference_tools": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "appeal_pa_denial",
+      "check_pa_requirements",
+      "gather_clinical_documentation",
+      "prepare_pa_submission",
+      "retrieve_medical_necessity_criteria",
+      "submit_pa_request",
+      "track_pa_status",
+      "validate_clinical_criteria"
+    ],
+    "source": "expected",
+    "unknown_tool_policy": "reported and excluded from score",
+    "unmatched_tasks": []
+  },
+  "distinct_tools_used": 10,
+  "never_called_tools": [
+    "CANCELLED",
+    "FAILED"
+  ],
+  "normalized_tool_usage_diversity": 0.869224743033185,
+  "raw_shannon_entropy": 2.159942344123427,
+  "recognized_tool_calls": 63,
+  "reference_tool_count": 12,
+  "task_calls": [
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W1_TC1"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W1_TC2"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "HUMAN_IN_THE_LOOP",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W2_TC1"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W3_TC1"
+    },
+    {
+      "calls": [
+        "track_pa_status",
+        "gather_clinical_documentation",
+        "appeal_pa_denial",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W4_TC1"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W5_TC1"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "gather_clinical_documentation",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W6_TC1"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W7_TC1"
+    },
+    {
+      "calls": [
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcarePA_W8_TC1"
+    }
+  ],
+  "tool_balance": 0.9380510412819789,
+  "tool_call_counts": {
+    "CANCELLED": 0,
+    "FAILED": 0,
+    "HUMAN_IN_THE_LOOP": 1,
+    "SUCCESS": 9,
+    "appeal_pa_denial": 1,
+    "check_pa_requirements": 7,
+    "gather_clinical_documentation": 9,
+    "prepare_pa_submission": 7,
+    "retrieve_medical_necessity_criteria": 6,
+    "submit_pa_request": 7,
+    "track_pa_status": 10,
+    "validate_clinical_criteria": 6
+  },
+  "tool_call_proportions": {
+    "CANCELLED": 0.0,
+    "FAILED": 0.0,
+    "HUMAN_IN_THE_LOOP": 0.015873015873015872,
+    "SUCCESS": 0.14285714285714285,
+    "appeal_pa_denial": 0.015873015873015872,
+    "check_pa_requirements": 0.1111111111111111,
+    "gather_clinical_documentation": 0.14285714285714285,
+    "prepare_pa_submission": 0.1111111111111111,
+    "retrieve_medical_necessity_criteria": 0.09523809523809523,
+    "submit_pa_request": 0.1111111111111111,
+    "track_pa_status": 0.15873015873015872,
+    "validate_clinical_criteria": 0.09523809523809523
+  },
+  "total_tool_calls": 63,
+  "unknown_tool_call_counts": {},
+  "unknown_tool_calls": 0,
+  "validation": {
+    "baseline_diversity": 0.869224743033185,
+    "baseline_tools_represented": [
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "appeal_pa_denial",
+      "check_pa_requirements",
+      "gather_clinical_documentation",
+      "prepare_pa_submission",
+      "retrieve_medical_necessity_criteria",
+      "submit_pa_request",
+      "track_pa_status",
+      "validate_clinical_criteria"
+    ],
+    "strict_single_tool": {
+      "absolute_score_change": 0.869224743033185,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "passed": true,
+      "relative_score_change": -1.0,
+      "selected_tool": "track_pa_status",
+      "tool_call_count": 10,
+      "tools_represented": [
+        "track_pa_status"
+      ]
+    },
+    "task_level_single_tool_subset": {
+      "absolute_score_change": null,
+      "expected_decrease": null,
+      "normalized_tool_usage_diversity": null,
+      "relative_score_change": null,
+      "supported": false,
+      "task_count": 0,
+      "tool_call_count": 0,
+      "tools_represented": []
+    }
+  }
+}

@@ -1,0 +1,259 @@
+{
+  "configuration": {
+    "dataset": "healthcare_prior_authorization",
+    "model": "gpt-6-luna",
+    "reference_tools": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "appeal_pa_denial",
+      "check_pa_requirements",
+      "gather_clinical_documentation",
+      "prepare_pa_submission",
+      "retrieve_medical_necessity_criteria",
+      "submit_pa_request",
+      "track_pa_status",
+      "validate_clinical_criteria"
+    ],
+    "run_errors": [],
+    "source": "live",
+    "trace_file": "tool_diversity_results/synthetic/traces/healthcare_prior_authorization.json",
+    "unknown_tool_policy": "reported and excluded from score"
+  },
+  "distinct_tools_used": 10,
+  "never_called_tools": [
+    "CANCELLED",
+    "FAILED"
+  ],
+  "normalized_tool_usage_diversity": 0.8666061023397167,
+  "raw_shannon_entropy": 2.1534352664508223,
+  "recognized_tool_calls": 101,
+  "reference_tool_count": 12,
+  "task_calls": [
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "HUMAN_IN_THE_LOOP",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase1_HealthcarePriorAuthorizationAutomationAgent_W1_Standard_Prior_Authorization_Submission_easy"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase2_HealthcarePriorAuthorizationAutomationAgent_W1_Standard_Prior_Authorization_Submission_easy"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "gather_clinical_documentation",
+        "retrieve_medical_necessity_criteria",
+        "check_pa_requirements",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase3_HealthcarePriorAuthorizationAutomationAgent_W2_Documentation_Request_and_Completion_Workflow_medium"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase4_HealthcarePriorAuthorizationAutomationAgent_W3_Specialty_Drug_Prior_Authorization_Workflow_easy"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "HUMAN_IN_THE_LOOP",
+        "appeal_pa_denial",
+        "track_pa_status",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "gather_clinical_documentation",
+        "HUMAN_IN_THE_LOOP",
+        "gather_clinical_documentation",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "gather_clinical_documentation",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP"
+      ],
+      "completed": false,
+      "task_id": "TestCase5_HealthcarePriorAuthorizationAutomationAgent_W4_Denial_and_Appeal_Workflow_easy"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase6_HealthcarePriorAuthorizationAutomationAgent_W5_Durable_Medical_Equipment_PA_Workflow_easy"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "track_pa_status",
+        "track_pa_status",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "track_pa_status"
+      ],
+      "completed": false,
+      "task_id": "TestCase7_HealthcarePriorAuthorizationAutomationAgent_W6_Urgent_Expedited_Prior_Authorization_Workflow_easy"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase8_HealthcarePriorAuthorizationAutomationAgent_W7_MultiStepBariatricSurgeryPAWorkflow_easy"
+    },
+    {
+      "calls": [
+        "check_pa_requirements",
+        "retrieve_medical_necessity_criteria",
+        "gather_clinical_documentation",
+        "validate_clinical_criteria",
+        "prepare_pa_submission",
+        "submit_pa_request",
+        "track_pa_status",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase9_HealthcarePriorAuthorizationAutomationAgent_W8_PA_Status_Tracking_and_Follow_Up_Workflow_easy"
+    }
+  ],
+  "tool_balance": 0.9352250533554508,
+  "tool_call_counts": {
+    "CANCELLED": 0,
+    "FAILED": 0,
+    "HUMAN_IN_THE_LOOP": 24,
+    "SUCCESS": 7,
+    "appeal_pa_denial": 1,
+    "check_pa_requirements": 10,
+    "gather_clinical_documentation": 12,
+    "prepare_pa_submission": 8,
+    "retrieve_medical_necessity_criteria": 9,
+    "submit_pa_request": 8,
+    "track_pa_status": 12,
+    "validate_clinical_criteria": 10
+  },
+  "tool_call_proportions": {
+    "CANCELLED": 0.0,
+    "FAILED": 0.0,
+    "HUMAN_IN_THE_LOOP": 0.2376237623762376,
+    "SUCCESS": 0.06930693069306931,
+    "appeal_pa_denial": 0.009900990099009901,
+    "check_pa_requirements": 0.09900990099009901,
+    "gather_clinical_documentation": 0.1188118811881188,
+    "prepare_pa_submission": 0.07920792079207921,
+    "retrieve_medical_necessity_criteria": 0.0891089108910891,
+    "submit_pa_request": 0.07920792079207921,
+    "track_pa_status": 0.1188118811881188,
+    "validate_clinical_criteria": 0.09900990099009901
+  },
+  "total_tool_calls": 101,
+  "unknown_tool_call_counts": {},
+  "unknown_tool_calls": 0,
+  "validation": {
+    "baseline_diversity": 0.8666061023397167,
+    "baseline_tools_represented": [
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "appeal_pa_denial",
+      "check_pa_requirements",
+      "gather_clinical_documentation",
+      "prepare_pa_submission",
+      "retrieve_medical_necessity_criteria",
+      "submit_pa_request",
+      "track_pa_status",
+      "validate_clinical_criteria"
+    ],
+    "strict_single_tool": {
+      "absolute_score_change": 0.8666061023397167,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "passed": true,
+      "relative_score_change": -1.0,
+      "selected_tool": "HUMAN_IN_THE_LOOP",
+      "tool_call_count": 24,
+      "tools_represented": [
+        "HUMAN_IN_THE_LOOP"
+      ]
+    },
+    "task_level_single_tool_subset": {
+      "absolute_score_change": null,
+      "expected_decrease": null,
+      "normalized_tool_usage_diversity": null,
+      "relative_score_change": null,
+      "supported": false,
+      "task_count": 0,
+      "tool_call_count": 0,
+      "tools_represented": []
+    }
+  }
+}

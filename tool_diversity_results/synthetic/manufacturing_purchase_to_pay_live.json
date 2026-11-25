@@ -1,0 +1,240 @@
+{
+  "configuration": {
+    "dataset": "manufacturing_purchase_to_pay",
+    "model": "gpt-6-luna",
+    "reference_tools": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "check_supplier_contracts",
+      "create_purchase_order",
+      "match_invoice_to_po",
+      "process_payment",
+      "read_purchase_requisition",
+      "route_payment_approval",
+      "send_po_to_supplier",
+      "validate_budget_availability"
+    ],
+    "run_errors": [],
+    "source": "live",
+    "trace_file": "tool_diversity_results/synthetic/traces/manufacturing_purchase_to_pay.json",
+    "unknown_tool_policy": "reported and excluded from score"
+  },
+  "distinct_tools_used": 12,
+  "never_called_tools": [],
+  "normalized_tool_usage_diversity": 0.8650756276752051,
+  "raw_shannon_entropy": 2.1496321797796454,
+  "recognized_tool_calls": 83,
+  "reference_tool_count": 12,
+  "task_calls": [
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "process_payment",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase1_ManufacturingPurchaseToPayAutomationAgent_W1_Standard_Raw_Materials_Purchase_3_Way_Match_easy"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "HUMAN_IN_THE_LOOP",
+        "CANCELLED"
+      ],
+      "completed": true,
+      "task_id": "TestCase2_ManufacturingPurchaseToPayAutomationAgent_W1_Standard_Raw_Materials_Purchase_3_Way_Match_easy"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "CANCELLED"
+      ],
+      "completed": true,
+      "task_id": "TestCase3_ManufacturingPurchaseToPayAutomationAgent_W2_Budget_Exceeded_Approval_Required_medium"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "HUMAN_IN_THE_LOOP",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "HUMAN_IN_THE_LOOP",
+        "create_purchase_order",
+        "match_invoice_to_po",
+        "HUMAN_IN_THE_LOOP",
+        "route_payment_approval",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "match_invoice_to_po",
+        "HUMAN_IN_THE_LOOP",
+        "match_invoice_to_po",
+        "HUMAN_IN_THE_LOOP",
+        "match_invoice_to_po",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP"
+      ],
+      "completed": false,
+      "task_id": "TestCase4_ManufacturingPurchaseToPayAutomationAgent_W3_InvoicePriceMismatchExceptionRouting_medium"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "match_invoice_to_po",
+        "check_supplier_contracts",
+        "route_payment_approval",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "HUMAN_IN_THE_LOOP",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "HUMAN_IN_THE_LOOP",
+        "route_payment_approval",
+        "process_payment",
+        "HUMAN_IN_THE_LOOP",
+        "process_payment",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP"
+      ],
+      "completed": false,
+      "task_id": "TestCase5_ManufacturingPurchaseToPayAutomationAgent_W4_Quantity_Discrepancy_Partial_Receipt_medium"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "FAILED"
+      ],
+      "completed": true,
+      "task_id": "TestCase6_ManufacturingPurchaseToPayAutomationAgent_W5_DuplicateInvoiceDetection_easy"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "HUMAN_IN_THE_LOOP",
+        "create_purchase_order",
+        "send_po_to_supplier",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "FAILED"
+      ],
+      "completed": true,
+      "task_id": "TestCase7_ManufacturingPurchaseToPayAutomationAgent_W6_Early_Payment_Discount_Optimize_Cash_Flow_easy"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "match_invoice_to_po",
+        "route_payment_approval",
+        "CANCELLED"
+      ],
+      "completed": true,
+      "task_id": "TestCase8_ManufacturingPurchaseToPayAutomationAgent_W7_BlanketPOReleaseOngoingSupplyAgreement_easy"
+    },
+    {
+      "calls": [
+        "read_purchase_requisition",
+        "validate_budget_availability",
+        "check_supplier_contracts",
+        "CANCELLED"
+      ],
+      "completed": true,
+      "task_id": "TestCase9_ManufacturingPurchaseToPayAutomationAgent_W8___Emergency_Purchase___Expedited_Processing_easy"
+    }
+  ],
+  "tool_balance": 0.8650756276752051,
+  "tool_call_counts": {
+    "CANCELLED": 4,
+    "FAILED": 2,
+    "HUMAN_IN_THE_LOOP": 22,
+    "SUCCESS": 1,
+    "check_supplier_contracts": 9,
+    "create_purchase_order": 2,
+    "match_invoice_to_po": 11,
+    "process_payment": 3,
+    "read_purchase_requisition": 9,
+    "route_payment_approval": 9,
+    "send_po_to_supplier": 1,
+    "validate_budget_availability": 10
+  },
+  "tool_call_proportions": {
+    "CANCELLED": 0.04819277108433735,
+    "FAILED": 0.024096385542168676,
+    "HUMAN_IN_THE_LOOP": 0.26506024096385544,
+    "SUCCESS": 0.012048192771084338,
+    "check_supplier_contracts": 0.10843373493975904,
+    "create_purchase_order": 0.024096385542168676,
+    "match_invoice_to_po": 0.13253012048192772,
+    "process_payment": 0.03614457831325301,
+    "read_purchase_requisition": 0.10843373493975904,
+    "route_payment_approval": 0.10843373493975904,
+    "send_po_to_supplier": 0.012048192771084338,
+    "validate_budget_availability": 0.12048192771084337
+  },
+  "total_tool_calls": 83,
+  "unknown_tool_call_counts": {},
+  "unknown_tool_calls": 0,
+  "validation": {
+    "baseline_diversity": 0.8650756276752051,
+    "baseline_tools_represented": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "check_supplier_contracts",
+      "create_purchase_order",
+      "match_invoice_to_po",
+      "process_payment",
+      "read_purchase_requisition",
+      "route_payment_approval",
+      "send_po_to_supplier",
+      "validate_budget_availability"
+    ],
+    "strict_single_tool": {
+      "absolute_score_change": 0.8650756276752051,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "passed": true,
+      "relative_score_change": -1.0,
+      "selected_tool": "HUMAN_IN_THE_LOOP",
+      "tool_call_count": 22,
+      "tools_represented": [
+        "HUMAN_IN_THE_LOOP"
+      ]
+    },
+    "task_level_single_tool_subset": {
+      "absolute_score_change": null,
+      "expected_decrease": null,
+      "normalized_tool_usage_diversity": null,
+      "relative_score_change": null,
+      "supported": false,
+      "task_count": 0,
+      "tool_call_count": 0,
+      "tools_represented": []
+    }
+  }
+}

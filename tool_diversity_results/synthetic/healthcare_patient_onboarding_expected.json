@@ -1,0 +1,218 @@
+{
+  "configuration": {
+    "dataset": "healthcare_patient_onboarding",
+    "reference_tools": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "check_provider_availability",
+      "create_ehr_patient_record",
+      "extract_insurance_info",
+      "extract_medical_history",
+      "extract_patient_demographics",
+      "schedule_appointment",
+      "send_patient_communication",
+      "verify_insurance_eligibility"
+    ],
+    "source": "expected",
+    "unknown_tool_policy": "reported and excluded from score",
+    "unmatched_tasks": []
+  },
+  "distinct_tools_used": 9,
+  "never_called_tools": [
+    "CANCELLED",
+    "FAILED",
+    "HUMAN_IN_THE_LOOP"
+  ],
+  "normalized_tool_usage_diversity": 0.8616529993019899,
+  "raw_shannon_entropy": 2.14112726777529,
+  "recognized_tool_calls": 71,
+  "reference_tool_count": 12,
+  "task_calls": [
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "verify_insurance_eligibility",
+        "extract_medical_history",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W1_TC1"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "verify_insurance_eligibility",
+        "extract_medical_history",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W1_TC2"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "verify_insurance_eligibility",
+        "extract_medical_history",
+        "create_ehr_patient_record",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W2_TC1"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "verify_insurance_eligibility",
+        "send_patient_communication",
+        "verify_insurance_eligibility",
+        "create_ehr_patient_record",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W3_TC1"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "verify_insurance_eligibility",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W4_TC1"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_medical_history",
+        "create_ehr_patient_record",
+        "send_patient_communication",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W5_TC1"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "create_ehr_patient_record",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W6_TC1"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_medical_history",
+        "extract_insurance_info",
+        "verify_insurance_eligibility",
+        "create_ehr_patient_record",
+        "check_provider_availability",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W7_TC1"
+    },
+    {
+      "calls": [
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "send_patient_communication",
+        "extract_patient_demographics",
+        "extract_insurance_info",
+        "verify_insurance_eligibility",
+        "create_ehr_patient_record",
+        "schedule_appointment",
+        "send_patient_communication",
+        "SUCCESS"
+      ],
+      "task_id": "HealthcareOnboarding_W8_TC1"
+    }
+  ],
+  "tool_balance": 0.9744690141647065,
+  "tool_call_counts": {
+    "CANCELLED": 0,
+    "FAILED": 0,
+    "HUMAN_IN_THE_LOOP": 0,
+    "SUCCESS": 9,
+    "check_provider_availability": 3,
+    "create_ehr_patient_record": 8,
+    "extract_insurance_info": 7,
+    "extract_medical_history": 5,
+    "extract_patient_demographics": 10,
+    "schedule_appointment": 9,
+    "send_patient_communication": 12,
+    "verify_insurance_eligibility": 8
+  },
+  "tool_call_proportions": {
+    "CANCELLED": 0.0,
+    "FAILED": 0.0,
+    "HUMAN_IN_THE_LOOP": 0.0,
+    "SUCCESS": 0.1267605633802817,
+    "check_provider_availability": 0.04225352112676056,
+    "create_ehr_patient_record": 0.11267605633802817,
+    "extract_insurance_info": 0.09859154929577464,
+    "extract_medical_history": 0.07042253521126761,
+    "extract_patient_demographics": 0.14084507042253522,
+    "schedule_appointment": 0.1267605633802817,
+    "send_patient_communication": 0.16901408450704225,
+    "verify_insurance_eligibility": 0.11267605633802817
+  },
+  "total_tool_calls": 71,
+  "unknown_tool_call_counts": {},
+  "unknown_tool_calls": 0,
+  "validation": {
+    "baseline_diversity": 0.8616529993019899,
+    "baseline_tools_represented": [
+      "SUCCESS",
+      "check_provider_availability",
+      "create_ehr_patient_record",
+      "extract_insurance_info",
+      "extract_medical_history",
+      "extract_patient_demographics",
+      "schedule_appointment",
+      "send_patient_communication",
+      "verify_insurance_eligibility"
+    ],
+    "strict_single_tool": {
+      "absolute_score_change": 0.8616529993019899,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "passed": true,
+      "relative_score_change": -1.0,
+      "selected_tool": "send_patient_communication",
+      "tool_call_count": 12,
+      "tools_represented": [
+        "send_patient_communication"
+      ]
+    },
+    "task_level_single_tool_subset": {
+      "absolute_score_change": null,
+      "expected_decrease": null,
+      "normalized_tool_usage_diversity": null,
+      "relative_score_change": null,
+      "supported": false,
+      "task_count": 0,
+      "tool_call_count": 0,
+      "tools_represented": []
+    }
+  }
+}

@@ -1,0 +1,245 @@
+{
+  "configuration": {
+    "dataset": "insurance_claims_intake",
+    "model": "gpt-6-luna",
+    "reference_tools": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "assess_claim_severity",
+      "classify_claim_type",
+      "create_claim_record",
+      "extract_loss_details",
+      "route_to_adjuster",
+      "send_claim_acknowledgment",
+      "trigger_emergency_services",
+      "validate_policy_coverage"
+    ],
+    "run_errors": [],
+    "source": "live",
+    "trace_file": "tool_diversity_results/synthetic/traces/insurance_claims_intake.json",
+    "unknown_tool_policy": "reported and excluded from score"
+  },
+  "distinct_tools_used": 12,
+  "never_called_tools": [],
+  "normalized_tool_usage_diversity": 0.5357278439288108,
+  "raw_shannon_entropy": 1.33123368185529,
+  "recognized_tool_calls": 80,
+  "reference_tool_count": 12,
+  "task_calls": [
+    {
+      "calls": [
+        "extract_loss_details",
+        "FAILED"
+      ],
+      "completed": true,
+      "task_id": "TestCase10_InsuranceClaimsIntakeAndTriageAgent_W8_hard"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "validate_policy_coverage",
+        "classify_claim_type",
+        "assess_claim_severity",
+        "create_claim_record",
+        "route_to_adjuster",
+        "trigger_emergency_services",
+        "send_claim_acknowledgment",
+        "SUCCESS"
+      ],
+      "completed": true,
+      "task_id": "TestCase1_InsuranceClaimsIntakeAndTriageAgent_W1_easy"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "CANCELLED"
+      ],
+      "completed": true,
+      "task_id": "TestCase2_InsuranceClaimsIntakeAndTriageAgent_W1_medium"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "CANCELLED"
+      ],
+      "completed": true,
+      "task_id": "TestCase3_InsuranceClaimsIntakeAndTriageAgent_W2_easy"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "HUMAN_IN_THE_LOOP",
+        "validate_policy_coverage",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP"
+      ],
+      "completed": false,
+      "task_id": "TestCase4_InsuranceClaimsIntakeAndTriageAgent_W2_easy"
+    },
+    {
+      "calls": [
+        "FAILED"
+      ],
+      "completed": true,
+      "task_id": "TestCase5_InsuranceClaimsIntakeAndTriageAgent_W3_medium"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "FAILED"
+      ],
+      "completed": true,
+      "task_id": "TestCase6_InsuranceClaimsIntakeAndTriageAgent_W4_easy"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "FAILED"
+      ],
+      "completed": true,
+      "task_id": "TestCase7_InsuranceClaimsIntakeAndTriageAgent_W5_medium"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "validate_policy_coverage",
+        "HUMAN_IN_THE_LOOP",
+        "validate_policy_coverage",
+        "HUMAN_IN_THE_LOOP",
+        "assess_claim_severity",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP"
+      ],
+      "completed": false,
+      "task_id": "TestCase8_InsuranceClaimsIntakeAndTriageAgent_W6_easy"
+    },
+    {
+      "calls": [
+        "extract_loss_details",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP",
+        "HUMAN_IN_THE_LOOP"
+      ],
+      "completed": false,
+      "task_id": "TestCase9_InsuranceClaimsIntakeAndTriageAgent_W7_easy"
+    }
+  ],
+  "tool_balance": 0.5357278439288108,
+  "tool_call_counts": {
+    "CANCELLED": 2,
+    "FAILED": 4,
+    "HUMAN_IN_THE_LOOP": 53,
+    "SUCCESS": 1,
+    "assess_claim_severity": 2,
+    "classify_claim_type": 1,
+    "create_claim_record": 1,
+    "extract_loss_details": 9,
+    "route_to_adjuster": 1,
+    "send_claim_acknowledgment": 1,
+    "trigger_emergency_services": 1,
+    "validate_policy_coverage": 4
+  },
+  "tool_call_proportions": {
+    "CANCELLED": 0.025,
+    "FAILED": 0.05,
+    "HUMAN_IN_THE_LOOP": 0.6625,
+    "SUCCESS": 0.0125,
+    "assess_claim_severity": 0.025,
+    "classify_claim_type": 0.0125,
+    "create_claim_record": 0.0125,
+    "extract_loss_details": 0.1125,
+    "route_to_adjuster": 0.0125,
+    "send_claim_acknowledgment": 0.0125,
+    "trigger_emergency_services": 0.0125,
+    "validate_policy_coverage": 0.05
+  },
+  "total_tool_calls": 80,
+  "unknown_tool_call_counts": {},
+  "unknown_tool_calls": 0,
+  "validation": {
+    "baseline_diversity": 0.5357278439288108,
+    "baseline_tools_represented": [
+      "CANCELLED",
+      "FAILED",
+      "HUMAN_IN_THE_LOOP",
+      "SUCCESS",
+      "assess_claim_severity",
+      "classify_claim_type",
+      "create_claim_record",
+      "extract_loss_details",
+      "route_to_adjuster",
+      "send_claim_acknowledgment",
+      "trigger_emergency_services",
+      "validate_policy_coverage"
+    ],
+    "strict_single_tool": {
+      "absolute_score_change": 0.5357278439288108,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "passed": true,
+      "relative_score_change": -1.0,
+      "selected_tool": "HUMAN_IN_THE_LOOP",
+      "tool_call_count": 53,
+      "tools_represented": [
+        "HUMAN_IN_THE_LOOP"
+      ]
+    },
+    "task_level_single_tool_subset": {
+      "absolute_score_change": 0.5357278439288108,
+      "expected_decrease": true,
+      "normalized_tool_usage_diversity": 0.0,
+      "relative_score_change": -1.0,
+      "supported": true,
+      "task_count": 1,
+      "tool_call_count": 1,
+      "tools_represented": [
+        "FAILED"
+      ]
+    }
+  }
+}
